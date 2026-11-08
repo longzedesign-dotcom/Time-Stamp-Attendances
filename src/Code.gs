@@ -128,6 +128,15 @@ function apiDispatcher(action, payload) {
       case 'DELETE_LOCATION':
         res = Admin.deleteLocation(token, data.locationId);
         break;
+      case 'GET_HOLIDAYS':
+        res = Admin.getHolidays(token);
+        break;
+      case 'SAVE_HOLIDAY':
+        res = Admin.saveHoliday(token, data.holidayData);
+        break;
+      case 'DELETE_HOLIDAY':
+        res = Admin.deleteHoliday(token, data.holidayDate);
+        break;
 
       default:
         res = Utils.error(`Unknown API action: "${action}"`);

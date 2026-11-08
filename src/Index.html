@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.28
+      Version 1.0.29
     </div>
   </div>
 
@@ -458,8 +458,8 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
           <h4 class="text-xs font-semibold text-slate-400 mb-3">ตั้งค่า</h4>
           <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1.5 text-slate-700 hover:text-blue-600 transition">
-            <div class="flex items-center gap-2 text-xs">
-              <i class="fa-regular fa-bell text-slate-400 w-4 text-center"></i>
+            <div class="flex items-center gap-2 text-xs font-medium">
+              <i class="fa-solid fa-bell text-amber-500 w-4 text-center"></i>
               <span>การแจ้งเตือน</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
@@ -467,14 +467,25 @@
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
           </div>
-          <!-- [icon Pin] ตั้งค่า สถานที่ทำงาน ต่อจาก ตั้งค่า การแจ้งเตือน (แสดงเฉพาะ ADMIN) -->
+          <!-- [icon Pin] สถานที่ทำงาน ต่อจาก การแจ้งเตือน (แสดงเฉพาะ ADMIN) -->
           <div id="btn-location-settings-menu" onclick="openLocationSettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
             <div class="flex items-center gap-2 text-xs font-medium">
               <i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i>
-              <span>ตั้งค่า สถานที่ทำงาน</span>
+              <span>สถานที่ทำงาน</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
               <span id="label-locations-count">สำนักงาน & Site</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </div>
+          </div>
+          <!-- [icon Alarm] ตั้งค่าวันหยุด ถัดจาก ปุ่ม สถานที่ทำงาน (แสดงเฉพาะ ADMIN) -->
+          <div id="btn-holiday-settings-menu" onclick="openHolidaySettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
+            <div class="flex items-center gap-2 text-xs font-medium">
+              <i class="fa-solid fa-stopwatch text-red-500 w-4 text-center"></i>
+              <span>ตั้งค่าวันหยุด</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-slate-400">
+              <span id="label-holiday-count">วันหยุด</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
           </div>
@@ -507,7 +518,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 2.0.8
+          Version 1.0.29
         </div>
       </div>
 
@@ -772,6 +783,101 @@
     </div>
   </div>
 
+  <!-- Holiday Settings Modal -->
+  <div id="modal-holiday-settings" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <!-- Top Header -->
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
+      <div class="flex items-center gap-3">
+        <button onclick="closeHolidaySettingsModal()" class="p-1 hover:text-blue-200 text-lg">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div>
+          <h3 class="text-base font-semibold tracking-wide">ตั้งค่าวันหยุด</h3>
+          <p class="text-[10px] text-blue-200">จัดการวันหยุดประจำปี วันหยุดนักขัตฤกษ์ และวันหยุดบริษัท</p>
+        </div>
+      </div>
+      <button onclick="openHolidayFormModal()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>เพิ่มวันหยุด</span>
+      </button>
+    </div>
+
+    <!-- Holiday List Content -->
+    <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      <!-- Summary Bar -->
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-semibold text-slate-600">รายการวันหยุดทั้งหมด (<span id="holidays-count-text">0</span> วัน)</span>
+        <button onclick="fetchHolidayList()" class="text-[11px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
+          <i class="fa-solid fa-rotate text-[10px]"></i> รีเฟรช
+        </button>
+      </div>
+
+      <!-- Card List Container -->
+      <div id="holiday-list-container" class="space-y-3">
+        <div class="text-center py-12 text-slate-400 text-xs">
+          <i class="fa-solid fa-circle-notch fa-spin text-xl mb-2 text-red-500"></i>
+          <p>กำลังโหลดข้อมูลวันหยุด...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Holiday Modal -->
+  <div id="modal-holiday-form" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 id="holiday-modal-title" class="text-base font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-stopwatch text-red-500"></i>
+          <span>เพิ่มวันหยุด</span>
+        </h3>
+        <button onclick="closeHolidayFormModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="holiday-edit-form" onsubmit="handleSaveHoliday(event)" class="space-y-3">
+        <input type="hidden" id="holiday-form-orig-date" value="">
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">วันที่ <span class="text-red-500">*</span></label>
+          <input type="date" id="holiday-form-date" required class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">ชื่อวันหยุด <span class="text-red-500">*</span></label>
+          <input type="text" id="holiday-form-name" required placeholder="เช่น วันขึ้นปีใหม่, วันสงกรานต์" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-semibold text-slate-700">ประเภทวันหยุด</label>
+            <select id="holiday-form-type" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="Public">วันหยุดนักขัตฤกษ์ (Public)</option>
+              <option value="Company">วันหยุดบริษัท (Company)</option>
+              <option value="Special">วันหยุดพิเศษ (Special)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-700">สถานะการใช้งาน</label>
+            <select id="holiday-form-status" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="Active">เปิดใช้งาน (Active)</option>
+              <option value="Inactive">ปิดใช้งาน (Inactive)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeHolidayFormModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-save-holiday" class="flex-1 bg-[#1b4b8a] hover:bg-[#153d70] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-md">
+            <span>บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Internal Chat Modal -->
   <div id="modal-chat" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
     <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
@@ -896,6 +1002,7 @@
       detailMapInstance: null,
       cachedHistory: [],
       calendarStatusMap: {},
+      holidays: [],
       thaiMonths: [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -1049,6 +1156,18 @@
         } else {
           locBtn.classList.add('hidden');
           locBtn.classList.remove('flex');
+        }
+      }
+
+      // Holiday Settings button is ONLY visible for ADMIN users
+      const holidayBtn = document.getElementById('btn-holiday-settings-menu');
+      if (holidayBtn) {
+        if (user.Role === 'Admin') {
+          holidayBtn.classList.remove('hidden');
+          holidayBtn.classList.add('flex');
+        } else {
+          holidayBtn.classList.add('hidden');
+          holidayBtn.classList.remove('flex');
         }
       }
     }
@@ -1347,6 +1466,13 @@
           updateGPSStatusPill();
           updateOfficeLocationSelect();
           renderOfficeGeofenceCircles();
+        }
+      });
+      callAPI('GET_HOLIDAYS', { token: state.token }, res => {
+        if (res && res.success && res.data && res.data.holidays) {
+          state.holidays = res.data.holidays;
+          const labelHoliday = document.getElementById('label-holiday-count');
+          if (labelHoliday) labelHoliday.innerText = `${state.holidays.length} วัน`;
         }
       });
     }
@@ -2353,6 +2479,288 @@
         cb.checked = !cb.checked;
         handleLocationToggleSwitch({ target: cb }, locId);
       }
+    }
+
+    // ==================== HOLIDAY SETTINGS LOGIC ====================
+    function openHolidaySettingsModal() {
+      if (!state.user || state.user.Role !== 'Admin') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีสิทธิ์เข้าถึง',
+          text: 'เมนูตั้งค่าวันหยุดสงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+      document.getElementById('modal-holiday-settings').classList.remove('hidden');
+      fetchHolidayList();
+    }
+
+    function closeHolidaySettingsModal() {
+      document.getElementById('modal-holiday-settings').classList.add('hidden');
+    }
+
+    function openHolidayFormModal(hDate = null) {
+      const modal = document.getElementById('modal-holiday-form');
+      const title = document.getElementById('holiday-modal-title');
+      const origDateInput = document.getElementById('holiday-form-orig-date');
+      const dateInput = document.getElementById('holiday-form-date');
+      const nameInput = document.getElementById('holiday-form-name');
+      const typeInput = document.getElementById('holiday-form-type');
+      const statusInput = document.getElementById('holiday-form-status');
+
+      if (hDate && state.holidays) {
+        const item = state.holidays.find(h => String(h.HolidayDate).substring(0, 10) === String(hDate).substring(0, 10));
+        if (item) {
+          title.innerHTML = '<i class="fa-solid fa-pen-to-square text-red-500"></i><span>แก้ไขข้อมูลวันหยุด</span>';
+          const isoDate = String(item.HolidayDate).substring(0, 10);
+          origDateInput.value = isoDate;
+          dateInput.value = isoDate;
+          nameInput.value = item.HolidayName || '';
+          typeInput.value = item.Type || 'Public';
+          statusInput.value = item.Status || 'Active';
+          modal.classList.remove('hidden');
+          return;
+        }
+      }
+
+      title.innerHTML = '<i class="fa-solid fa-stopwatch text-red-500"></i><span>เพิ่มวันหยุด</span>';
+      origDateInput.value = '';
+      dateInput.value = new Date().toISOString().substring(0, 10);
+      nameInput.value = '';
+      typeInput.value = 'Public';
+      statusInput.value = 'Active';
+      modal.classList.remove('hidden');
+    }
+
+    function closeHolidayFormModal() {
+      document.getElementById('modal-holiday-form').classList.add('hidden');
+    }
+
+    function fetchHolidayList() {
+      const container = document.getElementById('holiday-list-container');
+      const countText = document.getElementById('holidays-count-text');
+      const labelCount = document.getElementById('label-holiday-count');
+
+      if (state.holidays && state.holidays.length > 0) {
+        if (countText) countText.innerText = state.holidays.length;
+        if (labelCount) labelCount.innerText = `${state.holidays.length} วัน`;
+        renderHolidayList(state.holidays);
+      } else if (container) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            <i class="fa-solid fa-circle-notch fa-spin text-xl mb-2 text-red-500"></i>
+            <p>กำลังโหลดข้อมูลวันหยุด...</p>
+          </div>
+        `;
+      }
+
+      callAPI('GET_HOLIDAYS', { token: state.token }, res => {
+        if (res && res.success && res.data && res.data.holidays) {
+          state.holidays = res.data.holidays;
+          if (countText) countText.innerText = state.holidays.length;
+          if (labelCount) labelCount.innerText = `${state.holidays.length} วัน`;
+          renderHolidayList(state.holidays);
+        } else {
+          if (container && (!state.holidays || state.holidays.length === 0)) {
+            container.innerHTML = '<div class="text-center py-8 text-xs text-rose-500">ไม่สามารถโหลดรายการวันหยุดได้</div>';
+          }
+        }
+      });
+    }
+
+    function renderHolidayList(holidays) {
+      const container = document.getElementById('holiday-list-container');
+      if (!container) return;
+
+      if (!holidays || holidays.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center text-slate-400 border border-slate-100 shadow-sm">
+            <i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">ยังไม่มีข้อมูลวันหยุด</p>
+            <button onclick="openHolidayFormModal()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-medium hover:bg-red-700 transition">
+              + เพิ่มวันหยุดแรก
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...holidays].sort((a, b) => String(a.HolidayDate).localeCompare(String(b.HolidayDate)));
+
+      container.innerHTML = sorted.map(h => {
+        if (!h) return '';
+        const hDate = String(h.HolidayDate || '').substring(0, 10);
+        const hName = String(h.HolidayName || 'ไม่ระบุชื่อ');
+        const hType = String(h.Type || 'Public');
+        const isActive = h.Status !== 'Inactive';
+
+        let typeLabel = 'นักขัตฤกษ์';
+        let typeBadgeClass = 'bg-rose-100 text-rose-700';
+        if (hType === 'Company') {
+          typeLabel = 'วันหยุดบริษัท';
+          typeBadgeClass = 'bg-amber-100 text-amber-700';
+        } else if (hType === 'Special') {
+          typeLabel = 'วันหยุดพิเศษ';
+          typeBadgeClass = 'bg-purple-100 text-purple-700';
+        }
+
+        const statusBadge = isActive
+          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">เปิดใช้งาน</span>'
+          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">ปิดใช้งาน</span>';
+
+        return `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${typeBadgeClass}">
+                  <i class="fa-solid fa-tag text-[9px] mr-1"></i>${typeLabel}
+                </span>
+                ${statusBadge}
+              </div>
+              <span class="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
+                ${formatThaiDateStr(hDate)}
+              </span>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-stopwatch text-red-500 text-xs"></i>
+                <span>${hName}</span>
+              </h4>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <!-- iOS Style Toggle Switch for Active/Inactive -->
+              <div class="flex items-center gap-2.5">
+                <label class="relative inline-flex items-center cursor-pointer select-none">
+                  <input type="checkbox" id="toggle-holiday-${hDate}" ${isActive ? 'checked' : ''} onchange="handleHolidayToggleSwitch(event, '${hDate}')" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+                <span class="text-xs font-semibold ${isActive ? 'text-emerald-700' : 'text-slate-400'}">
+                  ${isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                </span>
+              </div>
+
+              <!-- Edit Button -->
+              <button onclick="openHolidayFormModal('${hDate}')" class="px-3.5 py-1.5 text-xs rounded-xl bg-red-50 text-red-700 hover:bg-red-100 font-medium transition flex items-center gap-1.5">
+                <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                <span>แก้ไข</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleSaveHoliday(e) {
+      e.preventDefault();
+      const origDate = document.getElementById('holiday-form-orig-date').value;
+      const hDate = document.getElementById('holiday-form-date').value;
+      const hName = document.getElementById('holiday-form-name').value;
+      const hType = document.getElementById('holiday-form-type').value;
+      const hStatus = document.getElementById('holiday-form-status').value;
+      const btn = document.getElementById('btn-save-holiday');
+
+      if (!hDate || !hName) {
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกวันที่และชื่อวันหยุด', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังบันทึก...</span>';
+      }
+
+      const payload = {
+        token: state.token,
+        holidayData: {
+          HolidayDate: hDate,
+          HolidayName: hName,
+          Type: hType,
+          Status: hStatus
+        }
+      };
+
+      callAPI('SAVE_HOLIDAY', payload, res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>บันทึกข้อมูล</span>';
+        }
+        if (res && res.success) {
+          closeHolidayFormModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            text: `บันทึกข้อมูลวันหยุด "${hName}" เรียบร้อย`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          fetchHolidayList();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'บันทึกไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการบันทึกวันหยุด',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function handleHolidayToggleSwitch(e, hDate) {
+      const checkbox = e.target;
+      const willBeActive = checkbox.checked;
+      const holiday = state.holidays ? state.holidays.find(h => String(h.HolidayDate).substring(0, 10) === String(hDate).substring(0, 10)) : null;
+      if (!holiday) return;
+
+      const hName = holiday.HolidayName || 'วันหยุดนี้';
+      const actionTitle = willBeActive ? 'ยืนยันเปิดใช้งานวันหยุด?' : 'ยืนยันปิดการใช้งานวันหยุด?';
+      const actionText = willBeActive
+        ? `คุณต้องการเปิดใช้งานวันหยุด "${hName}" ใช่หรือไม่`
+        : `คุณต้องการปิดการใช้งาน "${hName}" ชั่วคราวใช่หรือไม่`;
+
+      Swal.fire({
+        title: actionTitle,
+        text: actionText,
+        icon: willBeActive ? 'question' : 'warning',
+        showCancelButton: true,
+        confirmButtonColor: willBeActive ? '#16a34a' : '#d97706',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: willBeActive ? 'เปิดใช้งาน' : 'ปิดการใช้งาน',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const newStatus = willBeActive ? 'Active' : 'Inactive';
+          const payload = {
+            token: state.token,
+            holidayData: Object.assign({}, holiday, { Status: newStatus })
+          };
+          callAPI('SAVE_HOLIDAY', payload, res => {
+            if (res && res.success) {
+              Swal.fire({
+                icon: 'success',
+                title: willBeActive ? 'เปิดใช้งานเรียบร้อย' : 'ปิดการใช้งานเรียบร้อย',
+                text: `สถานะของ "${hName}" ถูกปรับปรุงแล้ว`,
+                timer: 1500,
+                showConfirmButton: false
+              });
+              fetchHolidayList();
+            } else {
+              checkbox.checked = !willBeActive;
+              Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: (res && res.error && res.error.message) || 'ไม่สามารถบันทึกสถานะได้',
+                confirmButtonColor: '#1b4b8a'
+              });
+            }
+          });
+        } else {
+          checkbox.checked = !willBeActive;
+        }
+      });
     }
     function showTermsModal() {
       Swal.fire({

@@ -100,5 +100,59 @@ const Admin = {
 
     Db.update(CONFIG.SHEETS.LOCATIONS, l => String(l.LocationID) === String(locationId), { Status: 'Inactive' });
     return Utils.success({}, 'ปิดการใช้งานสถานที่เรียบร้อย');
+  },
+
+  /**
+   * Get all holidays
+   */
+  getHolidays(token) {
+    const holidays = Db.getAll(CONFIG.SHEETS.HOLIDAY) || [];
+    return Utils.success({ holidays: holidays });
+  },
+
+  /**
+   * Save or update holiday - Admin Only
+   */
+  saveHoliday(token, holidayData) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+      return Utils.error('ไม่มีสิทธิ์จัดการวันหยุด (เฉพาะผู้ดูแลระบบ Admin เท่านั้น)', 'FORBIDDEN');
+    }
+
+    if (!holidayData || !holidayData.HolidayDate || !holidayData.HolidayName) {
+      return Utils.error('กรุณาระบุวันที่และชื่อวันหยุด');
+    }
+
+    const cleanDate = Utils.formatISODate(holidayData.HolidayDate);
+    const cleanData = {
+      HolidayDate: cleanDate,
+      HolidayName: String(holidayData.HolidayName).trim(),
+      Type: holidayData.Type || 'Public',
+      Status: holidayData.Status === 'Inactive' ? 'Inactive' : 'Active'
+    };
+
+    const existing = Db.findOne(CONFIG.SHEETS.HOLIDAY, h => h.HolidayDate === cleanDate);
+    if (existing) {
+      Db.update(CONFIG.SHEETS.HOLIDAY, h => h.HolidayDate === cleanDate, cleanData);
+    } else {
+      Db.insert(CONFIG.SHEETS.HOLIDAY, cleanData);
+    }
+
+    return Utils.success({ holiday: cleanData }, 'บันทึกข้อมูลวันหยุดเรียบร้อย');
+  },
+
+  /**
+   * Delete or toggle holiday - Admin Only
+   */
+  deleteHoliday(token, holidayDate) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+      return Utils.error('ไม่มีสิทธิ์จัดการวันหยุด (เฉพาะผู้ดูแลระบบ Admin เท่านั้น)', 'FORBIDDEN');
+    }
+    const cleanDate = Utils.formatISODate(holidayDate);
+    Db.update(CONFIG.SHEETS.HOLIDAY, h => h.HolidayDate === cleanDate, { Status: 'Inactive' });
+    return Utils.success({}, 'ปิดการใช้งานวันหยุดเรียบร้อย');
   }
 };
