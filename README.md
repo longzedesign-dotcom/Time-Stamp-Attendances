@@ -1,7 +1,7 @@
 # 🏢 ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
 
 **ระบบลงเวลาเข้า-ออกงานออนไลน์อัจฉริยะ พร้อมระบบพิกัด GPS Geofencing, Full-Screen Map, ปฏิทิน พ.ศ., แชตภายใน, และสายอนุมัติคำขอ**  
-**Comment / Release:** TimeStampAttendances V1.0.19  
+**Comment / Release:** TimeStampAttendances V1.0.20  
 **Web App URL:** https://script.google.com/macros/s/AKfycby3WoJljZRlZ3NvFY-wrQcKIcw8lLZCgxVk75-_B1zDUYFZRFNP_opcGfPfm1QX09P56Q/exec
 
 ---

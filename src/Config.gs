@@ -9,7 +9,7 @@ const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.19',
+  APP_VERSION: '1.0.20',
   APP_UPDATED_AT: '2026-11-08',
   TIMEZONE: 'Asia/Bangkok',
 
@@ -63,9 +63,9 @@ const CONFIG = Object.freeze({
   SECURITY: Object.freeze({
     SESSION_HOURS: 24,
     SALT: 'TSA_MOC_SECURE_SALT_v210',
-    LOGIN_MAX_FAILED_ATTEMPTS: 5,
+    LOGIN_MAX_FAILED_ATTEMPTS: 10,
     LOGIN_FAILURE_WINDOW_SECONDS: 300,
-    LOGIN_LOCKOUT_SECONDS: 600
+    LOGIN_LOCKOUT_SECONDS: 300
   }),
 
   // Enterprise GPS Filtering & Anti-Spoofing Parameters
