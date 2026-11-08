@@ -129,7 +129,7 @@
           <label class="text-xs font-medium text-slate-500">รหัสผ่าน</label>
           <input type="password" id="login-password" value="12345" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
         </div>
-        <button type="submit" class="w-full bg-[#1b4b8a] text-white py-2.5 rounded-lg text-sm font-medium shadow hover:bg-blue-800 transition flex items-center justify-center gap-2">
+        <button type="submit" id="btn-standard-login" class="w-full bg-[#1b4b8a] text-white py-2.5 rounded-lg text-sm font-medium shadow hover:bg-blue-800 transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-right-to-bracket text-xs"></i>
           <span>เข้าใช้งานระบบ</span>
         </button>
@@ -138,7 +138,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-blue-200/70 font-light pb-2">
-      Version 1.0.18
+      Version 1.0.19
     </div>
   </div>
 
@@ -810,11 +810,19 @@
     }
 
     function showLoginScreen() {
-      document.getElementById('screen-login').classList.remove('hidden');
+      const el = document.getElementById('screen-login');
+      if (el) {
+        el.style.display = 'flex';
+        el.classList.remove('hidden');
+      }
     }
 
     function hideLoginScreen() {
-      document.getElementById('screen-login').classList.add('hidden');
+      const el = document.getElementById('screen-login');
+      if (el) {
+        el.style.display = 'none';
+        el.classList.add('hidden');
+      }
     }
 
     function toggleStandardLogin() {
@@ -827,11 +835,18 @@
 
     // Login Handlers
     function handleLineLogin() {
+      Swal.fire({
+        title: 'กำลังเข้าสู่ระบบด้วย LINE...',
+        text: 'กรุณารอสักครู่ กำลังเชื่อมต่อข้อมูล',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
       callAPI('LOGIN_LINE', { deviceInfo: 'LINE Mobile Client' }, res => {
-        if (res.success) {
+        Swal.close();
+        if (res && res.success) {
           state.token = res.data.token;
           state.user = res.data.user;
-          localStorage.setItem('tsa_token', state.token);
+          try { localStorage.setItem('tsa_token', state.token); } catch(e) {}
           applyUserData(state.user);
           hideLoginScreen();
           loadDashboardData();
@@ -846,7 +861,7 @@
           Swal.fire({
             icon: 'error',
             title: 'เข้าสู่ระบบไม่สำเร็จ',
-            text: res.error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE',
+            text: (res && res.error && res.error.message) || (res && res.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE',
             confirmButtonColor: '#1b4b8a'
           });
         }
@@ -866,11 +881,18 @@
         cancelButtonText: 'ยกเลิก'
       }).then(result => {
         if (result.isConfirmed && result.value) {
+          Swal.fire({
+            title: 'กำลังตรวจสอบบัญชี Google...',
+            text: 'กรุณารอสักครู่',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
           callAPI('LOGIN_GOOGLE', { email: result.value, deviceInfo: 'Google Workspace Account' }, res => {
-            if (res.success) {
+            Swal.close();
+            if (res && res.success) {
               state.token = res.data.token;
               state.user = res.data.user;
-              localStorage.setItem('tsa_token', state.token);
+              try { localStorage.setItem('tsa_token', state.token); } catch(e) {}
               applyUserData(state.user);
               hideLoginScreen();
               loadDashboardData();
@@ -885,7 +907,7 @@
               Swal.fire({
                 icon: 'error',
                 title: 'เข้าสู่ระบบไม่สำเร็จ',
-                text: res.error.message,
+                text: (res && res.error && res.error.message) || (res && res.message) || 'ไม่พบบัญชีพนักงานที่ผูกกับ Google Account นี้',
                 confirmButtonColor: '#1b4b8a'
               });
             }
@@ -899,11 +921,34 @@
       const rawEmail = document.getElementById('login-email').value || '';
       const email = rawEmail.trim().replace(/[\u0E31-\u0E3A\u0E47-\u0E4E]/g, '');
       const pass = document.getElementById('login-password').value;
+      const btn = document.getElementById('btn-standard-login') || (e.target && e.target.querySelector('button[type="submit"]'));
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังเข้าสู่ระบบ...</span>';
+      }
+
+      Swal.fire({
+        title: 'กำลังเข้าสู่ระบบ...',
+        text: 'กรุณารอสักครู่ ระบบกำลังตรวจสอบข้อมูลพนักงาน',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       callAPI('LOGIN', { email: email, password: pass }, res => {
-        if (res.success) {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket text-xs"></i><span>เข้าใช้งานระบบ</span>';
+        }
+
+        if (res && res.success) {
           state.token = res.data.token;
           state.user = res.data.user;
-          localStorage.setItem('tsa_token', state.token);
+          try {
+            localStorage.setItem('tsa_token', state.token);
+          } catch(err) {}
           applyUserData(state.user);
           hideLoginScreen();
           loadDashboardData();
@@ -918,7 +963,7 @@
           Swal.fire({
             icon: 'error',
             title: 'เข้าสู่ระบบไม่สำเร็จ',
-            text: res.error.message || 'รหัสผ่านไม่ถูกต้อง',
+            text: (res && res.error && res.error.message) || (res && res.message) || 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง',
             confirmButtonColor: '#1b4b8a',
             confirmButtonText: 'ตกลง'
           });
