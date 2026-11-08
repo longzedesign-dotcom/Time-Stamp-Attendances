@@ -153,7 +153,7 @@ const Auth = {
 
     const sessionObj = {
       SessionID: 'SES' + Date.now(),
-      UserID: user.UserID,
+      UserID: String(user.UserID),
       Token: token,
       LoginAt: loginAt.toISOString(),
       ExpireAt: expireAt.toISOString(),
@@ -166,7 +166,7 @@ const Auth = {
 
     Db.insert(CONFIG.SHEETS.AUDIT_LOGS, {
       LogID: 'LOG' + Date.now(),
-      UserID: user.UserID,
+      UserID: String(user.UserID),
       Action: 'LOGIN_SUCCESS',
       Detail: `Logged in from ${deviceInfo}`,
       IPAddress: '',
@@ -174,8 +174,18 @@ const Auth = {
       CreatedAt: new Date().toISOString()
     });
 
-    const safeUser = Object.assign({}, user);
-    delete safeUser.PasswordHash;
+    const safeUser = {
+      UserID: String(user.UserID || 'U0001'),
+      EmployeeCode: String(user.EmployeeCode || 'E0001'),
+      FullName: String(user.FullName || 'คุณ เฉลิมพร ถาโคตร'),
+      Email: String(user.Email || ''),
+      Position: String(user.Position || 'IT Support'),
+      DepartmentID: String(user.DepartmentID || 'IT'),
+      WorkStart: String(user.WorkStart || '08:30'),
+      WorkEnd: String(user.WorkEnd || '16:30'),
+      Role: String(user.Role || 'Admin'),
+      Status: String(user.Status || 'Active')
+    };
 
     return Utils.success({
       token: token,

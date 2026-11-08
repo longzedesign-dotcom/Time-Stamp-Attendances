@@ -167,7 +167,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.21
+      Version 1.0.22
     </div>
   </div>
 
@@ -998,7 +998,7 @@
       callAPI('LOGIN', { email: email, password: pass }, res => {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket text-xs"></i><span>เข้าใช้งานระบบ</span>';
+          btn.innerHTML = '<span>LOGIN</span>';
         }
 
         if (res && res.success) {
@@ -1018,11 +1018,12 @@
             showConfirmButton: false
           });
         } else {
+          const errorMsg = (res && res.error && res.error.message) || (res && res.message) || 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง';
           Swal.fire({
             icon: 'error',
             title: 'เข้าสู่ระบบไม่สำเร็จ',
-            text: (res && res.error && res.error.message) || (res && res.message) || 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง',
-            confirmButtonColor: '#1b4b8a',
+            text: errorMsg,
+            confirmButtonColor: '#1976d2',
             confirmButtonText: 'ตกลง'
           });
         }
@@ -1596,10 +1597,14 @@
     function callAPI(action, payload, callback) {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(res => { if (callback) callback(res); })
+          .withSuccessHandler(res => { 
+            console.log('GAS Success for ' + action + ':', res);
+            if (callback) callback(res); 
+          })
           .withFailureHandler(err => {
-            console.error('GAS Error:', err);
-            if (callback) callback({ success: false, error: { message: err.message || err } });
+            console.error('GAS Error on ' + action + ':', err);
+            const errMsg = (err && (err.message || (typeof err === 'string' ? err : ''))) || 'เกิดข้อผิดพลาดในการประมวลผลระบบ';
+            if (callback) callback({ success: false, error: { message: errMsg } });
           })
           .apiDispatcher(action, payload);
       } else {

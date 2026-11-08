@@ -70,7 +70,17 @@ const Db = {
     return data.map((row, index) => {
       const item = { _rowIndex: index + 2 };
       headers.forEach((h, colIndex) => {
-        item[h] = row[colIndex];
+        let val = row[colIndex];
+        if (val instanceof Date) {
+          if (val.getFullYear() === 1899) {
+            const hStr = String(val.getHours()).padStart(2, '0');
+            const mStr = String(val.getMinutes()).padStart(2, '0');
+            val = `${hStr}:${mStr}`;
+          } else {
+            val = Utilities.formatDate(val, 'Asia/Bangkok', 'yyyy-MM-dd');
+          }
+        }
+        item[h] = val;
       });
       return item;
     });

@@ -100,6 +100,6 @@ function apiDispatcher(action, payload) {
     }
   } catch (error) {
     Logger.log(`API Error [${action}]: ` + error.toString());
-    return Utils.error(error.message || 'เกิดข้อผิดพลาดในการประมวลผลระบบ');
+    return { success: false, error: { message: error.message || error.toString() } };
   }
 }
