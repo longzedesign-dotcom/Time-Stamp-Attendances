@@ -15,6 +15,7 @@ function doGet(e) {
  * Universal Client-Server API Dispatcher
  */
 function apiDispatcher(action, payload) {
+  let res = null;
   try {
     const data = payload || {};
     const token = data.token;
@@ -22,84 +23,116 @@ function apiDispatcher(action, payload) {
     switch (action) {
       // Setup & Health
       case 'SETUP_DATABASE':
-        return setupDatabase();
+        res = setupDatabase();
+        break;
 
       // Auth
       case 'LOGIN':
       case 'LOGIN_MEMBER':
-        return Auth.loginMember(data.identifier || data.email, data.password, data.deviceInfo, data.userAgent);
+        res = Auth.loginMember(data.identifier || data.email, data.password, data.deviceInfo, data.userAgent);
+        break;
       case 'LOGIN_LINE':
-        return Auth.loginLINE(data.lineId, data.displayName, data.pictureUrl, data.deviceInfo, data.userAgent);
+        res = Auth.loginLINE(data.lineId, data.displayName, data.pictureUrl, data.deviceInfo, data.userAgent);
+        break;
       case 'LOGIN_GOOGLE':
-        return Auth.loginGoogle(data.email, data.name, data.pictureUrl, data.deviceInfo, data.userAgent);
+        res = Auth.loginGoogle(data.email, data.name, data.pictureUrl, data.deviceInfo, data.userAgent);
+        break;
       case 'LOGIN_MOC':
-        return Auth.loginMOC(data.email, data.deviceInfo, data.userAgent);
+        res = Auth.loginMOC(data.email, data.deviceInfo, data.userAgent);
+        break;
       case 'LOGIN_THAID':
-        return Auth.loginThaID(data.idCardNo, data.fullName, data.deviceInfo, data.userAgent);
+        res = Auth.loginThaID(data.idCardNo, data.fullName, data.deviceInfo, data.userAgent);
+        break;
       case 'VALIDATE_SESSION':
-        return Auth.validateSession(token);
+        res = Auth.validateSession(token);
+        break;
       case 'LOGOUT':
-        return Auth.logout(token);
+        res = Auth.logout(token);
+        break;
       case 'UPDATE_PROFILE':
-        return Auth.updateProfile(token, data.profileData);
+        res = Auth.updateProfile(token, data.profileData);
+        break;
 
       // Attendance
       case 'RECORD_ATTENDANCE':
-        return Attendance.record(token, data);
+        res = Attendance.record(token, data);
+        break;
       case 'GET_USER_OFFICES':
-        return Attendance.getUserOffices(token);
+        res = Attendance.getUserOffices(token);
+        break;
       case 'GET_ATTENDANCE_HISTORY':
-        return Attendance.getHistory(token, data.startDate, data.endDate);
+        res = Attendance.getHistory(token, data.startDate, data.endDate);
+        break;
       case 'GET_ATTENDANCE_DETAIL':
-        return Attendance.getDetail(token, data.attendanceId);
+        res = Attendance.getDetail(token, data.attendanceId);
+        break;
       case 'GET_TODAY_STATUS':
-        return Attendance.getTodayStatus(token);
+        res = Attendance.getTodayStatus(token);
+        break;
 
       // Workflow
       case 'SUBMIT_CORRECTION':
-        return Workflow.submitCorrection(token, data);
+        res = Workflow.submitCorrection(token, data);
+        break;
       case 'SUBMIT_OVERTIME':
-        return Workflow.submitOvertime(token, data);
+        res = Workflow.submitOvertime(token, data);
+        break;
       case 'GET_REQUESTS':
-        return Workflow.getRequests(token);
+        res = Workflow.getRequests(token);
+        break;
       case 'REVIEW_REQUEST':
-        return Workflow.reviewRequest(token, data.requestId, data.type, data.status, data.comment);
+        res = Workflow.reviewRequest(token, data.requestId, data.type, data.status, data.comment);
+        break;
 
       // Chat & Support
       case 'GET_MESSAGES':
-        return Chat.getMessages(token, data.channelId);
+        res = Chat.getMessages(token, data.channelId);
+        break;
       case 'SEND_MESSAGE':
-        return Chat.sendMessage(token, data.channelId, data.content, data.attachmentUrl);
+        res = Chat.sendMessage(token, data.channelId, data.content, data.attachmentUrl);
+        break;
       case 'GET_FAQS':
-        return Chat.getFAQs(token);
+        res = Chat.getFAQs(token);
+        break;
       case 'CREATE_HR_TICKET':
-        return Chat.createTicket(token, data);
+        res = Chat.createTicket(token, data);
+        break;
       case 'GET_HR_TICKETS':
-        return Chat.getTickets(token);
+        res = Chat.getTickets(token);
+        break;
 
       // Notifications
       case 'GET_NOTIFICATIONS':
-        return Notify.getUserNotifications(token);
+        res = Notify.getUserNotifications(token);
+        break;
       case 'MARK_NOTIFICATION_READ':
-        return Notify.markAsRead(token, data.notificationId);
+        res = Notify.markAsRead(token, data.notificationId);
+        break;
 
       // Reports & Admin
       case 'GET_MONTHLY_SUMMARY':
-        return Reports.getMonthlySummary(token, data.year, data.month);
+        res = Reports.getMonthlySummary(token, data.year, data.month);
+        break;
       case 'EXPORT_CSV':
-        return Reports.exportCSV(token, data.year, data.month);
+        res = Reports.exportCSV(token, data.year, data.month);
+        break;
       case 'GET_ADMIN_DASHBOARD':
-        return Admin.getDashboard(token);
+        res = Admin.getDashboard(token);
+        break;
       case 'GET_LOCATIONS':
-        return Admin.getLocations(token);
+        res = Admin.getLocations(token);
+        break;
       case 'SAVE_LOCATION':
-        return Admin.saveLocation(token, data.locationData);
+        res = Admin.saveLocation(token, data.locationData);
+        break;
 
       default:
-        return Utils.error(`Unknown API action: "${action}"`);
+        res = Utils.error(`Unknown API action: "${action}"`);
+        break;
     }
   } catch (error) {
     Logger.log(`API Error [${action}]: ` + error.toString());
-    return { success: false, error: { message: error.message || error.toString() } };
+    res = { success: false, error: { message: error.message || error.toString() } };
   }
+  return JSON.stringify(res);
 }

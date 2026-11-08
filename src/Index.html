@@ -167,7 +167,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.22
+      Version 1.0.23
     </div>
   </div>
 
@@ -1599,7 +1599,15 @@
         google.script.run
           .withSuccessHandler(res => { 
             console.log('GAS Success for ' + action + ':', res);
-            if (callback) callback(res); 
+            let parsed = res;
+            if (typeof res === 'string') {
+              try {
+                parsed = JSON.parse(res);
+              } catch (parseErr) {
+                console.warn('JSON parse warning:', parseErr, res);
+              }
+            }
+            if (callback) callback(parsed); 
           })
           .withFailureHandler(err => {
             console.error('GAS Error on ' + action + ':', err);
