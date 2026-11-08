@@ -46,6 +46,8 @@ function apiDispatcher(action, payload) {
       // Attendance
       case 'RECORD_ATTENDANCE':
         return Attendance.record(token, data);
+      case 'GET_USER_OFFICES':
+        return Attendance.getUserOffices(token);
       case 'GET_ATTENDANCE_HISTORY':
         return Attendance.getHistory(token, data.startDate, data.endDate);
       case 'GET_ATTENDANCE_DETAIL':

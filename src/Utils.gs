@@ -1,6 +1,6 @@
 /**
  * File: Utils.gs
- * Description: Helper functions for GPS calculation, Thai formatting, Hashing, and Response wrapping.
+ * Description: Enterprise Utility Engine for GPS calculation, Accuracy Buffers, Time Windows, and Formatting.
  */
 
 const Utils = {
@@ -9,7 +9,7 @@ const Utils = {
    */
   calculateDistance(lat1, lon1, lat2, lon2) {
     if (!lat1 || !lon1 || !lat2 || !lon2) return 999999;
-    const R = 6371000; // Radius of Earth in meters
+    const R = 6371000; // Earth radius in meters
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
@@ -23,8 +23,75 @@ const Utils = {
   },
 
   /**
-   * Format Date to Thai Buddhist Era Date string: e.g. "13 กรกฎาคม 2569"
+   * Enterprise Geofence evaluation with Dynamic Accuracy Buffer
+   * Prevents false rejections caused by satellite drift inside buildings.
    */
+  evaluateGeofence(distanceMeters, radiusMeters, accuracyMeters) {
+    const radius = Number(radiusMeters) || CONFIG.GPS.DEFAULT_LOCATION_RADIUS_METERS;
+    const accuracy = Number(accuracyMeters) || 30;
+
+    const buffer = Math.min(
+      CONFIG.GPS.GEOFENCE_ACCURACY_BUFFER_MAX_METERS,
+      Math.round(accuracy * CONFIG.GPS.GEOFENCE_ACCURACY_BUFFER_FACTOR)
+    );
+
+    const effectiveRadius = radius + buffer;
+    const isInside = distanceMeters <= effectiveRadius;
+
+    return {
+      isInside: isInside,
+      distanceMeters: distanceMeters,
+      effectiveRadius: effectiveRadius,
+      bufferMeters: buffer
+    };
+  },
+
+  /**
+   * Evaluate Attendance Time Window
+   */
+  evaluateTimeWindow(type, timeStr) {
+    const curMin = this.timeToMinutes(timeStr);
+    const tw = CONFIG.TIME_WINDOWS;
+
+    if (type === CONFIG.ATTENDANCE_TYPE.CHECK_IN) {
+      const startMin = this.timeToMinutes(tw.CHECK_IN_START);
+      const normalEndMin = this.timeToMinutes(tw.NORMAL_UNTIL);
+      const checkInEndMin = this.timeToMinutes(tw.CHECK_IN_END);
+
+      if (curMin < startMin) {
+        return { allowed: false, message: `ยังไม่ถึงเวลาเริ่มลงเวลาเข้างาน (เริ่ม ${tw.CHECK_IN_START} น.)` };
+      }
+      if (curMin > checkInEndMin) {
+        return { allowed: false, message: `เกินเวลาลงเวลาเข้างานประจำวันแล้ว (สิ้นสุด ${tw.CHECK_IN_END} น.) กรุณาส่งคำขอปรับปรุงเวลา` };
+      }
+
+      if (curMin <= normalEndMin) {
+        return { allowed: true, status: CONFIG.ATTENDANCE_STATUS.ON_TIME, lateMinutes: 0 };
+      } else {
+        const lateMinutes = curMin - normalEndMin;
+        return { allowed: true, status: CONFIG.ATTENDANCE_STATUS.LATE, lateMinutes: lateMinutes };
+      }
+    } else {
+      // Check Out
+      const outStartMin = this.timeToMinutes(tw.CHECK_OUT_START);
+      const outEndMin = this.timeToMinutes(tw.CHECK_OUT_END);
+
+      if (curMin < outStartMin) {
+        return { allowed: false, message: `ยังไม่ถึงเวลาลงเวลาออกงาน (เริ่ม ${tw.CHECK_OUT_START} น.)` };
+      }
+      if (curMin > outEndMin) {
+        return { allowed: false, message: `เกินช่วงเวลาลงเวลาออกงานแล้ว (${tw.CHECK_OUT_END} น.)` };
+      }
+
+      const standardEndMin = this.timeToMinutes(CONFIG.TIME_WINDOWS.NORMAL_UNTIL === '08:30' ? '16:30' : '17:00');
+      if (curMin < standardEndMin) {
+        const earlyMinutes = standardEndMin - curMin;
+        return { allowed: true, status: CONFIG.ATTENDANCE_STATUS.EARLY_LEAVE, earlyMinutes: earlyMinutes };
+      }
+      return { allowed: true, status: CONFIG.ATTENDANCE_STATUS.CHECKED_OUT, earlyMinutes: 0 };
+    }
+  },
+
   formatThaiDate(dateObj) {
     if (!dateObj) return '';
     const date = new Date(dateObj);
@@ -32,108 +99,48 @@ const Utils = {
       'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
       'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
-    const day = date.getDate();
-    const month = thaiMonths[date.getMonth()];
-    const year = date.getFullYear() + 543;
-    return `${day} ${month} ${year}`;
+    return `${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
   },
 
-  /**
-   * Format Date with Day of Week: e.g. "วันจันทร์ 13 กรกฎาคม 2569"
-   */
   formatThaiFullDate(dateObj) {
     if (!dateObj) return '';
     const date = new Date(dateObj);
-    const thaiDays = [
-      'วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'
-    ];
+    const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
     return `${thaiDays[date.getDay()]} ${this.formatThaiDate(date)}`;
   },
 
-  /**
-   * Format Time: e.g. "08:32"
-   */
   formatTime(dateObj) {
     if (!dateObj) return '';
     const date = new Date(dateObj);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   },
 
-  /**
-   * Format Thai Date Time: e.g. "09 กรกฎาคม 2569 08:32"
-   */
   formatThaiDateTime(dateObj) {
     if (!dateObj) return '';
     return `${this.formatThaiDate(dateObj)} ${this.formatTime(dateObj)}`;
   },
 
-  /**
-   * Get Standard ISO Date string: "YYYY-MM-DD"
-   */
   formatISODate(dateObj) {
     const d = new Date(dateObj || new Date());
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   },
 
-  /**
-   * Generate SHA-256 Hash with Salt
-   */
   hashPassword(password) {
     const raw = password + CONFIG.SECURITY.SALT;
     const signature = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, raw, Utilities.Charset.UTF_8);
     return signature.map(b => ('0' + (b & 0xFF).toString(16)).slice(-2)).join('');
   },
 
-  /**
-   * Generate a random Secure Token
-   */
   generateToken() {
     return Utilities.getUuid() + '-' + Date.now().toString(36);
   },
 
-  /**
-   * Parse "HH:mm" into minutes from midnight
-   */
   timeToMinutes(timeStr) {
     if (!timeStr) return 0;
     const parts = timeStr.split(':').map(Number);
     return (parts[0] || 0) * 60 + (parts[1] || 0);
   },
 
-  /**
-   * Determine late status and minutes
-   */
-  checkLateStatus(clockInTimeStr, shiftStartStr) {
-    const clockInMin = this.timeToMinutes(clockInTimeStr);
-    const shiftStartMin = this.timeToMinutes(shiftStartStr || CONFIG.DEFAULTS.WORK_START);
-    const diff = clockInMin - shiftStartMin;
-    if (diff > CONFIG.DEFAULTS.LATE_GRACE_MINUTES) {
-      return { isLate: true, lateMinutes: diff };
-    }
-    return { isLate: false, lateMinutes: 0 };
-  },
-
-  /**
-   * Determine early leave status and minutes
-   */
-  checkEarlyLeaveStatus(clockOutTimeStr, shiftEndStr) {
-    const clockOutMin = this.timeToMinutes(clockOutTimeStr);
-    const shiftEndMin = this.timeToMinutes(shiftEndStr || CONFIG.DEFAULTS.WORK_END);
-    const diff = shiftEndMin - clockOutMin;
-    if (diff > 0) {
-      return { isEarly: true, earlyMinutes: diff };
-    }
-    return { isEarly: false, earlyMinutes: 0 };
-  },
-
-  /**
-   * Success Response
-   */
   success(data, message = 'Success') {
     return {
       success: true,
@@ -143,16 +150,10 @@ const Utils = {
     };
   },
 
-  /**
-   * Error Response
-   */
   error(message = 'An error occurred', code = 'ERROR') {
     return {
       success: false,
-      error: {
-        code: code,
-        message: message
-      },
+      error: { code: code, message: message },
       timestamp: new Date().toISOString()
     };
   }

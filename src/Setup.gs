@@ -1,6 +1,6 @@
 /**
  * File: Setup.gs
- * Description: Initial database setup, schema verification, and default data seeding.
+ * Description: Enterprise Database Setup & Self-Healing Schema Manager.
  */
 
 function setupDatabase() {
@@ -16,9 +16,16 @@ function setupDatabase() {
       'Accuracy', 'DistanceMeter', 'LocationID', 'LocationName', 'Address',
       'DeviceInfo', 'UserAgent', 'SelfieUrl', 'WorkMode', 'CreatedAt', 'Remark'
     ],
+    [CONFIG.SHEETS.ATTENDANCE_EVENTS]: [
+      'EventID', 'AttendanceID', 'UserID', 'Action', 'Latitude', 'Longitude',
+      'Accuracy', 'DistanceMeters', 'Status', 'WorkMode', 'CreatedAt'
+    ],
     [CONFIG.SHEETS.LOCATIONS]: [
       'LocationID', 'LocationName', 'Address', 'Latitude', 'Longitude',
       'RadiusMeter', 'MinAccuracy', 'Status'
+    ],
+    [CONFIG.SHEETS.USER_LOCATION_ASSIGNMENTS]: [
+      'AssignmentID', 'UserID', 'MainLocationID', 'SiteLocationID', 'Status', 'UpdatedAt'
     ],
     [CONFIG.SHEETS.SESSIONS]: [
       'SessionID', 'UserID', 'Token', 'LoginAt', 'ExpireAt',
@@ -77,84 +84,34 @@ function setupDatabase() {
     }
   });
 
-  // Seed default admin if Users table is empty or missing admin
-  const users = Db.getAll(CONFIG.SHEETS.USERS);
-  if (users.length === 0) {
-    Db.insert(CONFIG.SHEETS.USERS, {
-      UserID: 'U0001',
-      EmployeeCode: 'E0001',
-      FullName: 'คุณ เฉลิมพร ถาโคตร',
-      Email: 'thakot.ch@gmail.com',
-      PasswordHash: Utils.hashPassword('12345678'),
-      Position: 'IT Support',
-      DepartmentID: 'IT',
-      WorkStart: '08:30',
-      WorkEnd: '16:30',
-      Role: CONFIG.ROLES.ADMIN,
-      Status: 'Active',
-      AvatarUrl: '',
-      CreatedAt: new Date().toISOString(),
-      UpdatedAt: new Date().toISOString()
-    });
-  }
-
-  // Seed Default Location if Locations table is empty
-  const locations = Db.getAll(CONFIG.SHEETS.LOCATIONS);
-  if (locations.length === 0) {
+  // Ensure default Locations (Dual Office: Main & Site)
+  const locMain = Db.findOne(CONFIG.SHEETS.LOCATIONS, l => l.LocationID === 'LOC001');
+  if (!locMain) {
     Db.insert(CONFIG.SHEETS.LOCATIONS, {
-      LocationID: CONFIG.DEFAULTS.DEFAULT_LOCATION.ID,
-      LocationName: CONFIG.DEFAULTS.DEFAULT_LOCATION.NAME,
-      Address: CONFIG.DEFAULTS.DEFAULT_LOCATION.ADDRESS,
-      Latitude: CONFIG.DEFAULTS.DEFAULT_LOCATION.LATITUDE,
-      Longitude: CONFIG.DEFAULTS.DEFAULT_LOCATION.LONGITUDE,
-      RadiusMeter: CONFIG.DEFAULTS.DEFAULT_LOCATION.RADIUS_METERS,
-      MinAccuracy: CONFIG.DEFAULTS.DEFAULT_LOCATION.MIN_ACCURACY,
+      LocationID: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.ID,
+      LocationName: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.NAME,
+      Address: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.ADDRESS,
+      Latitude: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.LATITUDE,
+      Longitude: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.LONGITUDE,
+      RadiusMeter: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.RADIUS_METERS,
+      MinAccuracy: CONFIG.LOCATIONS_DEFAULT.MAIN_OFFICE.MIN_ACCURACY,
       Status: 'Active'
     });
   }
 
-  // Seed Department if empty
-  const depts = Db.getAll(CONFIG.SHEETS.DEPARTMENTS);
-  if (depts.length === 0) {
-    Db.insert(CONFIG.SHEETS.DEPARTMENTS, {
-      DepartmentID: 'IT',
-      DepartmentName: 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร',
-      ParentDepartmentID: 'OPS',
+  const locSite = Db.findOne(CONFIG.SHEETS.LOCATIONS, l => l.LocationID === 'LOC002');
+  if (!locSite) {
+    Db.insert(CONFIG.SHEETS.LOCATIONS, {
+      LocationID: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.ID,
+      LocationName: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.NAME,
+      Address: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.ADDRESS,
+      Latitude: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.LATITUDE,
+      Longitude: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.LONGITUDE,
+      RadiusMeter: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.RADIUS_METERS,
+      MinAccuracy: CONFIG.LOCATIONS_DEFAULT.SITE_OFFICE.MIN_ACCURACY,
       Status: 'Active'
     });
   }
 
-  // Seed FAQs if empty
-  const faqs = Db.getAll(CONFIG.SHEETS.FAQ_ITEMS);
-  if (faqs.length === 0) {
-    const defaultFaqs = [
-      {
-        FAQID: 'FAQ001',
-        Category: 'การลงเวลา',
-        Question: 'เวลาเข้า-ออกงานมาตรฐานคือเวลาใด?',
-        Answer: 'เวลาปฏิบัติงานมาตรฐานคือ 08:30 - 16:30 น. (หากลงเวลาเข้าหลัง 08:30 น. ระบบจะนับเป็นการมาสาย)',
-        OrderNum: 1,
-        Status: 'Active'
-      },
-      {
-        FAQID: 'FAQ002',
-        Category: 'การลงเวลา',
-        Question: 'หากลืมลงเวลาเข้างาน หรือออกงาน ต้องทำอย่างไร?',
-        Answer: 'สามารถส่งคำขอ "ขอปรับปรุงเวลา (Correction Request)" ผ่านระบบ พร้อมระบุเหตุผล เพื่อส่งให้หัวหน้างานพิจารณาอนุมัติ',
-        OrderNum: 2,
-        Status: 'Active'
-      },
-      {
-        FAQID: 'FAQ003',
-        Category: 'พิกัด GPS',
-        Question: 'ระบบแจ้งว่าอยู่นอกพื้นที่ทำงาน (Out of Geofence)?',
-        Answer: 'ให้เปิดใช้งาน Location Service บนอุปกรณ์ และอนุญาตให้เว็บบราวเซอร์เข้าถึงพิกัด จากนั้นกดปุ่มเป้าหมายเพื่อตรวจจับพิกัดใหม่อีกครั้ง หรือสลับโหมดเป็น WFH / นอกสถานที่ ตามภารกิจที่ได้รับมอบหมาย',
-        OrderNum: 3,
-        Status: 'Active'
-      }
-    ];
-    defaultFaqs.forEach(f => Db.insert(CONFIG.SHEETS.FAQ_ITEMS, f));
-  }
-
-  return Utils.success({ message: 'ฐานข้อมูลและสคีมาได้รับการตรวจสอบและติดตั้งเรียบร้อยแล้ว' });
+  return Utils.success({ message: 'ฐานข้อมูลได้รับการตรวจสอบและตั้งค่าเรียบร้อยแล้ว' });
 }

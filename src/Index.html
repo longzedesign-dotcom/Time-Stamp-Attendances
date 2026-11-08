@@ -221,6 +221,30 @@
           </div>
         </div>
 
+        <!-- Month Summary Stats Cards -->
+        <div class="grid grid-cols-4 gap-2 mb-4">
+          <div class="bg-white rounded-xl p-2.5 text-center border border-slate-100 shadow-sm">
+            <span class="text-[10px] text-slate-400 block font-medium">มาทำงาน</span>
+            <strong id="stat-work-days" class="text-emerald-600 text-sm font-bold">0</strong>
+            <span class="text-[9px] text-slate-400 block">วัน</span>
+          </div>
+          <div class="bg-white rounded-xl p-2.5 text-center border border-slate-100 shadow-sm">
+            <span class="text-[10px] text-slate-400 block font-medium">มาสาย</span>
+            <strong id="stat-late-days" class="text-amber-500 text-sm font-bold">0</strong>
+            <span class="text-[9px] text-slate-400 block">วัน</span>
+          </div>
+          <div class="bg-white rounded-xl p-2.5 text-center border border-slate-100 shadow-sm">
+            <span class="text-[10px] text-slate-400 block font-medium">ออกก่อน</span>
+            <strong id="stat-early-days" class="text-rose-500 text-sm font-bold">0</strong>
+            <span class="text-[9px] text-slate-400 block">วัน</span>
+          </div>
+          <div class="bg-white rounded-xl p-2.5 text-center border border-slate-100 shadow-sm">
+            <span class="text-[10px] text-slate-400 block font-medium">OT รวม</span>
+            <strong id="stat-ot-hours" class="text-blue-600 text-sm font-bold">0.0</strong>
+            <span class="text-[9px] text-slate-400 block">ชม.</span>
+          </div>
+        </div>
+
         <!-- Selected Date Details Panel -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
           <h4 id="selected-date-header" class="text-sm font-bold text-slate-800 mb-3">13 กรกฎาคม 2569</h4>
@@ -252,11 +276,26 @@
         <!-- Full-screen Map -->
         <div id="clock-map" class="w-full h-full z-0"></div>
 
-        <!-- Floating Top Header: Live Date & Clock -->
-        <div class="absolute top-4 left-4 right-4 z-20 pointer-events-none">
-          <div class="bg-white/95 backdrop-blur-md border border-white/80 rounded-2xl shadow-lg px-5 py-3.5 flex items-center justify-between pointer-events-auto">
-            <span id="live-thai-date" class="text-sm font-bold text-slate-800">วันจันทร์ 13 กรกฎาคม 2569</span>
+        <!-- Floating Top Header: Live Date & Clock + Dual Office + GPS Lock -->
+        <div class="absolute top-4 left-4 right-4 z-20 pointer-events-none space-y-2">
+          <div class="bg-white/95 backdrop-blur-md border border-white/80 rounded-2xl shadow-lg px-4 py-3 flex items-center justify-between pointer-events-auto">
+            <div>
+              <span id="live-thai-date" class="text-xs font-bold text-slate-800 block">วันจันทร์ 13 กรกฎาคม 2569</span>
+              <span id="assigned-offices-badge" class="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-building text-blue-600 text-[9px]"></i>
+                <span id="label-active-office">สำนักงานใหญ่ (567 ถ.นนทบุรี)</span>
+              </span>
+            </div>
             <span id="live-thai-clock" class="text-lg font-extrabold text-[#1b4b8a] tracking-tight">01:17</span>
+          </div>
+
+          <!-- GPS Stability & Geofence Indicator Pill -->
+          <div id="gps-lock-pill" class="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl px-3 py-1.5 shadow flex items-center justify-between text-[11px] pointer-events-auto transition">
+            <div class="flex items-center gap-1.5 text-emerald-700 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="gps-lock-text">พิกัด GPS เสถียร (ความแม่นยำ 15 ม.)</span>
+            </div>
+            <span id="gps-distance-text" class="text-slate-500 text-[10px]">ห่างจากจุดลงเวลา 35 ม.</span>
           </div>
         </div>
 
@@ -677,22 +716,70 @@
       setInterval(update, 1000);
     }
 
-    // Geolocation Watcher
+    // Geolocation Watcher with Multi-sample Stabilization & Distance Tracking
+    let gpsSampleCount = 0;
     function initLocationWatch() {
       if ('geolocation' in navigator) {
         navigator.geolocation.watchPosition(
           pos => {
             state.currentCoords.lat = pos.coords.latitude;
             state.currentCoords.lng = pos.coords.longitude;
-            state.currentCoords.accuracy = pos.coords.accuracy;
+            state.currentCoords.accuracy = Math.round(pos.coords.accuracy);
+            gpsSampleCount++;
+
             updateMapPin();
+            updateGPSStatusPill();
           },
           err => {
-            console.warn('Geolocation access fallback to default office coords:', err);
+            console.warn('Geolocation fallback:', err);
+            updateGPSStatusPill(true);
           },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
         );
       }
+    }
+
+    function updateGPSStatusPill(isError = false) {
+      const lockText = document.getElementById('gps-lock-text');
+      const distText = document.getElementById('gps-distance-text');
+      const officeLabel = document.getElementById('label-active-office');
+      if (!lockText || !distText) return;
+
+      if (isError) {
+        lockText.innerText = 'ไม่สามารถระบุพิกัดได้ (กรุณาเปิด GPS)';
+        lockText.parentElement.className = 'flex items-center gap-1.5 text-amber-600 font-medium';
+        distText.innerText = 'โหมดออฟไลน์';
+        return;
+      }
+
+      // Calculate distance to closest office
+      const mainLat = 13.91094031;
+      const mainLng = 100.5946153;
+      const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, mainLat, mainLng);
+
+      const isStable = gpsSampleCount >= 2;
+      const accuracy = state.currentCoords.accuracy;
+
+      if (isStable && accuracy <= 100) {
+        lockText.innerText = `พิกัด GPS เสถียร (ความแม่นยำ ${accuracy} ม.)`;
+        lockText.parentElement.className = 'flex items-center gap-1.5 text-emerald-700 font-medium';
+      } else {
+        lockText.innerText = `กำลังปรับสัญญาณ GPS (${accuracy} ม.)`;
+        lockText.parentElement.className = 'flex items-center gap-1.5 text-blue-700 font-medium';
+      }
+
+      distText.innerText = `ห่างจากสำนักงาน ${d} ม.`;
+      if (officeLabel) {
+        officeLabel.innerText = d <= 300 ? 'อยู่ในพื้นที่สำนักงานหลัก' : 'นอกรัศมีสำนักงานหลัก';
+      }
+    }
+
+    function calcDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+      return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     // Auth & Session Check
@@ -874,6 +961,20 @@
       const yearBE = state.currentYear + 543;
       document.getElementById('cal-month-name').innerText = monthName;
       document.getElementById('cal-year-val').innerText = yearBE;
+
+      // Update Monthly Statistics
+      const monthPrefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+      const monthLogs = state.cachedHistory.filter(l => String(l.WorkDate).startsWith(monthPrefix));
+      const workDays = new Set(monthLogs.map(l => l.WorkDate)).size;
+      const lateDays = monthLogs.filter(l => l.Status === 'LATE').length;
+      const earlyDays = monthLogs.filter(l => l.Status === 'EARLY_LEAVE').length;
+
+      const statWork = document.getElementById('stat-work-days');
+      const statLate = document.getElementById('stat-late-days');
+      const statEarly = document.getElementById('stat-early-days');
+      if (statWork) statWork.innerText = workDays;
+      if (statLate) statLate.innerText = lateDays;
+      if (statEarly) statEarly.innerText = earlyDays;
 
       const grid = document.getElementById('calendar-days-grid');
       grid.innerHTML = '';

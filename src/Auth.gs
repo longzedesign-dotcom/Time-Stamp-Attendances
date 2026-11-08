@@ -1,11 +1,52 @@
 /**
  * File: Auth.gs
- * Description: User Authentication, MOC Account SSO, ThaID Simulation, and Session Management.
+ * Description: Enterprise Authentication Engine with Brute-Force Protection, LINE, Google, and Member Login.
  */
 
 const Auth = {
   /**
-   * Login with Member ID / Employee Code or Email
+   * Check Brute Force lockout status
+   */
+  checkLockout(identifier) {
+    const clean = String(identifier).trim().toLowerCase();
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - CONFIG.SECURITY.LOGIN_FAILURE_WINDOW_SECONDS * 1000).toISOString();
+
+    const failedLogs = Db.find(CONFIG.SHEETS.AUDIT_LOGS, l => 
+      l.Action === 'LOGIN_FAILED' && 
+      l.UserID === clean && 
+      l.CreatedAt >= windowStart
+    );
+
+    if (failedLogs.length >= CONFIG.SECURITY.LOGIN_MAX_FAILED_ATTEMPTS) {
+      const lastFail = new Date(failedLogs[failedLogs.length - 1].CreatedAt);
+      const unlockTime = new Date(lastFail.getTime() + CONFIG.SECURITY.LOGIN_LOCKOUT_SECONDS * 1000);
+      if (now < unlockTime) {
+        const waitMinutes = Math.ceil((unlockTime.getTime() - now.getTime()) / 60000);
+        return { locked: true, waitMinutes: waitMinutes };
+      }
+    }
+    return { locked: false };
+  },
+
+  /**
+   * Record login failure
+   */
+  recordFailure(identifier, reason = '', userAgent = '') {
+    const clean = String(identifier).trim().toLowerCase();
+    Db.insert(CONFIG.SHEETS.AUDIT_LOGS, {
+      LogID: 'LOG' + Date.now(),
+      UserID: clean,
+      Action: 'LOGIN_FAILED',
+      Detail: reason,
+      IPAddress: '',
+      UserAgent: userAgent,
+      CreatedAt: new Date().toISOString()
+    });
+  },
+
+  /**
+   * Member ID / Employee Code or Email Login
    */
   loginMember(identifier, password, deviceInfo = '', userAgent = '') {
     if (!identifier || !password) {
@@ -13,6 +54,13 @@ const Auth = {
     }
 
     const clean = String(identifier).trim().toLowerCase();
+
+    // Check Lockout
+    const lockCheck = this.checkLockout(clean);
+    if (lockCheck.locked) {
+      return Utils.error(`บัญชีถูกระงับชั่วคราวเนื่องจากใส่รหัสผิดเกินกำหนด กรุณารอ ${lockCheck.waitMinutes} นาที`, 'ACCOUNT_LOCKED');
+    }
+
     const user = Db.findOne(CONFIG.SHEETS.USERS, u => 
       String(u.Email).toLowerCase() === clean || 
       String(u.EmployeeCode).toLowerCase() === clean ||
@@ -20,6 +68,7 @@ const Auth = {
     );
 
     if (!user) {
+      this.recordFailure(clean, 'User not found', userAgent);
       return Utils.error('ไม่พบบัญชีพนักงานในระบบ');
     }
 
@@ -29,6 +78,7 @@ const Auth = {
 
     const inputHash = Utils.hashPassword(password);
     if (user.PasswordHash && user.PasswordHash !== inputHash) {
+      this.recordFailure(clean, 'Invalid password', userAgent);
       return Utils.error('รหัสผ่านไม่ถูกต้อง');
     }
 
@@ -36,7 +86,7 @@ const Auth = {
   },
 
   /**
-   * Login with LINE Account
+   * LINE Account Login
    */
   loginLINE(lineId = '', displayName = '', pictureUrl = '', deviceInfo = '', userAgent = '') {
     let user = null;
@@ -44,22 +94,21 @@ const Auth = {
       user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.EmployeeCode) === String(lineId));
     }
     if (!user) {
-      // Find active user or match default
       user = Db.findOne(CONFIG.SHEETS.USERS, u => u.Status === 'Active');
     }
     if (!user) {
-      return Utils.error('ไม่พบบัญชีพนักงานที่เชื่อมต่อกับ LINE');
+      return Utils.error('ไม่พบบัญชีพนักงานที่ผูกกับ LINE');
     }
 
-    return this.createSession(user, deviceInfo || 'LINE Mobile App', userAgent);
+    return this.createSession(user, deviceInfo || 'LINE Mobile Client', userAgent);
   },
 
   /**
-   * Login with Google Account
+   * Google Account Login
    */
   loginGoogle(email = '', name = '', pictureUrl = '', deviceInfo = '', userAgent = '') {
-    let user = null;
     const cleanEmail = String(email || '').trim().toLowerCase();
+    let user = null;
     if (cleanEmail) {
       user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.Email).toLowerCase() === cleanEmail);
     }
@@ -67,70 +116,14 @@ const Auth = {
       user = Db.findOne(CONFIG.SHEETS.USERS, u => u.Status === 'Active');
     }
     if (!user) {
-      return Utils.error('ไม่พบบัญชีพนักงานที่เชื่อมต่อกับ Google Account นี้');
+      return Utils.error('ไม่พบบัญชีพนักงานที่ผูกกับ Google Account นี้');
     }
 
     return this.createSession(user, deviceInfo || 'Google Workspace SSO', userAgent);
   },
 
   /**
-   * MOC Account Login (Single Sign-On for Ministry of Commerce)
-   */
-  loginMOC(email, deviceInfo = '', userAgent = '') {
-    if (!email) {
-      return Utils.error('กรุณาระบุ MOC Account Email');
-    }
-    const cleanEmail = String(email).trim().toLowerCase();
-    let user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.Email).toLowerCase() === cleanEmail);
-
-    if (!user) {
-      // Auto-provision if authorized domain or create user
-      const newUserId = 'U' + String(Date.now()).slice(-4);
-      user = {
-        UserID: newUserId,
-        EmployeeCode: 'MOC' + newUserId,
-        FullName: 'ผู้ใช้งานกระทรวงพาณิชย์ (' + cleanEmail.split('@')[0] + ')',
-        Email: cleanEmail,
-        PasswordHash: '',
-        Position: 'เจ้าหน้าที่',
-        DepartmentID: 'IT',
-        WorkStart: '08:30',
-        WorkEnd: '16:30',
-        Role: CONFIG.ROLES.USER,
-        Status: 'Active',
-        AvatarUrl: '',
-        CreatedAt: new Date().toISOString(),
-        UpdatedAt: new Date().toISOString()
-      };
-      Db.insert(CONFIG.SHEETS.USERS, user);
-    }
-
-    return this.createSession(user, deviceInfo, userAgent);
-  },
-
-  /**
-   * ThaID Digital Identity Login Simulation
-   */
-  loginThaID(idCardNo = '', fullName = '', deviceInfo = '', userAgent = '') {
-    // If user with this ID or demo user exists
-    let user = null;
-    if (idCardNo) {
-      user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.EmployeeCode) === String(idCardNo));
-    }
-    if (!user) {
-      // Use primary active user (e.g. คุณ เฉลิมพร ถาโคตร) or create
-      user = Db.findOne(CONFIG.SHEETS.USERS, u => u.Status === 'Active');
-    }
-
-    if (!user) {
-      return Utils.error('ไม่สามารถยืนยันตัวตนด้วย ThaID ได้');
-    }
-
-    return this.createSession(user, deviceInfo || 'ThaID Verified Mobile', userAgent);
-  },
-
-  /**
-   * Create Session and issue Session Token
+   * Create Session
    */
   createSession(user, deviceInfo = '', userAgent = '') {
     const token = Utils.generateToken();
@@ -150,12 +143,11 @@ const Auth = {
 
     Db.insert(CONFIG.SHEETS.SESSIONS, sessionObj);
 
-    // Audit log
     Db.insert(CONFIG.SHEETS.AUDIT_LOGS, {
       LogID: 'LOG' + Date.now(),
       UserID: user.UserID,
-      Action: 'LOGIN',
-      Detail: `User logged in from ${deviceInfo}`,
+      Action: 'LOGIN_SUCCESS',
+      Detail: `Logged in from ${deviceInfo}`,
       IPAddress: '',
       UserAgent: userAgent,
       CreatedAt: new Date().toISOString()
@@ -172,7 +164,7 @@ const Auth = {
   },
 
   /**
-   * Validate Session Token and return User
+   * Validate Session Token
    */
   validateSession(token) {
     if (!token) {
@@ -203,7 +195,7 @@ const Auth = {
   },
 
   /**
-   * Logout user and revoke session
+   * Logout
    */
   logout(token) {
     if (!token) return Utils.success({}, 'ออกจากระบบแล้ว');
@@ -212,7 +204,7 @@ const Auth = {
   },
 
   /**
-   * Update Profile Details
+   * Update Profile
    */
   updateProfile(token, profileData) {
     const valid = this.validateSession(token);
