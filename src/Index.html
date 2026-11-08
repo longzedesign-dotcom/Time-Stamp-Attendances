@@ -167,7 +167,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.24
+      Version 1.0.25
     </div>
   </div>
 
@@ -405,13 +405,24 @@
         <!-- Settings Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
           <h4 class="text-xs font-semibold text-slate-400 mb-3">ตั้งค่า</h4>
-          <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1 text-slate-700 hover:text-blue-600">
+          <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1.5 text-slate-700 hover:text-blue-600 transition">
             <div class="flex items-center gap-2 text-xs">
-              <i class="fa-regular fa-bell text-slate-400"></i>
+              <i class="fa-regular fa-bell text-slate-400 w-4 text-center"></i>
               <span>การแจ้งเตือน</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
               <span>เปิดอยู่</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </div>
+          </div>
+          <!-- [icon Pin] ตั้งค่า สถานที่ทำงาน ต่อจาก ตั้งค่า การแจ้งเตือน -->
+          <div onclick="openLocationSettingsModal()" class="flex items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
+            <div class="flex items-center gap-2 text-xs font-medium">
+              <i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i>
+              <span>ตั้งค่า สถานที่ทำงาน</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-slate-400">
+              <span id="label-locations-count">สำนักงาน & Site</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
           </div>
@@ -583,6 +594,129 @@
           <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1b4b8a]"></div>
         </label>
       </div>
+    </div>
+  </div>
+
+  <!-- Workplace / Locations Settings Modal -->
+  <div id="modal-location-settings" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <!-- Top Header -->
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
+      <div class="flex items-center gap-3">
+        <button onclick="closeLocationSettingsModal()" class="p-1 hover:text-blue-200 text-lg">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div>
+          <h3 class="text-base font-semibold tracking-wide">ตั้งค่าสถานที่ทำงาน</h3>
+          <p class="text-[10px] text-blue-200">จัดการสำนักงานหลักและ Site งานย่อยสำหรับพนักงาน</p>
+        </div>
+      </div>
+      <button onclick="openLocationFormModal()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>เพิ่มสถานที่</span>
+      </button>
+    </div>
+
+    <!-- Location List Content -->
+    <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      <!-- Summary Bar -->
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-semibold text-slate-600">สถานที่และไซต์งานทั้งหมด (<span id="locations-count-text">0</span> แห่ง)</span>
+        <button onclick="fetchLocationsList()" class="text-[11px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
+          <i class="fa-solid fa-rotate text-[10px]"></i> รีเฟรช
+        </button>
+      </div>
+
+      <!-- Card List Container -->
+      <div id="locations-list-container" class="space-y-3">
+        <!-- Rendered via Javascript -->
+        <div class="text-center py-12 text-slate-400 text-xs">
+          <i class="fa-solid fa-circle-notch fa-spin text-xl mb-2 text-blue-600"></i>
+          <p>กำลังโหลดข้อมูลสถานที่ทำงาน...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Location Modal -->
+  <div id="modal-location-form" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 id="location-modal-title" class="text-base font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-location-dot text-rose-500"></i>
+          <span>เพิ่มสถานที่ทำงาน / Site งาน</span>
+        </h3>
+        <button onclick="closeLocationFormModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="location-edit-form" onsubmit="handleSaveLocation(event)" class="space-y-3">
+        <input type="hidden" id="loc-form-id" value="">
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">ชื่อสถานที่ / ชื่อไซต์งาน <span class="text-red-500">*</span></label>
+          <input type="text" id="loc-form-name" required placeholder="เช่น สำนักงานใหญ่, Site ก่อสร้าง A, สาขาชลบุรี" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">ที่อยู่สถานที่ / จุดสังเกต</label>
+          <textarea id="loc-form-address" rows="2" placeholder="ระบุเลขที่ ถนน ตำบล อำเภอ จังหวัด หรือจุดสังเกตสำคัญ" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
+        </div>
+
+        <!-- GPS Coordinates Box with Current Location Picker -->
+        <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-crosshairs text-blue-600"></i>
+              <span>พิกัด GPS สำหรับลงเวลา</span>
+            </span>
+            <button type="button" onclick="fillCurrentLocationToForm()" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium px-2.5 py-1 rounded-lg transition flex items-center gap-1 shadow-sm active:scale-95">
+              <i class="fa-solid fa-location-crosshairs text-[10px]"></i>
+              <span>ดึงพิกัดปัจจุบัน</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-600">ละติจูด (Latitude) <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="loc-form-lat" required placeholder="13.91094" class="w-full mt-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-600">ลองจิจูด (Longitude) <span class="text-red-500">*</span></label>
+              <input type="number" step="any" id="loc-form-lng" required placeholder="100.5946" class="w-full mt-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500">กดปุ่ม <b>"ดึงพิกัดปัจจุบัน"</b> ขณะอยู่ที่ไซต์งานจริง เพื่อกรอกพิกัดโดยอัตโนมัติ</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-semibold text-slate-700">รัศมีลงเวลา (Geofence)</label>
+            <select id="loc-form-radius" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="100">100 เมตร (แคบ)</option>
+              <option value="200" selected>200 เมตร (มาตรฐาน)</option>
+              <option value="300">300 เมตร (สำนักงานกว้าง)</option>
+              <option value="500">500 เมตร (ไซต์งานก่อสร้าง/โรงงาน)</option>
+              <option value="1000">1,000 เมตร (พื้นที่โครงการใหญ่)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-700">สถานะการใช้งาน</label>
+            <select id="loc-form-status" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="Active">เปิดใช้งาน (Active)</option>
+              <option value="Inactive">ปิดใช้งาน (Inactive)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeLocationFormModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-save-loc" class="flex-1 bg-[#1b4b8a] hover:bg-[#153d70] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-md">
+            <span>บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -780,10 +914,23 @@
         return;
       }
 
-      // Calculate distance to closest office
-      const mainLat = 13.91094031;
-      const mainLng = 100.5946153;
-      const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, mainLat, mainLng);
+      // Calculate distance to closest office / site from state.locations
+      const activeLocs = (state.locations && state.locations.length > 0)
+        ? state.locations.filter(l => l.Status !== 'Inactive')
+        : [
+            { LocationName: 'สำนักงานหลัก', Latitude: 13.91094031, Longitude: 100.5946153, RadiusMeter: 200 },
+            { LocationName: 'สำนักงานประจำ (Site Office)', Latitude: 13.9105, Longitude: 100.5942, RadiusMeter: 300 }
+          ];
+
+      let closestLoc = activeLocs[0];
+      let minDistance = 9999999;
+      activeLocs.forEach(l => {
+        const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, Number(l.Latitude), Number(l.Longitude));
+        if (d < minDistance) {
+          minDistance = d;
+          closestLoc = l;
+        }
+      });
 
       const isStable = gpsSampleCount >= 2;
       const accuracy = state.currentCoords.accuracy;
@@ -796,9 +943,12 @@
         lockText.parentElement.className = 'flex items-center gap-1.5 text-blue-700 font-medium';
       }
 
-      distText.innerText = `ห่างจากสำนักงาน ${d} ม.`;
+      const locName = closestLoc ? (closestLoc.LocationName || 'จุดลงเวลา') : 'สำนักงาน';
+      const locRadius = closestLoc ? (Number(closestLoc.RadiusMeter) || 200) : 200;
+
+      distText.innerText = `ห่างจาก ${locName} ${minDistance} ม.`;
       if (officeLabel) {
-        officeLabel.innerText = d <= 300 ? 'อยู่ในพื้นที่สำนักงานหลัก' : 'นอกรัศมีสำนักงานหลัก';
+        officeLabel.innerText = minDistance <= locRadius ? `อยู่ในพื้นที่ ${locName}` : `นอกรัศมี ${locName}`;
       }
     }
 
@@ -1116,7 +1266,7 @@
     // Dashboard Data Loading
     function loadDashboardData() {
       callAPI('GET_ATTENDANCE_HISTORY', { token: state.token }, res => {
-        if (res.success) {
+        if (res && res.success) {
           state.cachedHistory = res.data.historyList || [];
           state.calendarStatusMap = res.data.calendarStatusMap || {};
           renderCalendar();
@@ -1124,6 +1274,14 @@
         }
       });
       loadNotifications();
+      callAPI('GET_LOCATIONS', { token: state.token }, res => {
+        if (res && res.success && res.data && res.data.locations) {
+          state.locations = res.data.locations;
+          const labelCount = document.getElementById('label-locations-count');
+          if (labelCount) labelCount.innerText = `${state.locations.length} แห่ง`;
+          updateGPSStatusPill();
+        }
+      });
     }
 
     // Calendar Generation
@@ -1558,6 +1716,300 @@
 
     function openNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.remove('hidden'); }
     function closeNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.add('hidden'); }
+
+    // ==========================================
+    // Location / Workplace & Sites Settings
+    // ==========================================
+    function openLocationSettingsModal() {
+      document.getElementById('modal-location-settings').classList.remove('hidden');
+      fetchLocationsList();
+    }
+
+    function closeLocationSettingsModal() {
+      document.getElementById('modal-location-settings').classList.add('hidden');
+    }
+
+    function openLocationFormModal(locId = null) {
+      const modal = document.getElementById('modal-location-form');
+      const title = document.getElementById('location-modal-title');
+      const idInput = document.getElementById('loc-form-id');
+      const nameInput = document.getElementById('loc-form-name');
+      const addrInput = document.getElementById('loc-form-address');
+      const latInput = document.getElementById('loc-form-lat');
+      const lngInput = document.getElementById('loc-form-lng');
+      const radiusInput = document.getElementById('loc-form-radius');
+      const statusInput = document.getElementById('loc-form-status');
+
+      if (locId && state.locations) {
+        const loc = state.locations.find(l => String(l.LocationID) === String(locId));
+        if (loc) {
+          title.innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-600"></i><span>แก้ไขข้อมูลสถานที่ทำงาน</span>';
+          idInput.value = loc.LocationID;
+          nameInput.value = loc.LocationName || '';
+          addrInput.value = loc.Address || '';
+          latInput.value = loc.Latitude || '';
+          lngInput.value = loc.Longitude || '';
+          radiusInput.value = loc.RadiusMeter || 200;
+          statusInput.value = loc.Status || 'Active';
+          modal.classList.remove('hidden');
+          return;
+        }
+      }
+
+      // Add New Location Mode
+      title.innerHTML = '<i class="fa-solid fa-location-dot text-rose-500"></i><span>เพิ่มสถานที่ทำงาน / Site งาน</span>';
+      idInput.value = '';
+      nameInput.value = '';
+      addrInput.value = '';
+      latInput.value = (state.currentCoords && state.currentCoords.lat) ? Number(state.currentCoords.lat).toFixed(7) : '';
+      lngInput.value = (state.currentCoords && state.currentCoords.lng) ? Number(state.currentCoords.lng).toFixed(7) : '';
+      radiusInput.value = 200;
+      statusInput.value = 'Active';
+      modal.classList.remove('hidden');
+    }
+
+    function closeLocationFormModal() {
+      document.getElementById('modal-location-form').classList.add('hidden');
+    }
+
+    function fillCurrentLocationToForm() {
+      if (state.currentCoords && state.currentCoords.lat && state.currentCoords.lng) {
+        document.getElementById('loc-form-lat').value = Number(state.currentCoords.lat).toFixed(7);
+        document.getElementById('loc-form-lng').value = Number(state.currentCoords.lng).toFixed(7);
+        Swal.fire({
+          icon: 'success',
+          title: 'ดึงพิกัดสำเร็จ!',
+          text: `ละติจูด: ${Number(state.currentCoords.lat).toFixed(6)}, ลองจิจูด: ${Number(state.currentCoords.lng).toFixed(6)}`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          state.currentCoords.lat = pos.coords.latitude;
+          state.currentCoords.lng = pos.coords.longitude;
+          state.currentCoords.accuracy = Math.round(pos.coords.accuracy);
+          document.getElementById('loc-form-lat').value = Number(pos.coords.latitude).toFixed(7);
+          document.getElementById('loc-form-lng').value = Number(pos.coords.longitude).toFixed(7);
+          Swal.fire({
+            icon: 'success',
+            title: 'ดึงพิกัดปัจจุบันสำเร็จ!',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }, err => {
+          Swal.fire({
+            icon: 'warning',
+            title: 'ไม่สามารถดึงพิกัดได้',
+            text: 'กรุณาเปิดบริการระบุตำแหน่ง (GPS) บนอุปกรณ์ของท่าน',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }, { enableHighAccuracy: true, timeout: 10000 });
+      }
+    }
+
+    function fetchLocationsList() {
+      const container = document.getElementById('locations-list-container');
+      const countText = document.getElementById('locations-count-text');
+      const labelCount = document.getElementById('label-locations-count');
+      if (container) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            <i class="fa-solid fa-circle-notch fa-spin text-xl mb-2 text-blue-600"></i>
+            <p>กำลังโหลดข้อมูลสถานที่ทำงาน...</p>
+          </div>
+        `;
+      }
+
+      callAPI('GET_LOCATIONS', {}, res => {
+        if (res && res.success && res.data && res.data.locations) {
+          state.locations = res.data.locations;
+          if (countText) countText.innerText = state.locations.length;
+          if (labelCount) labelCount.innerText = `${state.locations.length} แห่ง`;
+          renderLocationsList(state.locations);
+          updateGPSStatusPill();
+        } else {
+          if (container) {
+            container.innerHTML = '<div class="text-center py-8 text-xs text-rose-500">ไม่สามารถโหลดรายการสถานที่ได้</div>';
+          }
+        }
+      });
+    }
+
+    function renderLocationsList(locations) {
+      const container = document.getElementById('locations-list-container');
+      if (!container) return;
+
+      if (!locations || locations.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center text-slate-400 border border-slate-100 shadow-sm">
+            <i class="fa-solid fa-map-location-dot text-3xl mb-2 text-slate-300"></i>
+            <p class="text-xs">ยังไม่มีข้อมูลสถานที่ทำงาน</p>
+            <button onclick="openLocationFormModal()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 transition">
+              + เพิ่มสถานที่แรก
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = locations.map(loc => {
+        const isMain = String(loc.LocationID) === 'LOC001' || (loc.LocationName && (loc.LocationName.includes('หลัก') || loc.LocationName.includes('ใหญ่')));
+        const isActive = loc.Status !== 'Inactive';
+        const typeBadge = isMain
+          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-building text-[9px] mr-1"></i>สำนักงานหลัก (Main)</span>'
+          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-location-dot text-[9px] mr-1"></i>สำนักงานรอง / Site งาน</span>';
+
+        const statusBadge = isActive
+          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">เปิดใช้งาน</span>'
+          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">ปิดใช้งาน</span>';
+
+        const mapUrl = `https://www.google.com/maps?q=${loc.Latitude},${loc.Longitude}`;
+
+        // Distance from user's current GPS
+        let distText = '';
+        if (state.currentCoords && state.currentCoords.lat && loc.Latitude && loc.Longitude) {
+          const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, Number(loc.Latitude), Number(loc.Longitude));
+          distText = `<span class="text-[10px] text-slate-500 ml-auto font-normal"><i class="fa-solid fa-route text-slate-400 mr-0.5"></i>ห่าง ${d < 1000 ? d + ' ม.' : (d/1000).toFixed(1) + ' กม.'}</span>`;
+        }
+
+        return `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${typeBadge}
+                ${statusBadge}
+              </div>
+              ${distText}
+            </div>
+
+            <div>
+              <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-map-pin text-rose-500 text-xs"></i>
+                <span>${loc.LocationName || 'ไม่ระบุชื่อ'}</span>
+              </h4>
+              <p class="text-xs text-slate-500 mt-0.5 font-light leading-relaxed">${loc.Address || 'ไม่มีข้อมูลที่อยู่'}</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-2.5 flex items-center justify-between text-[11px] text-slate-600">
+              <div class="space-y-0.5">
+                <div><b>พิกัด:</b> ${Number(loc.Latitude).toFixed(5)}, ${Number(loc.Longitude).toFixed(5)}</div>
+                <div><b>รัศมีลงเวลา:</b> ${loc.RadiusMeter || 200} เมตร</div>
+              </div>
+              <a href="${mapUrl}" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-blue-600 flex items-center gap-1 shadow-2xs font-medium text-[11px]">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                <span>ดูแผนที่</span>
+              </a>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+              <button onclick="toggleLocationStatus('${loc.LocationID}')" class="px-3 py-1 text-xs rounded-lg border transition ${isActive ? 'border-amber-200 text-amber-700 hover:bg-amber-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'}">
+                <i class="fa-solid ${isActive ? 'fa-pause' : 'fa-play'} text-[10px] mr-1"></i>
+                <span>${isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}</span>
+              </button>
+              <button onclick="openLocationFormModal('${loc.LocationID}')" class="px-3 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition flex items-center gap-1">
+                <i class="fa-solid fa-pen-to-square text-[10px]"></i>
+                <span>แก้ไข</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleSaveLocation(e) {
+      e.preventDefault();
+      const locId = document.getElementById('loc-form-id').value;
+      const name = document.getElementById('loc-form-name').value;
+      const address = document.getElementById('loc-form-address').value;
+      const lat = parseFloat(document.getElementById('loc-form-lat').value);
+      const lng = parseFloat(document.getElementById('loc-form-lng').value);
+      const radius = parseInt(document.getElementById('loc-form-radius').value, 10);
+      const status = document.getElementById('loc-form-status').value;
+      const btn = document.getElementById('btn-save-loc');
+
+      if (isNaN(lat) || isNaN(lng)) {
+        Swal.fire({ icon: 'warning', title: 'พิกัดไม่ถูกต้อง', text: 'กรุณากรอกละติจูดและลองจิจูดเป็นตัวเลข', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังบันทึก...</span>';
+      }
+
+      const payload = {
+        token: state.token,
+        locationData: {
+          LocationID: locId || undefined,
+          LocationName: name,
+          Address: address,
+          Latitude: lat,
+          Longitude: lng,
+          RadiusMeter: radius || 200,
+          MinAccuracy: 100,
+          Status: status
+        }
+      };
+
+      callAPI('SAVE_LOCATION', payload, res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>บันทึกข้อมูล</span>';
+        }
+        if (res && res.success) {
+          closeLocationFormModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            text: `บันทึกข้อมูลสถานที่ "${name}" เรียบร้อย`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          fetchLocationsList();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'บันทึกไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการบันทึกสถานที่',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function toggleLocationStatus(locId) {
+      const loc = state.locations ? state.locations.find(l => String(l.LocationID) === String(locId)) : null;
+      if (!loc) return;
+
+      const newStatus = loc.Status === 'Inactive' ? 'Active' : 'Inactive';
+      const actionText = newStatus === 'Active' ? 'เปิดใช้งาน' : 'ปิดการใช้งาน';
+
+      Swal.fire({
+        title: `ยืนยัน${actionText}?`,
+        text: `คุณต้องการ${actionText}สถานที่ "${loc.LocationName}" ใช่หรือไม่`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: newStatus === 'Active' ? '#1b4b8a' : '#d97706',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const payload = {
+            token: state.token,
+            locationData: Object.assign({}, loc, { Status: newStatus })
+          };
+          callAPI('SAVE_LOCATION', payload, res => {
+            if (res && res.success) {
+              Swal.fire({ icon: 'success', title: `${actionText}เรียบร้อย`, timer: 1200, showConfirmButton: false });
+              fetchLocationsList();
+            } else {
+              Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: (res && res.error && res.error.message) || '', confirmButtonColor: '#1b4b8a' });
+            }
+          });
+        }
+      });
+    }
     function showTermsModal() {
       Swal.fire({
         title: 'นโยบายความเป็นส่วนตัว',

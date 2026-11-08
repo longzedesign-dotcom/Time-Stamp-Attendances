@@ -40,29 +40,53 @@ const Admin = {
   getLocations(token) {
     const valid = Auth.validateSession(token);
     if (!valid.success) return valid;
-    return Utils.success({ locations: Db.getAll(CONFIG.SHEETS.LOCATIONS) });
+    const locations = Db.getAll(CONFIG.SHEETS.LOCATIONS) || [];
+    return Utils.success({ locations: locations });
   },
 
   /**
-   * Add or update location
+   * Add or update location (Main Office, Branch, Site Offices)
    */
   saveLocation(token, locationData) {
     const valid = Auth.validateSession(token);
     if (!valid.success) return valid;
-    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
-      return Utils.error('ไม่มีสิทธิ์จัดการสถานที่', 'FORBIDDEN');
+
+    if (!locationData || !locationData.LocationName) {
+      return Utils.error('กรุณาระบุชื่อสถานที่ / Site งาน');
     }
 
     const locId = locationData.LocationID || ('LOC' + Date.now());
-    const existing = Db.findOne(CONFIG.SHEETS.LOCATIONS, l => l.LocationID === locId);
+    const cleanData = {
+      LocationID: String(locId),
+      LocationName: String(locationData.LocationName || '').trim(),
+      Address: String(locationData.Address || '').trim(),
+      Latitude: Number(locationData.Latitude) || 0,
+      Longitude: Number(locationData.Longitude) || 0,
+      RadiusMeter: Number(locationData.RadiusMeter) || 200,
+      MinAccuracy: Number(locationData.MinAccuracy) || 100,
+      Status: locationData.Status === 'Inactive' ? 'Inactive' : 'Active'
+    };
+
+    const existing = Db.findOne(CONFIG.SHEETS.LOCATIONS, l => String(l.LocationID) === String(locId));
 
     if (existing) {
-      Db.update(CONFIG.SHEETS.LOCATIONS, l => l.LocationID === locId, locationData);
+      Db.update(CONFIG.SHEETS.LOCATIONS, l => String(l.LocationID) === String(locId), cleanData);
     } else {
-      locationData.LocationID = locId;
-      Db.insert(CONFIG.SHEETS.LOCATIONS, locationData);
+      Db.insert(CONFIG.SHEETS.LOCATIONS, cleanData);
     }
 
-    return Utils.success({ location: locationData }, 'บันทึกข้อมูลสถานที่เรียบร้อย');
+    return Utils.success({ location: cleanData }, 'บันทึกข้อมูลสถานที่เรียบร้อย');
+  },
+
+  /**
+   * Delete or toggle status of location
+   */
+  deleteLocation(token, locationId) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    if (!locationId) return Utils.error('ไม่พบรหัสสถานที่');
+
+    Db.update(CONFIG.SHEETS.LOCATIONS, l => String(l.LocationID) === String(locationId), { Status: 'Inactive' });
+    return Utils.success({}, 'ปิดการใช้งานสถานที่เรียบร้อย');
   }
 };

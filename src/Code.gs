@@ -125,6 +125,9 @@ function apiDispatcher(action, payload) {
       case 'SAVE_LOCATION':
         res = Admin.saveLocation(token, data.locationData);
         break;
+      case 'DELETE_LOCATION':
+        res = Admin.deleteLocation(token, data.locationId);
+        break;
 
       default:
         res = Utils.error(`Unknown API action: "${action}"`);
