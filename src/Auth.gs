@@ -72,10 +72,11 @@ const Auth = {
       return Utils.error(`บัญชีถูกระงับชั่วคราวเนื่องจากใส่รหัสผิดเกินกำหนด กรุณารอ ${lockCheck.waitMinutes} นาที`, 'ACCOUNT_LOCKED');
     }
 
+    // Find user primarily by EmployeeCode (also allows UserID or Email)
     const user = Db.findOne(CONFIG.SHEETS.USERS, u => 
-      this.cleanIdentifier(u.Email) === clean || 
-      this.cleanIdentifier(u.EmployeeCode) === clean ||
-      this.cleanIdentifier(u.UserID) === clean
+      this.cleanIdentifier(u.EmployeeCode) === clean || 
+      this.cleanIdentifier(u.UserID) === clean ||
+      this.cleanIdentifier(u.Email) === clean
     );
 
     if (!user) {
@@ -87,14 +88,11 @@ const Auth = {
       return Utils.error('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อฝ่ายบุคคล');
     }
 
-    // Password evaluation: Supports plain '12345' for testing, plain match, and salted SHA-256 hash
+    // Password evaluation: Verify salted SHA-256 hash
     const inputHash = Utils.hashPassword(password);
-    const isPasswordValid = 
-      String(password) === '12345' || 
-      String(user.PasswordHash) === String(password) || 
-      String(user.PasswordHash) === inputHash;
+    const isPasswordValid = (String(user.PasswordHash) === inputHash);
 
-    if (user.PasswordHash && !isPasswordValid) {
+    if (!isPasswordValid) {
       this.recordFailure(clean, 'Invalid password', userAgent);
       return Utils.error('รหัสผ่านไม่ถูกต้อง');
     }
