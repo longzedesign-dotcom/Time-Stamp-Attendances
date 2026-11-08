@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Time Stamp Attendance - สำนักงานปลัดกระทรวงพาณิชย์</title>
+  <!-- Google Fonts: Prompt & Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Sarabun', 'sans-serif'],
+          },
+          colors: {
+            moc: {
+              blue: '#1b4b8a',
+              dark: '#0f2c59',
+              light: '#eaf2fd',
+              green: '#2e7d32',
+              red: '#c62828',
+              accent: '#3b82f6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
+    .leaflet-control-attribution {
+      display: none !important;
+    }
+    .pulse-pin {
+      position: relative;
+    }
+    .pulse-pin::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.4);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      70% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
+
+  <!-- ==================== 1. SCREEN: LOGIN ==================== -->
+  <div id="screen-login" class="fixed inset-0 z-50 bg-gradient-to-b from-[#1b4b8a] via-[#163f75] to-[#0e274a] flex flex-col justify-between items-center py-10 px-6 overflow-y-auto">
+    <div class="w-full max-w-sm flex flex-col items-center mt-8">
+      <!-- OPS Logo -->
+      <div class="w-24 h-24 mb-4 flex items-center justify-center">
+        <div class="relative flex items-center justify-center">
+          <span class="text-4xl font-extrabold tracking-wider text-sky-400 drop-shadow-md">OP<span class="text-amber-400">S</span></span>
+        </div>
+      </div>
+      <h1 class="text-xl md:text-2xl font-bold text-white text-center leading-snug tracking-wide">สำนักงานปลัดกระทรวงพาณิชย์</h1>
+      <p class="text-xs text-sky-200 mt-1 text-center font-light">Office of the Permanent Secretary<br>of the Ministry of Commerce</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 my-auto">
+      <h2 class="text-lg font-semibold text-center text-slate-800 mb-6">เข้าสู่ระบบ login</h2>
+
+      <!-- ThaID Button -->
+      <button onclick="handleThaIDLogin()" class="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 transition shadow-sm mb-3 group">
+        <div class="w-6 h-6 rounded-full bg-blue-900 flex items-center justify-center text-white text-[10px] font-bold">ThaID</div>
+        <span class="font-medium text-slate-700 group-hover:text-blue-900">ThaID</span>
+      </button>
+
+      <!-- MOC Account Button -->
+      <button onclick="handleMOCLogin()" class="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 transition shadow-sm mb-4 group">
+        <div class="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold">
+          <i class="fa-solid fa-building-columns"></i>
+        </div>
+        <span class="font-medium text-slate-700 group-hover:text-blue-900">MOC Account</span>
+      </button>
+
+      <!-- Toggle Standard Login -->
+      <div class="text-center pt-2">
+        <button onclick="toggleStandardLogin()" class="text-xs text-slate-400 hover:text-slate-600 transition flex items-center justify-center gap-1 mx-auto">
+          <span>เข้าสู่ระบบด้วยรหัสผ่าน</span>
+          <i id="toggle-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- Standard Login Form -->
+      <form id="standard-login-form" onsubmit="handleStandardLogin(event)" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-3">
+        <div>
+          <label class="text-xs font-medium text-slate-500">อีเมล</label>
+          <input type="email" id="login-email" value="thakot.ch@gmail.com" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500">รหัสผ่าน</label>
+          <input type="password" id="login-password" value="12345678" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+        </div>
+        <button type="submit" class="w-full bg-[#1b4b8a] text-white py-2.5 rounded-lg text-sm font-medium shadow hover:bg-blue-800 transition">เข้าใช้งาน</button>
+      </form>
+    </div>
+
+    <!-- Version Footer -->
+    <div class="text-center text-xs text-blue-200/70 font-light pb-2">
+      Version 2.0.8
+    </div>
+  </div>
+
+
+  <!-- ==================== MAIN APP CONTAINER ==================== -->
+  <div id="app-main" class="flex-1 flex flex-col h-full w-full overflow-hidden relative">
+
+    <!-- TOP HEADER (For Calendar, Profile, Notifications) -->
+    <div id="top-user-header" class="bg-gradient-to-r from-[#1b4b8a] to-[#2563eb] text-white px-5 pt-7 pb-4 shadow-md shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div id="header-avatar" class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white text-xl border-2 border-white/40 overflow-hidden shadow">
+            <i class="fa-solid fa-user"></i>
+          </div>
+        </div>
+        <div>
+          <h2 id="header-fullname" class="text-base font-semibold tracking-tight">คุณ เฉลิมพร ถาโคตร</h2>
+          <div class="flex items-center gap-1.5 text-xs text-blue-100/90 font-light mt-0.5">
+            <i class="fa-regular fa-clock text-[11px]"></i>
+            <span id="header-shift">เวลาทำงาน 8:30 – 16:30</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segmented Sub-tab: ปฏิทิน / ประวัติการลงเวลา -->
+      <div id="header-subtabs" class="flex border-b border-blue-400/30 mt-4">
+        <button onclick="switchSubTab('calendar')" id="subtab-calendar" class="flex-1 pb-2.5 text-center text-sm font-semibold border-b-2 border-white text-white transition">
+          ปฏิทิน
+        </button>
+        <button onclick="switchSubTab('history')" id="subtab-history" class="flex-1 pb-2.5 text-center text-sm font-medium border-b-2 border-transparent text-blue-200 hover:text-white transition">
+          ประวัติการลงเวลา
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ==================== CONTENT TABS ==================== -->
+    <div class="flex-1 overflow-hidden relative">
+
+      <!-- TAB 1: CALENDAR VIEW (IMG_1191) -->
+      <div id="tab-calendar" class="h-full overflow-y-auto custom-scroll p-4 pb-20">
+        <div class="flex items-center justify-between mb-4 px-1">
+          <h3 class="text-lg font-bold text-slate-800">ปฏิทิน</h3>
+          <button onclick="showStatusLegend()" class="text-xs text-slate-500 hover:text-blue-600 flex items-center gap-1">
+            <span>สีสถานะ</span>
+            <i class="fa-regular fa-circle-question"></i>
+          </button>
+        </div>
+
+        <!-- Month Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
+          <div class="flex items-center justify-between px-2 mb-4 font-semibold text-slate-700">
+            <div class="flex items-center gap-3">
+              <button onclick="prevMonth()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-left"></i></button>
+              <span id="cal-month-name" class="w-28 text-center text-base">กรกฎาคม</span>
+              <button onclick="nextMonth()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="prevYear()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-left"></i></button>
+              <span id="cal-year-val" class="w-16 text-center text-base">2569</span>
+              <button onclick="nextYear()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Weekday Headers -->
+          <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-400 mb-2">
+            <div>อา.</div>
+            <div>จ.</div>
+            <div>อ.</div>
+            <div>พ.</div>
+            <div>พฤ.</div>
+            <div>ศ.</div>
+            <div>ส.</div>
+          </div>
+
+          <!-- Calendar Grid Days -->
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-y-2 text-center text-sm">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- Selected Date Details Panel -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+          <h4 id="selected-date-header" class="text-sm font-bold text-slate-800 mb-3">13 กรกฎาคม 2569</h4>
+          <div id="selected-date-logs" class="space-y-2 text-xs text-slate-400 text-center py-6">
+            ไม่พบประวัติการลงเวลา
+          </div>
+        </div>
+      </div>
+
+
+      <!-- TAB 1.2: HISTORY VIEW (IMG_1192) -->
+      <div id="tab-history" class="hidden h-full overflow-y-auto custom-scroll p-4 pb-20">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-lg font-bold text-slate-800">ประวัติการลงเวลา</h3>
+          <button onclick="openFilterModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition">
+            <i class="fa-solid fa-filter text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Grouped History List -->
+        <div id="history-container" class="space-y-4">
+          <!-- Populated via Javascript -->
+        </div>
+      </div>
+
+
+      <!-- TAB 2: CLOCK IN / CLOCK OUT HUB (IMG_1196, IMG_1197) -->
+      <div id="tab-clock" class="hidden h-full w-full relative">
+        <!-- Full-screen Map -->
+        <div id="clock-map" class="w-full h-full z-0"></div>
+
+        <!-- Floating Top Header: Live Date & Clock -->
+        <div class="absolute top-4 left-4 right-4 z-20 pointer-events-none">
+          <div class="bg-white/95 backdrop-blur-md border border-white/80 rounded-2xl shadow-lg px-5 py-3.5 flex items-center justify-between pointer-events-auto">
+            <span id="live-thai-date" class="text-sm font-bold text-slate-800">วันจันทร์ 13 กรกฎาคม 2569</span>
+            <span id="live-thai-clock" class="text-lg font-extrabold text-[#1b4b8a] tracking-tight">01:17</span>
+          </div>
+        </div>
+
+        <!-- Floating Re-center Target Button -->
+        <button onclick="recenterMap()" class="absolute bottom-28 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-lg border border-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition active:scale-95">
+          <i class="fa-solid fa-crosshairs text-base"></i>
+        </button>
+
+        <!-- Work Mode Selector Bar -->
+        <div class="absolute bottom-24 left-4 z-20">
+          <select id="work-mode-select" class="text-xs font-medium bg-white/90 backdrop-blur border border-slate-200 rounded-xl px-3 py-2 shadow-sm focus:outline-none">
+            <option value="ONSITE">🏢 ประจำสำนักงาน (Onsite)</option>
+            <option value="WFH">🏠 ปฏิบัติงานที่บ้าน (WFH)</option>
+            <option value="OFFSITE">🚗 ปฏิบัติงานนอกสถานที่ (Field)</option>
+          </select>
+        </div>
+
+        <!-- Bottom Dual Clock Action Buttons -->
+        <div class="absolute bottom-4 left-4 right-4 z-20 flex gap-3">
+          <!-- Clock In Button -->
+          <button onclick="triggerPunch('CHECK_IN')" class="flex-1 bg-[#38a169] hover:bg-[#2f855a] active:scale-[0.98] transition text-white py-3.5 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2">
+            <span>ลงเวลาเข้า</span>
+          </button>
+          <!-- Clock Out Button -->
+          <button onclick="triggerPunch('CHECK_OUT')" class="flex-1 bg-[#b91c1c] hover:bg-[#991b1b] active:scale-[0.98] transition text-white py-3.5 rounded-xl font-bold text-base shadow-lg flex items-center justify-center gap-2">
+            <span>ลงเวลาออก</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- TAB 3: NOTIFICATIONS (IMG_1201) -->
+      <div id="tab-notifications" class="hidden h-full overflow-y-auto custom-scroll p-4 pb-20">
+        <h3 class="text-lg font-bold text-slate-800 mb-4 px-1">การแจ้งเตือน</h3>
+        <div id="notifications-list" class="space-y-3">
+          <!-- Populated via Javascript -->
+        </div>
+      </div>
+
+
+      <!-- TAB 4: PROFILE (IMG_1200) -->
+      <div id="tab-profile" class="hidden h-full overflow-y-auto custom-scroll p-4 pb-20">
+        <!-- Avatar and Name -->
+        <div class="flex flex-col items-center mt-2 mb-6">
+          <div class="relative">
+            <div id="profile-avatar" class="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 text-4xl shadow-inner border-2 border-white">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <button onclick="promptAvatarUpload()" class="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full text-white flex items-center justify-center text-xs shadow-md hover:bg-blue-700 transition">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+          <h3 id="profile-fullname" class="text-lg font-bold text-slate-800 mt-3">เฉลิมพร ถาโคตร</h3>
+          <p id="profile-position" class="text-xs text-slate-400">IT Support</p>
+        </div>
+
+        <!-- User Information Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
+          <h4 class="text-xs font-semibold text-slate-400 mb-3">ข้อมูลผู้ใช้งาน</h4>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-start justify-between">
+              <span class="text-slate-500 text-xs">อีเมล:</span>
+              <span id="profile-email" class="text-slate-700 text-xs font-medium">thakot.ch@gmail.com</span>
+            </div>
+            <div class="flex items-start justify-between">
+              <span class="text-slate-500 text-xs">สังกัด:</span>
+              <span id="profile-dept" class="text-slate-700 text-xs font-medium text-right max-w-[200px]">ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร</span>
+            </div>
+            <div onclick="showTermsModal()" class="flex items-center justify-between pt-2 border-t border-slate-50 cursor-pointer text-slate-600 hover:text-blue-600">
+              <div class="flex items-center gap-2 text-xs">
+                <i class="fa-regular fa-file-lines text-slate-400"></i>
+                <span>Terms of Use & Privacy Policy</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
+          <h4 class="text-xs font-semibold text-slate-400 mb-3">ตั้งค่า</h4>
+          <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1 text-slate-700 hover:text-blue-600">
+            <div class="flex items-center gap-2 text-xs">
+              <i class="fa-regular fa-bell text-slate-400"></i>
+              <span>การแจ้งเตือน</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-slate-400">
+              <span>เปิดอยู่</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Feature Shortcuts (Chat / Workflow / Q&A) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
+          <h4 class="text-xs font-semibold text-slate-400 mb-3">บริการเพิ่มเติม</h4>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <button onclick="openChatModal()" class="p-2.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex flex-col items-center">
+              <i class="fa-regular fa-comments text-base mb-1"></i>
+              <span class="text-[11px] font-medium">แชตภายใน</span>
+            </button>
+            <button onclick="openWorkflowModal()" class="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition flex flex-col items-center">
+              <i class="fa-regular fa-calendar-check text-base mb-1"></i>
+              <span class="text-[11px] font-medium">ขอแก้เวลา/OT</span>
+            </button>
+            <button onclick="openFAQModal()" class="p-2.5 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 transition flex flex-col items-center">
+              <i class="fa-regular fa-circle-question text-base mb-1"></i>
+              <span class="text-[11px] font-medium">คำถามที่พบบ่อย</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button onclick="handleLogout()" class="w-full bg-white border border-slate-200 text-slate-700 font-medium py-3 rounded-2xl shadow-sm hover:bg-slate-50 transition flex items-center justify-center gap-2 mb-4">
+          <i class="fa-solid fa-arrow-right-from-bracket text-slate-400"></i>
+          <span class="text-sm">ออกจากระบบ</span>
+        </button>
+
+        <!-- Version Footer -->
+        <div class="text-center text-xs text-slate-400 py-2">
+          Version 2.0.8
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ==================== BOTTOM NAVIGATION BAR ==================== -->
+    <div id="bottom-nav" class="bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-around shrink-0 z-30">
+      <!-- 1. ปฏิทิน -->
+      <button onclick="switchTab('calendar')" id="nav-calendar" class="flex flex-col items-center gap-1 text-blue-600 transition">
+        <i class="fa-regular fa-calendar-days text-lg"></i>
+        <span class="text-[10px] font-medium">ปฏิทิน</span>
+      </button>
+
+      <!-- 2. ลงเวลาทำงาน -->
+      <button onclick="switchTab('clock')" id="nav-clock" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-regular fa-clock text-lg"></i>
+        <span class="text-[10px] font-medium">ลงเวลาทำงาน</span>
+      </button>
+
+      <!-- 3. แจ้งเตือน -->
+      <button onclick="switchTab('notifications')" id="nav-notifications" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition relative">
+        <div class="relative">
+          <i class="fa-regular fa-bell text-lg"></i>
+          <span id="badge-notifications" class="absolute -top-1 -right-2 bg-amber-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">1</span>
+        </div>
+        <span class="text-[10px] font-medium">แจ้งเตือน</span>
+      </button>
+
+      <!-- 4. โปรไฟล์ -->
+      <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-regular fa-user text-lg"></i>
+        <span class="text-[10px] font-medium">โปรไฟล์</span>
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- ==================== DETAIL VIEW (IMG_1195) ==================== -->
+  <div id="view-detail" class="hidden fixed inset-0 z-40 bg-slate-50 flex flex-col">
+    <!-- Blue Nav Header -->
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center gap-3 shadow shrink-0">
+      <button onclick="closeDetailView()" class="p-1 hover:text-blue-200 text-lg">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h3 class="text-base font-semibold tracking-wide">รายละเอียดการลงเวลา</h3>
+    </div>
+
+    <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+      <!-- Personnel Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+        <div class="flex justify-between items-center text-xs py-1">
+          <span class="text-slate-500">รหัสบุคลากร:</span>
+          <span id="detail-empcode" class="text-slate-700 font-medium">E0001</span>
+        </div>
+        <div class="flex justify-between items-center text-xs py-1">
+          <span class="text-slate-500">ชื่อ:</span>
+          <span id="detail-fullname" class="text-slate-700 font-medium">เฉลิมพร ถาโคตร</span>
+        </div>
+      </div>
+
+      <!-- Attendance Info Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-slate-500">สถานะ:</span>
+          <span id="detail-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">เข้า</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">เวลาที่บันทึก:</span>
+          <span id="detail-workdatetime" class="text-slate-700 font-medium">09 กรกฎาคม 2569 08:32</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-500">ประเภทการลงเวลา:</span>
+          <span class="text-slate-700 font-medium flex items-center gap-1">
+            <i class="fa-solid fa-location-dot text-slate-400"></i> GPS
+          </span>
+        </div>
+        <div class="text-xs pt-1">
+          <span class="text-slate-500 block mb-1">สถานที่:</span>
+          <p id="detail-address" class="text-slate-700 leading-relaxed font-light">
+            563 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000
+          </p>
+        </div>
+      </div>
+
+      <!-- Map Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 overflow-hidden">
+        <div id="detail-map" class="w-full h-72 rounded-xl"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Filter Date Modal (IMG_1193) -->
+  <div id="modal-filter" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+      <h3 class="text-base font-bold text-slate-800">กรองช่วงวัน</h3>
+      <div>
+        <label class="text-xs text-slate-500 block mb-1">ช่วงวัน</label>
+        <div class="relative">
+          <input type="text" id="filter-daterange" value="13/06/2569 - 13/07/2569" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i class="fa-regular fa-calendar absolute right-3 top-3 text-slate-400"></i>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="closeFilterModal()" class="px-5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">ยกเลิก</button>
+        <button onclick="applyDateFilter()" class="px-6 py-2 text-xs font-semibold text-white bg-[#1b4b8a] hover:bg-blue-800 rounded-xl transition shadow">ค้นหา</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Settings Modal (IMG_1201) -->
+  <div id="modal-notif-settings" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center gap-3 shadow shrink-0">
+      <button onclick="closeNotificationSettingsModal()" class="p-1 hover:text-blue-200 text-lg">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h3 class="text-base font-semibold tracking-wide">การแจ้งเตือน</h3>
+    </div>
+    <div class="p-4 space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center justify-between">
+        <span class="text-sm font-medium text-slate-700">แจ้งเตือนผ่านแอป</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-app-notif" checked class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1b4b8a]"></div>
+        </label>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center justify-between">
+        <span class="text-sm font-medium text-slate-700">แจ้งเตือนผ่านอีเมล</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-email-notif" checked class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1b4b8a]"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Internal Chat Modal -->
+  <div id="modal-chat" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
+      <div class="flex items-center gap-3">
+        <button onclick="closeChatModal()" class="p-1 hover:text-blue-200 text-lg">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h3 class="text-base font-semibold tracking-wide">ห้องแชตและปรึกษา</h3>
+      </div>
+      <button onclick="openCreateTicketModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-xl transition">
+        เปิดเคส HR
+      </button>
+    </div>
+    <!-- Messages Scroll Area -->
+    <div id="chat-messages-container" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3">
+      <!-- Populated via Javascript -->
+    </div>
+    <!-- Chat Input Box -->
+    <div class="bg-white border-t border-slate-200 p-3 flex items-center gap-2 shrink-0">
+      <input type="text" id="chat-input-text" placeholder="พิมพ์ข้อความที่นี่..." class="flex-1 bg-slate-100 rounded-full px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <button onclick="sendChatMessage()" class="w-8 h-8 rounded-full bg-[#1b4b8a] text-white flex items-center justify-center hover:bg-blue-800 transition shadow">
+        <i class="fa-solid fa-paper-plane text-xs"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Workflow / Request Modal -->
+  <div id="modal-workflow" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center gap-3 shadow shrink-0">
+      <button onclick="closeWorkflowModal()" class="p-1 hover:text-blue-200 text-lg">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h3 class="text-base font-semibold tracking-wide">คำขอปรับปรุงเวลา & ทำโอที</h3>
+    </div>
+    <div class="p-4 overflow-y-auto space-y-4">
+      <!-- Correction Form -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-blue-600"></i> ขอปรับปรุงเวลา (Correction)
+        </h4>
+        <div>
+          <label class="text-xs text-slate-500">วันที่ต้องการปรับปรุง</label>
+          <input type="date" id="req-corr-date" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-500">ประเภท</label>
+            <select id="req-corr-type" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+              <option value="CHECK_IN">ลงเวลาเข้า</option>
+              <option value="CHECK_OUT">ลงเวลาออก</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-500">เวลาจริง</label>
+            <input type="time" id="req-corr-time" value="08:30" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">เหตุผลประกอบ</label>
+          <textarea id="req-corr-reason" placeholder="เช่น ลืมนำโทรศัพท์มา, ปฏิบัติงานนอกสถานที่เร่งด่วน" class="w-full mt-1 border rounded-lg p-2 text-xs h-16"></textarea>
+        </div>
+        <button onclick="submitCorrectionRequest()" class="w-full bg-[#1b4b8a] text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-blue-800 transition">ส่งคำขอ</button>
+      </div>
+
+      <!-- Overtime Form -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-business-time text-emerald-600"></i> ขอทำงานล่วงเวลา (OT)
+        </h4>
+        <div>
+          <label class="text-xs text-slate-500">วันที่ทำ OT</label>
+          <input type="date" id="req-ot-date" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-500">ตั้งแต่เวลา</label>
+            <input type="time" id="req-ot-start" value="16:30" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="text-xs text-slate-500">ถึงเวลา</label>
+            <input type="time" id="req-ot-end" value="20:30" class="w-full mt-1 border rounded-lg px-3 py-2 text-xs">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">ภารกิจที่ทำ</label>
+          <textarea id="req-ot-reason" placeholder="เช่น งานประชุมเร่งด่วน, ตรวจรับระบบ" class="w-full mt-1 border rounded-lg p-2 text-xs h-16"></textarea>
+        </div>
+        <button onclick="submitOvertimeRequest()" class="w-full bg-[#2e7d32] text-white py-2 rounded-xl text-xs font-semibold shadow hover:bg-emerald-800 transition">ส่งคำขอ OT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Knowledge Base Modal -->
+  <div id="modal-faq" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center gap-3 shadow shrink-0">
+      <button onclick="closeFAQModal()" class="p-1 hover:text-blue-200 text-lg">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h3 class="text-base font-semibold tracking-wide">คำถามที่พบบ่อย (FAQ)</h3>
+    </div>
+    <div id="faq-list-container" class="p-4 overflow-y-auto space-y-3">
+      <!-- Populated via Javascript -->
+    </div>
+  </div>
+
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // System Global State
+    const state = {
+      token: localStorage.getItem('tsa_token') || '',
+      user: null,
+      currentTab: 'calendar',
+      currentSubTab: 'calendar',
+      currentYear: 2026,
+      currentMonth: 6, // 0-indexed: 6 = กรกฎาคม
+      selectedDate: '2026-07-13',
+      currentCoords: { lat: 13.91094031, lng: 100.5946153, accuracy: 25 },
+      mapInstance: null,
+      userMarker: null,
+      detailMapInstance: null,
+      cachedHistory: [],
+      calendarStatusMap: {},
+      thaiMonths: [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ]
+    };
+
+    // Initialize App on DOM Ready
+    document.addEventListener('DOMContentLoaded', () => {
+      startLiveClock();
+      initLocationWatch();
+      checkAuthSession();
+    });
+
+    // Realtime Clock Updater
+    function startLiveClock() {
+      const update = () => {
+        const now = new Date();
+        const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+        const dayName = thaiDays[now.getDay()];
+        const day = now.getDate();
+        const monthName = state.thaiMonths[now.getMonth()];
+        const yearBE = now.getFullYear() + 543;
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const elDate = document.getElementById('live-thai-date');
+        const elClock = document.getElementById('live-thai-clock');
+        if (elDate) elDate.innerText = `${dayName} ${day} ${monthName} ${yearBE}`;
+        if (elClock) elClock.innerText = `${hours}:${minutes}`;
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Geolocation Watcher
+    function initLocationWatch() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition(
+          pos => {
+            state.currentCoords.lat = pos.coords.latitude;
+            state.currentCoords.lng = pos.coords.longitude;
+            state.currentCoords.accuracy = pos.coords.accuracy;
+            updateMapPin();
+          },
+          err => {
+            console.warn('Geolocation access fallback to default office coords:', err);
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+      }
+    }
+
+    // Auth & Session Check
+    function checkAuthSession() {
+      if (!state.token) {
+        showLoginScreen();
+        return;
+      }
+      callAPI('VALIDATE_SESSION', { token: state.token }, res => {
+        if (res.success) {
+          state.user = res.data.user;
+          applyUserData(state.user);
+          hideLoginScreen();
+          loadDashboardData();
+        } else {
+          showLoginScreen();
+        }
+      });
+    }
+
+    function applyUserData(user) {
+      if (!user) return;
+      document.getElementById('header-fullname').innerText = user.FullName || 'คุณ เฉลิมพร ถาโคตร';
+      document.getElementById('header-shift').innerText = `เวลาทำงาน ${user.WorkStart || '8:30'} – ${user.WorkEnd || '16:30'}`;
+      document.getElementById('profile-fullname').innerText = user.FullName || 'คุณ เฉลิมพร ถาโคตร';
+      document.getElementById('profile-position').innerText = user.Position || 'IT Support';
+      document.getElementById('profile-email').innerText = user.Email || '';
+      document.getElementById('profile-dept').innerText = user.DepartmentID === 'IT' ? 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' : user.DepartmentID;
+    }
+
+    function showLoginScreen() {
+      document.getElementById('screen-login').classList.remove('hidden');
+    }
+
+    function hideLoginScreen() {
+      document.getElementById('screen-login').classList.add('hidden');
+    }
+
+    function toggleStandardLogin() {
+      const form = document.getElementById('standard-login-form');
+      const icon = document.getElementById('toggle-icon');
+      form.classList.toggle('hidden');
+      icon.classList.toggle('fa-chevron-up');
+      icon.classList.toggle('fa-chevron-down');
+    }
+
+    // Login Handlers
+    function handleThaIDLogin() {
+      callAPI('LOGIN_THAID', { deviceInfo: 'ThaID Mobile SSO' }, res => {
+        if (res.success) {
+          state.token = res.data.token;
+          state.user = res.data.user;
+          localStorage.setItem('tsa_token', state.token);
+          applyUserData(state.user);
+          hideLoginScreen();
+          loadDashboardData();
+        } else {
+          alert(res.error.message);
+        }
+      });
+    }
+
+    function handleMOCLogin() {
+      const email = prompt('กรุณาระบุ MOC Account Email ของท่าน:', 'thakot.ch@moc.go.th') || 'thakot.ch@gmail.com';
+      callAPI('LOGIN_MOC', { email: email, deviceInfo: 'MOC Account Portal' }, res => {
+        if (res.success) {
+          state.token = res.data.token;
+          state.user = res.data.user;
+          localStorage.setItem('tsa_token', state.token);
+          applyUserData(state.user);
+          hideLoginScreen();
+          loadDashboardData();
+        } else {
+          alert(res.error.message);
+        }
+      });
+    }
+
+    function handleStandardLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+      callAPI('LOGIN', { email: email, password: pass }, res => {
+        if (res.success) {
+          state.token = res.data.token;
+          state.user = res.data.user;
+          localStorage.setItem('tsa_token', state.token);
+          applyUserData(state.user);
+          hideLoginScreen();
+          loadDashboardData();
+        } else {
+          alert(res.error.message);
+        }
+      });
+    }
+
+    function handleLogout() {
+      if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
+        callAPI('LOGOUT', { token: state.token }, () => {
+          localStorage.removeItem('tsa_token');
+          state.token = '';
+          state.user = null;
+          showLoginScreen();
+        });
+      }
+    }
+
+    // Tab Navigation
+    function switchTab(tabId) {
+      state.currentTab = tabId;
+      const tabs = ['calendar', 'clock', 'notifications', 'profile'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (el) el.classList.add('hidden');
+        if (nav) {
+          nav.classList.remove('text-blue-600');
+          nav.classList.add('text-slate-400');
+        }
+      });
+
+      const activeEl = document.getElementById(`tab-${tabId}`);
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-400');
+        activeNav.classList.add('text-blue-600');
+      }
+
+      // Toggle top header visibility
+      const topHeader = document.getElementById('top-user-header');
+      if (tabId === 'clock') {
+        topHeader.classList.add('hidden');
+        setTimeout(initClockMap, 200);
+      } else {
+        topHeader.classList.remove('hidden');
+      }
+
+      if (tabId === 'notifications') loadNotifications();
+    }
+
+    function switchSubTab(subTabId) {
+      state.currentSubTab = subTabId;
+      const calSub = document.getElementById('subtab-calendar');
+      const histSub = document.getElementById('subtab-history');
+      const calTab = document.getElementById('tab-calendar');
+      const histTab = document.getElementById('tab-history');
+
+      if (subTabId === 'calendar') {
+        calSub.className = 'flex-1 pb-2.5 text-center text-sm font-semibold border-b-2 border-white text-white transition';
+        histSub.className = 'flex-1 pb-2.5 text-center text-sm font-medium border-b-2 border-transparent text-blue-200 hover:text-white transition';
+        calTab.classList.remove('hidden');
+        histTab.classList.add('hidden');
+      } else {
+        histSub.className = 'flex-1 pb-2.5 text-center text-sm font-semibold border-b-2 border-white text-white transition';
+        calSub.className = 'flex-1 pb-2.5 text-center text-sm font-medium border-b-2 border-transparent text-blue-200 hover:text-white transition';
+        histTab.classList.remove('hidden');
+        calTab.classList.add('hidden');
+        renderHistoryList();
+      }
+    }
+
+    // Dashboard Data Loading
+    function loadDashboardData() {
+      callAPI('GET_ATTENDANCE_HISTORY', { token: state.token }, res => {
+        if (res.success) {
+          state.cachedHistory = res.data.historyList || [];
+          state.calendarStatusMap = res.data.calendarStatusMap || {};
+          renderCalendar();
+          renderHistoryList();
+        }
+      });
+      loadNotifications();
+    }
+
+    // Calendar Generation
+    function renderCalendar() {
+      const monthName = state.thaiMonths[state.currentMonth];
+      const yearBE = state.currentYear + 543;
+      document.getElementById('cal-month-name').innerText = monthName;
+      document.getElementById('cal-year-val').innerText = yearBE;
+
+      const grid = document.getElementById('calendar-days-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(state.currentYear, state.currentMonth, 1).getDay();
+      const daysInMonth = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+      const prevDays = new Date(state.currentYear, state.currentMonth, 0).getDate();
+
+      // Leading days from previous month
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const d = prevDays - i;
+        grid.innerHTML += `<div class="py-2 text-slate-300 font-light">${d}</div>`;
+      }
+
+      // Current Month Days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isoDate = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isSelected = state.selectedDate === isoDate;
+        const status = state.calendarStatusMap[isoDate] || { hasIn: false, hasOut: false };
+
+        let dotsHtml = '<div class="flex items-center justify-center gap-1 mt-1 h-1.5">';
+        if (status.hasIn) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>';
+        if (status.hasOut) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>';
+        if (!status.hasIn && !status.hasOut) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>';
+        dotsHtml += '</div>';
+
+        const dayBtn = document.createElement('div');
+        dayBtn.className = `py-1 cursor-pointer rounded-xl transition ${isSelected ? 'bg-blue-500 text-white font-bold shadow' : 'hover:bg-slate-100 text-slate-700'}`;
+        dayBtn.innerHTML = `<span>${d}</span>${dotsHtml}`;
+        dayBtn.onclick = () => selectCalendarDate(isoDate, d);
+        grid.appendChild(dayBtn);
+      }
+    }
+
+    function selectCalendarDate(isoDate, dayNum) {
+      state.selectedDate = isoDate;
+      renderCalendar();
+
+      const thaiDate = `${dayNum} ${state.thaiMonths[state.currentMonth]} ${state.currentYear + 543}`;
+      document.getElementById('selected-date-header').innerText = thaiDate;
+
+      const dateLogs = state.cachedHistory.filter(l => l.WorkDate === isoDate);
+      const container = document.getElementById('selected-date-logs');
+
+      if (dateLogs.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 py-4">ไม่พบประวัติการลงเวลา</p>';
+      } else {
+        container.innerHTML = dateLogs.map(l => `
+          <div onclick="openDetailView('${l.AttendanceID}')" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition text-left">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${l.Type === 'CHECK_IN' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                ${l.Type === 'CHECK_IN' ? 'เข้า' : 'ออก'} ${l.WorkTime}
+              </span>
+              <span class="text-xs text-slate-600 truncate max-w-[180px]">${l.LocationName || 'สำนักงานหลัก'}</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+          </div>
+        `).join('');
+      }
+    }
+
+    function prevMonth() {
+      state.currentMonth--;
+      if (state.currentMonth < 0) {
+        state.currentMonth = 11;
+        state.currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      state.currentMonth++;
+      if (state.currentMonth > 11) {
+        state.currentMonth = 0;
+        state.currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function prevYear() {
+      state.currentYear--;
+      renderCalendar();
+    }
+
+    function nextYear() {
+      state.currentYear++;
+      renderCalendar();
+    }
+
+    // History List Rendering
+    function renderHistoryList() {
+      const container = document.getElementById('history-container');
+      if (!container) return;
+
+      if (state.cachedHistory.length === 0) {
+        container.innerHTML = '<div class="text-center text-xs text-slate-400 py-12">ไม่พบประวัติการลงเวลา</div>';
+        return;
+      }
+
+      // Group by date
+      const grouped = {};
+      state.cachedHistory.forEach(l => {
+        const thaiDate = formatThaiDateStr(l.WorkDate);
+        if (!grouped[thaiDate]) grouped[thaiDate] = [];
+        grouped[thaiDate].push(l);
+      });
+
+      container.innerHTML = Object.keys(grouped).map(dateKey => `
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-700 mt-2">${dateKey}</h4>
+          ${grouped[dateKey].map(item => `
+            <div onclick="openDetailView('${item.AttendanceID}')" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-start justify-between cursor-pointer hover:shadow transition">
+              <div class="space-y-1.5 flex-1 pr-2">
+                <div>
+                  <span class="inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold ${item.Type === 'CHECK_IN' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                    ${item.Type === 'CHECK_IN' ? 'เข้า' : 'ออก'} ${item.WorkTime}
+                  </span>
+                </div>
+                <div class="flex items-start gap-1.5 text-xs text-slate-500 font-light leading-snug">
+                  <i class="fa-solid fa-location-dot text-slate-400 text-[11px] mt-0.5"></i>
+                  <span>${item.Address || item.LocationName || 'สำนักงานปลัดกระทรวงพาณิชย์'}</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-xs text-slate-300 mt-2"></i>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    // Detail View Handlers
+    function openDetailView(attendanceId) {
+      callAPI('GET_ATTENDANCE_DETAIL', { token: state.token, attendanceId: attendanceId }, res => {
+        if (res.success) {
+          const rec = res.data.record;
+          document.getElementById('detail-empcode').innerText = rec.EmployeeCode || 'E0001';
+          document.getElementById('detail-fullname').innerText = rec.FullName || state.user.FullName;
+          document.getElementById('detail-workdatetime').innerText = res.data.thaiDateTime || `${rec.WorkDate} ${rec.WorkTime}`;
+          document.getElementById('detail-address').innerText = rec.Address || 'สำนักงานปลัดกระทรวงพาณิชย์ 563 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000';
+
+          const badge = document.getElementById('detail-status-badge');
+          if (rec.Type === 'CHECK_IN') {
+            badge.innerText = 'เข้า';
+            badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800';
+          } else {
+            badge.innerText = 'ออก';
+            badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800';
+          }
+
+          document.getElementById('view-detail').classList.remove('hidden');
+
+          setTimeout(() => {
+            initDetailMap(Number(rec.Latitude) || state.currentCoords.lat, Number(rec.Longitude) || state.currentCoords.lng);
+          }, 300);
+        }
+      });
+    }
+
+    function closeDetailView() {
+      document.getElementById('view-detail').classList.add('hidden');
+    }
+
+    function initDetailMap(lat, lng) {
+      if (!state.detailMapInstance) {
+        state.detailMapInstance = L.map('detail-map', { zoomControl: false }).setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(state.detailMapInstance);
+      } else {
+        state.detailMapInstance.setView([lat, lng], 16);
+      }
+      L.marker([lat, lng]).addTo(state.detailMapInstance);
+      state.detailMapInstance.invalidateSize();
+    }
+
+    // Fullscreen Clock Map (IMG_1196, IMG_1197)
+    function initClockMap() {
+      if (!state.mapInstance) {
+        state.mapInstance = L.map('clock-map', { zoomControl: false }).setView([state.currentCoords.lat, state.currentCoords.lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(state.mapInstance);
+
+        const customIcon = L.divIcon({
+          className: 'pulse-pin',
+          html: '<div class="w-3.5 h-3.5 bg-blue-600 rounded-full border-2 border-white shadow"></div>',
+          iconSize: [14, 14]
+        });
+        state.userMarker = L.marker([state.currentCoords.lat, state.currentCoords.lng], { icon: customIcon }).addTo(state.mapInstance);
+      } else {
+        state.mapInstance.invalidateSize();
+        recenterMap();
+      }
+    }
+
+    function updateMapPin() {
+      if (state.userMarker && state.currentCoords) {
+        state.userMarker.setLatLng([state.currentCoords.lat, state.currentCoords.lng]);
+      }
+    }
+
+    function recenterMap() {
+      if (state.mapInstance && state.currentCoords) {
+        state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 17);
+      }
+    }
+
+    // Punch Clock Trigger
+    function triggerPunch(type) {
+      const mode = document.getElementById('work-mode-select').value;
+      const confirmMsg = type === 'CHECK_IN' ? 'ยืนยันลงเวลาเข้างาน?' : 'ยืนยันลงเวลาออกงาน?';
+      if (!confirm(confirmMsg)) return;
+
+      const payload = {
+        token: state.token,
+        type: type,
+        latitude: state.currentCoords.lat,
+        longitude: state.currentCoords.lng,
+        accuracy: state.currentCoords.accuracy,
+        workMode: mode,
+        deviceInfo: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
+        userAgent: navigator.userAgent
+      };
+
+      callAPI('RECORD_ATTENDANCE', payload, res => {
+        if (res.success) {
+          alert(`✅ ${res.message}`);
+          loadDashboardData();
+          switchTab('calendar');
+        } else {
+          alert(`❌ ${res.error.message}`);
+        }
+      });
+    }
+
+    // Notifications
+    function loadNotifications() {
+      callAPI('GET_NOTIFICATIONS', { token: state.token }, res => {
+        if (res.success) {
+          const list = res.data.notifications || [];
+          const count = res.data.unreadCount || 0;
+          const badge = document.getElementById('badge-notifications');
+          if (badge) {
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+          }
+          const container = document.getElementById('notifications-list');
+          if (container) {
+            if (list.length === 0) {
+              container.innerHTML = '<div class="text-center text-xs text-slate-400 py-12">ไม่มีการแจ้งเตือน</div>';
+            } else {
+              container.innerHTML = list.map(n => `
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-xs">
+                    <i class="fa-regular fa-bell"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="text-xs font-bold text-slate-800">${n.Title}</h4>
+                    <p class="text-xs text-slate-500 mt-0.5 font-light">${n.Message}</p>
+                    <span class="text-[10px] text-slate-400 block mt-1">${formatThaiDateStr(n.CreatedAt)}</span>
+                  </div>
+                </div>
+              `).join('');
+            }
+          }
+        }
+      });
+    }
+
+    // Chat Logic
+    function openChatModal() {
+      document.getElementById('modal-chat').classList.remove('hidden');
+      loadChatMessages();
+    }
+    function closeChatModal() {
+      document.getElementById('modal-chat').classList.add('hidden');
+    }
+    function loadChatMessages() {
+      callAPI('GET_MESSAGES', { token: state.token, channelId: 'GENERAL' }, res => {
+        if (res.success) {
+          const msgs = res.data.messages || [];
+          const container = document.getElementById('chat-messages-container');
+          if (msgs.length === 0) {
+            container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีข้อความแชต</div>';
+          } else {
+            container.innerHTML = msgs.map(m => {
+              const isMe = m.SenderID === state.user.UserID;
+              return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                  <span class="text-[10px] text-slate-400 px-1 mb-0.5">${m.SenderName}</span>
+                  <div class="px-3.5 py-2 rounded-2xl max-w-[80%] text-xs shadow-sm ${isMe ? 'bg-[#1b4b8a] text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}">
+                    ${m.Content}
+                  </div>
+                </div>
+              `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+          }
+        }
+      });
+    }
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+      if (!text) return;
+      callAPI('SEND_MESSAGE', { token: state.token, channelId: 'GENERAL', content: text }, res => {
+        if (res.success) {
+          input.value = '';
+          loadChatMessages();
+        }
+      });
+    }
+
+    // Workflow / Correction / OT Logic
+    function openWorkflowModal() {
+      document.getElementById('modal-workflow').classList.remove('hidden');
+    }
+    function closeWorkflowModal() {
+      document.getElementById('modal-workflow').classList.add('hidden');
+    }
+    function submitCorrectionRequest() {
+      const targetDate = document.getElementById('req-corr-date').value;
+      const type = document.getElementById('req-corr-type').value;
+      const correctTime = document.getElementById('req-corr-time').value;
+      const reason = document.getElementById('req-corr-reason').value;
+
+      if (!targetDate || !reason) {
+        alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+        return;
+      }
+
+      callAPI('SUBMIT_CORRECTION', { token: state.token, targetDate, type, correctTime, reason }, res => {
+        if (res.success) {
+          alert('ส่งคำขอปรับปรุงเวลาเรียบร้อยแล้ว');
+          closeWorkflowModal();
+        } else {
+          alert(res.error.message);
+        }
+      });
+    }
+    function submitOvertimeRequest() {
+      const otDate = document.getElementById('req-ot-date').value;
+      const startTime = document.getElementById('req-ot-start').value;
+      const endTime = document.getElementById('req-ot-end').value;
+      const reason = document.getElementById('req-ot-reason').value;
+
+      if (!otDate || !reason) {
+        alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+        return;
+      }
+
+      callAPI('SUBMIT_OVERTIME', { token: state.token, otDate, startTime, endTime, reason }, res => {
+        if (res.success) {
+          alert('ส่งคำขอทำ OT เรียบร้อยแล้ว');
+          closeWorkflowModal();
+        } else {
+          alert(res.error.message);
+        }
+      });
+    }
+
+    // FAQ Knowledge Base
+    function openFAQModal() {
+      document.getElementById('modal-faq').classList.remove('hidden');
+      callAPI('GET_FAQS', { token: state.token }, res => {
+        if (res.success) {
+          const faqs = res.data.faqs || [];
+          const container = document.getElementById('faq-list-container');
+          container.innerHTML = faqs.map(f => `
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-1">
+              <span class="text-[10px] text-blue-600 font-semibold uppercase tracking-wider">${f.Category}</span>
+              <h4 class="text-xs font-bold text-slate-800">${f.Question}</h4>
+              <p class="text-xs text-slate-600 font-light leading-relaxed pt-1">${f.Answer}</p>
+            </div>
+          `).join('');
+        }
+      });
+    }
+    function closeFAQModal() {
+      document.getElementById('modal-faq').classList.add('hidden');
+    }
+
+    // Modals
+    function openFilterModal() { document.getElementById('modal-filter').classList.remove('hidden'); }
+    function closeFilterModal() { document.getElementById('modal-filter').classList.add('hidden'); }
+    function applyDateFilter() {
+      closeFilterModal();
+      alert('ปรับตัวกรองข้อมูลเรียบร้อย');
+    }
+
+    function openNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.remove('hidden'); }
+    function closeNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.add('hidden'); }
+    function showTermsModal() { alert('นโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งาน สำนักงานปลัดกระทรวงพาณิชย์'); }
+    function showStatusLegend() {
+      alert('คำอธิบายสีสถานะบนปฏิทิน:\n🟢 จุดสีเขียว = บันทึกเวลาเข้างาน\n🔴 จุดสีแดง = บันทึกเวลาออกงาน\n⚪ จุดสีเทา = ยังไม่มีการบันทึกเวลา');
+    }
+    function promptAvatarUpload() { alert('คุณสามารถอัปโหลดรูปภาพโปรไฟล์ใหม่ผ่าน Google Drive'); }
+
+    // Thai Date String Formatter
+    function formatThaiDateStr(isoOrDate) {
+      if (!isoOrDate) return '';
+      const d = new Date(isoOrDate);
+      if (isNaN(d.getTime())) return String(isoOrDate);
+      return `${d.getDate()} ${state.thaiMonths[d.getMonth()]} ${d.getFullYear() + 543}`;
+    }
+
+    // Universal API Caller
+    function callAPI(action, payload, callback) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(res => { if (callback) callback(res); })
+          .withFailureHandler(err => {
+            console.error('GAS Error:', err);
+            if (callback) callback({ success: false, error: { message: err.message || err } });
+          })
+          .apiDispatcher(action, payload);
+      } else {
+        // Offline / Simulation Fallback
+        console.warn(`Simulating API call for "${action}" in offline preview mode.`);
+        setTimeout(() => {
+          if (action === 'VALIDATE_SESSION') {
+            callback({
+              success: true,
+              data: {
+                user: {
+                  UserID: 'U0001',
+                  EmployeeCode: 'E0001',
+                  FullName: 'คุณ เฉลิมพร ถาโคตร',
+                  Email: 'thakot.ch@gmail.com',
+                  Position: 'IT Support',
+                  DepartmentID: 'IT',
+                  WorkStart: '8:30',
+                  WorkEnd: '16:30',
+                  Role: 'Admin'
+                }
+              }
+            });
+          } else if (action === 'LOGIN' || action === 'LOGIN_THAID' || action === 'LOGIN_MOC') {
+            callback({
+              success: true,
+              data: {
+                token: 'mock-token-preview',
+                user: {
+                  UserID: 'U0001',
+                  EmployeeCode: 'E0001',
+                  FullName: 'คุณ เฉลิมพร ถาโคตร',
+                  Email: 'thakot.ch@gmail.com',
+                  Position: 'IT Support',
+                  DepartmentID: 'IT',
+                  WorkStart: '8:30',
+                  WorkEnd: '16:30',
+                  Role: 'Admin'
+                }
+              }
+            });
+          } else if (action === 'GET_ATTENDANCE_HISTORY') {
+            callback({
+              success: true,
+              data: {
+                historyList: [
+                  {
+                    AttendanceID: 'ATT001',
+                    WorkDate: '2026-07-09',
+                    WorkTime: '08:32',
+                    Type: 'CHECK_IN',
+                    Status: 'ON_TIME',
+                    LocationName: 'สำนักงานหลัก',
+                    Address: '563 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000',
+                    Latitude: 13.91094031,
+                    Longitude: 100.5946153,
+                    CreatedAt: '2026-07-09T08:32:00Z'
+                  },
+                  {
+                    AttendanceID: 'ATT002',
+                    WorkDate: '2026-07-09',
+                    WorkTime: '17:09',
+                    Type: 'CHECK_OUT',
+                    Status: 'CHECKED_OUT',
+                    LocationName: 'สำนักงานหลัก',
+                    Address: '563 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000',
+                    Latitude: 13.91094031,
+                    Longitude: 100.5946153,
+                    CreatedAt: '2026-07-09T17:09:00Z'
+                  }
+                ],
+                calendarStatusMap: {
+                  '2026-07-01': { hasIn: true, hasOut: true },
+                  '2026-07-02': { hasIn: true, hasOut: false },
+                  '2026-07-06': { hasIn: true, hasOut: true },
+                  '2026-07-07': { hasIn: true, hasOut: true },
+                  '2026-07-08': { hasIn: true, hasOut: true },
+                  '2026-07-09': { hasIn: true, hasOut: true }
+                }
+              }
+            });
+          } else {
+            callback({ success: true, message: 'บันทึกข้อมูลสำเร็จ', data: {} });
+          }
+        }, 150);
+      }
+    }
+  </script>
+</body>
+</html>
