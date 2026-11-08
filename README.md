@@ -1,8 +1,8 @@
-# 🏢 Time Stamp Attendances (OPS MOC Edition)
+# 🏢 ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
 
 **ระบบลงเวลาเข้า-ออกงานออนไลน์อัจฉริยะ พร้อมระบบพิกัด GPS Geofencing, Full-Screen Map, ปฏิทิน พ.ศ., แชตภายใน, และสายอนุมัติคำขอ**  
-พัฒนาขึ้นสำหรับ **สำนักงานปลัดกระทรวงพาณิชย์ (Office of the Permanent Secretary, Ministry of Commerce)**  
-**Version:** 2.1.0 (ผสานขุมพลัง Enterprise GPS Engine, Dual-Office, และ Anti-Spoofing จาก TSA 1.7.37)
+**Comment / Release:** TimeStampAttendances V1.0.13  
+**Web App URL:** https://script.google.com/macros/s/AKfycby3WoJljZRlZ3NvFY-wrQcKIcw8lLZCgxVk75-_B1zDUYFZRFNP_opcGfPfm1QX09P56Q/exec
 
 ---
 

@@ -1,16 +1,18 @@
 # 📖 คู่มือการติดตั้งและใช้งาน (Installation Guide)
 
-**โปรเจกต์:** Time Stamp Attendances (OPS MOC Edition)  
-**เวอร์ชัน:** 2.0.8
+**โปรเจกต์:** ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)  
+**เวอร์ชัน:** TimeStampAttendances V1.0.13
 
 ---
 
 ## 📌 ข้อมูลทรัพยากรหลักของระบบ (System Resources)
 
 - **Web App Production URL:**  
-  https://script.google.com/macros/s/AKfycbySvE_BUB5DCQgDfFNAzkdzcYDLF5CwnyXZ1tLbIllHTRowa9eMHKigd2a9S_7a1EfiPQ/exec
-- **โฟลเดอร์ Google Drive:** `1MAGUA7IaoQ-IVbp6IJ7yJIZSGxMXvyrI`  
+  https://script.google.com/macros/s/AKfycby3WoJljZRlZ3NvFY-wrQcKIcw8lLZCgxVk75-_B1zDUYFZRFNP_opcGfPfm1QX09P56Q/exec
+- **โฟลเดอร์ Google Drive ประจำโปรเจกต์:** `1MAGUA7IaoQ-IVbp6IJ7yJIZSGxMXvyrI`  
   (https://drive.google.com/drive/u/0/folders/1MAGUA7IaoQ-IVbp6IJ7yJIZSGxMXvyrI)
+- **โฟลเดอร์ Google Drive หลัก:** `1LDXCfRWlv6y5cJF0ZZ_GzPN3gCtGRyTj`  
+  (https://drive.google.com/drive/u/0/folders/1LDXCfRWlv6y5cJF0ZZ_GzPN3gCtGRyTj)
 - **ฐานข้อมูล Google Spreadsheet:** `1KnDb_Pl9cYDhFXjBM-Moe9A3xE-vXDSz2cLMYsfHbQo`  
   (ชื่อไฟล์: *Timestamp Attendance Database*)
 - **GitHub Repository:**  

@@ -1,5 +1,5 @@
 /**
- * Project: Time Stamp Attendances (OPS MOC Edition)
+ * Project: ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
  * File: Code.gs
  * Description: Web App Entry Point and Client-Server API Dispatcher.
  */

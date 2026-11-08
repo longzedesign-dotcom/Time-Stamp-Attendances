@@ -6,10 +6,10 @@
  */
 
 const CONFIG = Object.freeze({
-  APP_NAME: 'Time Stamp Attendance',
-  APP_ORGANIZATION: 'สำนักงานปลัดกระทรวงพาณิชย์',
-  APP_ORGANIZATION_EN: 'Office of the Permanent Secretary, Ministry of Commerce',
-  APP_VERSION: '2.1.0',
+  APP_NAME: 'Time Stamp Attendances',
+  APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน',
+  APP_ORGANIZATION_EN: 'Time Stamp Attendances',
+  APP_VERSION: '1.0.13',
   APP_UPDATED_AT: '2026-11-08',
   TIMEZONE: 'Asia/Bangkok',
 

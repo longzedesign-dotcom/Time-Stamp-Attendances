@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Time Stamp Attendance - สำนักงานปลัดกระทรวงพาณิชย์</title>
+  <title>ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน - Time Stamp Attendances</title>
   <!-- Google Fonts: Prompt & Sarabun -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,14 +80,11 @@
   <!-- ==================== 1. SCREEN: LOGIN ==================== -->
   <div id="screen-login" class="fixed inset-0 z-50 bg-gradient-to-b from-[#1b4b8a] via-[#163f75] to-[#0e274a] flex flex-col justify-between items-center py-10 px-6 overflow-y-auto">
     <div class="w-full max-w-sm flex flex-col items-center mt-8">
-      <!-- OPS Logo -->
-      <div class="w-24 h-24 mb-4 flex items-center justify-center">
-        <div class="relative flex items-center justify-center">
-          <span class="text-4xl font-extrabold tracking-wider text-sky-400 drop-shadow-md">OP<span class="text-amber-400">S</span></span>
-        </div>
+      <div class="w-20 h-20 mb-3 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-business-time text-3xl text-sky-400"></i>
       </div>
-      <h1 class="text-xl md:text-2xl font-bold text-white text-center leading-snug tracking-wide">สำนักงานปลัดกระทรวงพาณิชย์</h1>
-      <p class="text-xs text-sky-200 mt-1 text-center font-light">Office of the Permanent Secretary<br>of the Ministry of Commerce</p>
+      <h1 class="text-xl md:text-2xl font-bold text-white text-center leading-snug tracking-wide">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน</h1>
+      <p class="text-sm font-semibold text-sky-300 mt-1 text-center tracking-wider">Time Stamp Attendances</p>
     </div>
 
     <!-- Login Card -->
@@ -1095,7 +1092,7 @@
                 </div>
                 <div class="flex items-start gap-1.5 text-xs text-slate-500 font-light leading-snug">
                   <i class="fa-solid fa-location-dot text-slate-400 text-[11px] mt-0.5"></i>
-                  <span>${item.Address || item.LocationName || 'สำนักงานปลัดกระทรวงพาณิชย์'}</span>
+                  <span>${item.Address || item.LocationName || 'สำนักงานประจำหน่วยงาน'}</span>
                 </div>
               </div>
               <i class="fa-solid fa-chevron-right text-xs text-slate-300 mt-2"></i>
@@ -1113,7 +1110,7 @@
           document.getElementById('detail-empcode').innerText = rec.EmployeeCode || 'E0001';
           document.getElementById('detail-fullname').innerText = rec.FullName || state.user.FullName;
           document.getElementById('detail-workdatetime').innerText = res.data.thaiDateTime || `${rec.WorkDate} ${rec.WorkTime}`;
-          document.getElementById('detail-address').innerText = rec.Address || 'สำนักงานปลัดกระทรวงพาณิชย์ 563 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000';
+          document.getElementById('detail-address').innerText = rec.Address || 'สำนักงานประจำหน่วยงาน 567 ถนนนนทบุรี ตำบลบางกระสอ อำเภอเมือง จังหวัดนนทบุรี 11000';
 
           const badge = document.getElementById('detail-status-badge');
           if (rec.Type === 'CHECK_IN') {
@@ -1363,7 +1360,7 @@
 
     function openNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.remove('hidden'); }
     function closeNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.add('hidden'); }
-    function showTermsModal() { alert('นโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งาน สำนักงานปลัดกระทรวงพาณิชย์'); }
+    function showTermsModal() { alert('นโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งาน ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)'); }
     function showStatusLegend() {
       alert('คำอธิบายสีสถานะบนปฏิทิน:\n🟢 จุดสีเขียว = บันทึกเวลาเข้างาน\n🔴 จุดสีแดง = บันทึกเวลาออกงาน\n⚪ จุดสีเทา = ยังไม่มีการบันทึกเวลา');
     }
