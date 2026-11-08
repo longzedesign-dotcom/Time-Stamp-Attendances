@@ -7,6 +7,8 @@
 
 ## 📌 ข้อมูลทรัพยากรหลักของระบบ (System Resources)
 
+- **Web App Production URL:**  
+  https://script.google.com/macros/s/AKfycbySvE_BUB5DCQgDfFNAzkdzcYDLF5CwnyXZ1tLbIllHTRowa9eMHKigd2a9S_7a1EfiPQ/exec
 - **โฟลเดอร์ Google Drive:** `1MAGUA7IaoQ-IVbp6IJ7yJIZSGxMXvyrI`  
   (https://drive.google.com/drive/u/0/folders/1MAGUA7IaoQ-IVbp6IJ7yJIZSGxMXvyrI)
 - **ฐานข้อมูล Google Spreadsheet:** `1KnDb_Pl9cYDhFXjBM-Moe9A3xE-vXDSz2cLMYsfHbQo`  
@@ -64,6 +66,7 @@
   - **รหัสผ่าน:** `12345678`
   - **สังกัด:** ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร
   - **เวลาปฏิบัติงาน:** 08:30 – 16:30 น.
-- **การเข้าใช้งานด่วน (One-Click Login):**
-  - กดปุ่ม **ThaID** เพื่อเข้าสู่ระบบในฐานะเจ้าหน้าที่ทันที
-  - หรือกดปุ่ม **MOC Account** แล้วระบุอีเมลกระทรวงพาณิชย์
+- **การเข้าใช้งาน (Login Options):**
+  - **LINE Login:** กดปุ่ม **เข้าสู่ระบบด้วย LINE** เพื่อเข้าใช้งานทันที
+  - **Google Account:** กดปุ่ม **เข้าสู่ระบบด้วย Google Account** ระบุอีเมลบัญชี Google
+  - **รหัสสมาชิก / พนักงานบริษัท:** กรอกรหัสพนักงาน (เช่น `E0002` หรือ `thakot.ch@gmail.com`) และรหัสผ่าน `12345678` เพื่อเข้าสู่ระบบในฐานะ Admin / พนักงาน

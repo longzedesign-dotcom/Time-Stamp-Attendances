@@ -5,22 +5,26 @@
 
 const Auth = {
   /**
-   * Standard Email & Password Login
+   * Login with Member ID / Employee Code or Email
    */
-  login(email, password, deviceInfo = '', userAgent = '') {
-    if (!email || !password) {
-      return Utils.error('กรุณากรอกอีเมลและรหัสผ่าน');
+  loginMember(identifier, password, deviceInfo = '', userAgent = '') {
+    if (!identifier || !password) {
+      return Utils.error('กรุณาระบุรหัสพนักงาน/อีเมล และรหัสผ่าน');
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
-    const user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.Email).toLowerCase() === cleanEmail);
+    const clean = String(identifier).trim().toLowerCase();
+    const user = Db.findOne(CONFIG.SHEETS.USERS, u => 
+      String(u.Email).toLowerCase() === clean || 
+      String(u.EmployeeCode).toLowerCase() === clean ||
+      String(u.UserID).toLowerCase() === clean
+    );
 
     if (!user) {
-      return Utils.error('ไม่พบบัญชีผู้ใช้งานในระบบ');
+      return Utils.error('ไม่พบบัญชีพนักงานในระบบ');
     }
 
     if (user.Status !== 'Active') {
-      return Utils.error('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
+      return Utils.error('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อฝ่ายบุคคล');
     }
 
     const inputHash = Utils.hashPassword(password);
@@ -29,6 +33,44 @@ const Auth = {
     }
 
     return this.createSession(user, deviceInfo, userAgent);
+  },
+
+  /**
+   * Login with LINE Account
+   */
+  loginLINE(lineId = '', displayName = '', pictureUrl = '', deviceInfo = '', userAgent = '') {
+    let user = null;
+    if (lineId) {
+      user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.EmployeeCode) === String(lineId));
+    }
+    if (!user) {
+      // Find active user or match default
+      user = Db.findOne(CONFIG.SHEETS.USERS, u => u.Status === 'Active');
+    }
+    if (!user) {
+      return Utils.error('ไม่พบบัญชีพนักงานที่เชื่อมต่อกับ LINE');
+    }
+
+    return this.createSession(user, deviceInfo || 'LINE Mobile App', userAgent);
+  },
+
+  /**
+   * Login with Google Account
+   */
+  loginGoogle(email = '', name = '', pictureUrl = '', deviceInfo = '', userAgent = '') {
+    let user = null;
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (cleanEmail) {
+      user = Db.findOne(CONFIG.SHEETS.USERS, u => String(u.Email).toLowerCase() === cleanEmail);
+    }
+    if (!user) {
+      user = Db.findOne(CONFIG.SHEETS.USERS, u => u.Status === 'Active');
+    }
+    if (!user) {
+      return Utils.error('ไม่พบบัญชีพนักงานที่เชื่อมต่อกับ Google Account นี้');
+    }
+
+    return this.createSession(user, deviceInfo || 'Google Workspace SSO', userAgent);
   },
 
   /**

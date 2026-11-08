@@ -5,15 +5,7 @@
  */
 
 function doGet(e) {
-  // Ensure database tables exist
-  try {
-    setupDatabase();
-  } catch (err) {
-    Logger.log('Auto-setup error: ' + err.toString());
-  }
-
-  const template = HtmlService.createTemplateFromFile('Index');
-  return template.evaluate()
+  return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle(CONFIG.APP_NAME + ' - ' + CONFIG.APP_ORGANIZATION)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -34,7 +26,12 @@ function apiDispatcher(action, payload) {
 
       // Auth
       case 'LOGIN':
-        return Auth.login(data.email, data.password, data.deviceInfo, data.userAgent);
+      case 'LOGIN_MEMBER':
+        return Auth.loginMember(data.identifier || data.email, data.password, data.deviceInfo, data.userAgent);
+      case 'LOGIN_LINE':
+        return Auth.loginLINE(data.lineId, data.displayName, data.pictureUrl, data.deviceInfo, data.userAgent);
+      case 'LOGIN_GOOGLE':
+        return Auth.loginGoogle(data.email, data.name, data.pictureUrl, data.deviceInfo, data.userAgent);
       case 'LOGIN_MOC':
         return Auth.loginMOC(data.email, data.deviceInfo, data.userAgent);
       case 'LOGIN_THAID':
