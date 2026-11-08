@@ -123,25 +123,6 @@ const Attendance = {
 
     Db.insert(CONFIG.SHEETS.ATTENDANCE, record);
 
-    // Record Event in Attendance_Events
-    try {
-      Db.insert(CONFIG.SHEETS.ATTENDANCE_EVENTS, {
-        EventID: 'EVT' + Date.now(),
-        AttendanceID: attendanceId,
-        UserID: user.UserID,
-        Action: actionType,
-        Latitude: lat,
-        Longitude: lng,
-        Accuracy: accuracy,
-        DistanceMeters: shortestDistance,
-        Status: timeCheck.status,
-        WorkMode: workMode,
-        CreatedAt: now.toISOString()
-      });
-    } catch (e) {
-      Logger.log('Attendance_Events log error: ' + e.toString());
-    }
-
     // In-app Notification
     const notifTitle = actionType === CONFIG.ATTENDANCE_TYPE.CHECK_IN ? 'ลงเวลาเข้างานสำเร็จ' : 'ลงเวลาออกงานสำเร็จ';
     const notifMsg = `${actionType === CONFIG.ATTENDANCE_TYPE.CHECK_IN ? 'เข้างาน' : 'ออกงาน'} เมื่อ ${workTime} น. (${timeCheck.status}) ${matchedLocation ? matchedLocation.LocationName : ''}`;

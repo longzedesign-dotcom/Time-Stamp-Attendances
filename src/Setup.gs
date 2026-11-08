@@ -16,16 +16,9 @@ function setupDatabase() {
       'Accuracy', 'DistanceMeter', 'LocationID', 'LocationName', 'Address',
       'DeviceInfo', 'UserAgent', 'SelfieUrl', 'WorkMode', 'CreatedAt', 'Remark'
     ],
-    [CONFIG.SHEETS.ATTENDANCE_EVENTS]: [
-      'EventID', 'AttendanceID', 'UserID', 'Action', 'Latitude', 'Longitude',
-      'Accuracy', 'DistanceMeters', 'Status', 'WorkMode', 'CreatedAt'
-    ],
     [CONFIG.SHEETS.LOCATIONS]: [
       'LocationID', 'LocationName', 'Address', 'Latitude', 'Longitude',
       'RadiusMeter', 'MinAccuracy', 'Status'
-    ],
-    [CONFIG.SHEETS.USER_LOCATION_ASSIGNMENTS]: [
-      'AssignmentID', 'UserID', 'MainLocationID', 'SiteLocationID', 'Status', 'UpdatedAt'
     ],
     [CONFIG.SHEETS.SESSIONS]: [
       'SessionID', 'UserID', 'Token', 'LoginAt', 'ExpireAt',

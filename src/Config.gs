@@ -9,7 +9,7 @@ const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.16',
+  APP_VERSION: '1.0.17',
   APP_UPDATED_AT: '2026-11-08',
   TIMEZONE: 'Asia/Bangkok',
 
@@ -21,9 +21,7 @@ const CONFIG = Object.freeze({
   SHEETS: Object.freeze({
     USERS: 'Users',
     ATTENDANCE: 'Attendance',
-    ATTENDANCE_EVENTS: 'Attendance_Events',
     LOCATIONS: 'Locations',
-    USER_LOCATION_ASSIGNMENTS: 'User_Location_Assignments',
     SESSIONS: 'Sessions',
     NOTIFICATIONS: 'Notifications',
     DEPARTMENTS: 'Departments',
