@@ -5,16 +5,27 @@
 
 const Auth = {
   /**
+   * Helper: Clean user identifier & strip accidental Thai diacritics / tone marks
+   */
+  cleanIdentifier(raw) {
+    if (!raw) return '';
+    let str = String(raw).trim();
+    // Remove accidental Thai tone marks / vowels attached to Latin alphanumeric codes (e.g. ๊u0001 -> u0001)
+    str = str.replace(/[\u0E31-\u0E3A\u0E47-\u0E4E]/g, '');
+    return str.trim().toLowerCase();
+  },
+
+  /**
    * Check Brute Force lockout status
    */
   checkLockout(identifier) {
-    const clean = String(identifier).trim().toLowerCase();
+    const clean = this.cleanIdentifier(identifier);
     const now = new Date();
     const windowStart = new Date(now.getTime() - CONFIG.SECURITY.LOGIN_FAILURE_WINDOW_SECONDS * 1000).toISOString();
 
     const failedLogs = Db.find(CONFIG.SHEETS.AUDIT_LOGS, l => 
       l.Action === 'LOGIN_FAILED' && 
-      l.UserID === clean && 
+      this.cleanIdentifier(l.UserID) === clean && 
       l.CreatedAt >= windowStart
     );
 
@@ -33,7 +44,7 @@ const Auth = {
    * Record login failure
    */
   recordFailure(identifier, reason = '', userAgent = '') {
-    const clean = String(identifier).trim().toLowerCase();
+    const clean = this.cleanIdentifier(identifier);
     Db.insert(CONFIG.SHEETS.AUDIT_LOGS, {
       LogID: 'LOG' + Date.now(),
       UserID: clean,
@@ -53,7 +64,7 @@ const Auth = {
       return Utils.error('กรุณาระบุรหัสพนักงาน/อีเมล และรหัสผ่าน');
     }
 
-    const clean = String(identifier).trim().toLowerCase();
+    const clean = this.cleanIdentifier(identifier);
 
     // Check Lockout
     const lockCheck = this.checkLockout(clean);
@@ -62,9 +73,9 @@ const Auth = {
     }
 
     const user = Db.findOne(CONFIG.SHEETS.USERS, u => 
-      String(u.Email).toLowerCase() === clean || 
-      String(u.EmployeeCode).toLowerCase() === clean ||
-      String(u.UserID).toLowerCase() === clean
+      this.cleanIdentifier(u.Email) === clean || 
+      this.cleanIdentifier(u.EmployeeCode) === clean ||
+      this.cleanIdentifier(u.UserID) === clean
     );
 
     if (!user) {
