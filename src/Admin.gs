@@ -38,18 +38,27 @@ const Admin = {
    * Get all locations
    */
   getLocations(token) {
-    const valid = Auth.validateSession(token);
-    if (!valid.success) return valid;
+    if (token) {
+      const valid = Auth.validateSession(token);
+      if (!valid.success) {
+        // Return locations as reference data even if session needs refresh
+        const locs = Db.getAll(CONFIG.SHEETS.LOCATIONS) || [];
+        return Utils.success({ locations: locs });
+      }
+    }
     const locations = Db.getAll(CONFIG.SHEETS.LOCATIONS) || [];
     return Utils.success({ locations: locations });
   },
 
   /**
-   * Add or update location (Main Office, Branch, Site Offices)
+   * Add or update location (Main Office, Branch, Site Offices) - Admin Only
    */
   saveLocation(token, locationData) {
     const valid = Auth.validateSession(token);
     if (!valid.success) return valid;
+    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+      return Utils.error('ไม่มีสิทธิ์จัดการสถานที่ (เฉพาะผู้ดูแลระบบ Admin เท่านั้น)', 'FORBIDDEN');
+    }
 
     if (!locationData || !locationData.LocationName) {
       return Utils.error('กรุณาระบุชื่อสถานที่ / Site งาน');
@@ -84,6 +93,9 @@ const Admin = {
   deleteLocation(token, locationId) {
     const valid = Auth.validateSession(token);
     if (!valid.success) return valid;
+    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+      return Utils.error('ไม่มีสิทธิ์จัดการสถานที่ (เฉพาะผู้ดูแลระบบ Admin เท่านั้น)', 'FORBIDDEN');
+    }
     if (!locationId) return Utils.error('ไม่พบรหัสสถานที่');
 
     Db.update(CONFIG.SHEETS.LOCATIONS, l => String(l.LocationID) === String(locationId), { Status: 'Inactive' });

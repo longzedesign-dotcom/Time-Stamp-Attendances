@@ -167,7 +167,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.25
+      Version 1.0.26
     </div>
   </div>
 
@@ -415,8 +415,8 @@
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
           </div>
-          <!-- [icon Pin] ตั้งค่า สถานที่ทำงาน ต่อจาก ตั้งค่า การแจ้งเตือน -->
-          <div onclick="openLocationSettingsModal()" class="flex items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
+          <!-- [icon Pin] ตั้งค่า สถานที่ทำงาน ต่อจาก ตั้งค่า การแจ้งเตือน (แสดงเฉพาะ ADMIN) -->
+          <div id="btn-location-settings-menu" onclick="openLocationSettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
             <div class="flex items-center gap-2 text-xs font-medium">
               <i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i>
               <span>ตั้งค่า สถานที่ทำงาน</span>
@@ -986,6 +986,18 @@
       document.getElementById('profile-position').innerText = user.Position || 'IT Support';
       document.getElementById('profile-email').innerText = user.Email || '';
       document.getElementById('profile-dept').innerText = user.DepartmentID === 'IT' ? 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' : user.DepartmentID;
+
+      // Location Settings button is ONLY visible for ADMIN users
+      const locBtn = document.getElementById('btn-location-settings-menu');
+      if (locBtn) {
+        if (user.Role === 'Admin') {
+          locBtn.classList.remove('hidden');
+          locBtn.classList.add('flex');
+        } else {
+          locBtn.classList.add('hidden');
+          locBtn.classList.remove('flex');
+        }
+      }
     }
 
     function showLoginScreen() {
@@ -1721,6 +1733,15 @@
     // Location / Workplace & Sites Settings
     // ==========================================
     function openLocationSettingsModal() {
+      if (!state.user || state.user.Role !== 'Admin') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีสิทธิ์เข้าถึง',
+          text: 'เมนูตั้งค่าสถานที่ทำงานสงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
       document.getElementById('modal-location-settings').classList.remove('hidden');
       fetchLocationsList();
     }
@@ -1811,7 +1832,13 @@
       const container = document.getElementById('locations-list-container');
       const countText = document.getElementById('locations-count-text');
       const labelCount = document.getElementById('label-locations-count');
-      if (container) {
+
+      // If we already have cached locations, render immediately so user sees them without waiting!
+      if (state.locations && state.locations.length > 0) {
+        if (countText) countText.innerText = state.locations.length;
+        if (labelCount) labelCount.innerText = `${state.locations.length} แห่ง`;
+        renderLocationsList(state.locations);
+      } else if (container) {
         container.innerHTML = `
           <div class="text-center py-10 text-slate-400 text-xs">
             <i class="fa-solid fa-circle-notch fa-spin text-xl mb-2 text-blue-600"></i>
@@ -1820,7 +1847,7 @@
         `;
       }
 
-      callAPI('GET_LOCATIONS', {}, res => {
+      callAPI('GET_LOCATIONS', { token: state.token }, res => {
         if (res && res.success && res.data && res.data.locations) {
           state.locations = res.data.locations;
           if (countText) countText.innerText = state.locations.length;
@@ -1828,8 +1855,8 @@
           renderLocationsList(state.locations);
           updateGPSStatusPill();
         } else {
-          if (container) {
-            container.innerHTML = '<div class="text-center py-8 text-xs text-rose-500">ไม่สามารถโหลดรายการสถานที่ได้</div>';
+          if (container && (!state.locations || state.locations.length === 0)) {
+            container.innerHTML = '<div class="text-center py-8 text-xs text-rose-500">ไม่สามารถโหลดรายการสถานที่ได้ กรุณาลองใหม่อีกครั้ง</div>';
           }
         }
       });
@@ -1853,7 +1880,14 @@
       }
 
       container.innerHTML = locations.map(loc => {
-        const isMain = String(loc.LocationID) === 'LOC001' || (loc.LocationName && (loc.LocationName.includes('หลัก') || loc.LocationName.includes('ใหญ่')));
+        if (!loc) return '';
+        const locId = String(loc.LocationID || '');
+        const locName = String(loc.LocationName || 'ไม่ระบุชื่อ');
+        const locAddr = String(loc.Address || 'ไม่มีข้อมูลที่อยู่');
+        const lat = parseFloat(loc.Latitude) || 0;
+        const lng = parseFloat(loc.Longitude) || 0;
+        const radius = parseInt(loc.RadiusMeter, 10) || 200;
+        const isMain = locId === 'LOC001' || locName.includes('หลัก') || locName.includes('ใหญ่');
         const isActive = loc.Status !== 'Inactive';
         const typeBadge = isMain
           ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-building text-[9px] mr-1"></i>สำนักงานหลัก (Main)</span>'
@@ -1863,12 +1897,12 @@
           ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">เปิดใช้งาน</span>'
           : '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">ปิดใช้งาน</span>';
 
-        const mapUrl = `https://www.google.com/maps?q=${loc.Latitude},${loc.Longitude}`;
+        const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
 
         // Distance from user's current GPS
         let distText = '';
-        if (state.currentCoords && state.currentCoords.lat && loc.Latitude && loc.Longitude) {
-          const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, Number(loc.Latitude), Number(loc.Longitude));
+        if (state.currentCoords && state.currentCoords.lat && lat && lng) {
+          const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, lat, lng);
           distText = `<span class="text-[10px] text-slate-500 ml-auto font-normal"><i class="fa-solid fa-route text-slate-400 mr-0.5"></i>ห่าง ${d < 1000 ? d + ' ม.' : (d/1000).toFixed(1) + ' กม.'}</span>`;
         }
 
@@ -1885,28 +1919,28 @@
             <div>
               <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
                 <i class="fa-solid fa-map-pin text-rose-500 text-xs"></i>
-                <span>${loc.LocationName || 'ไม่ระบุชื่อ'}</span>
+                <span>${locName}</span>
               </h4>
-              <p class="text-xs text-slate-500 mt-0.5 font-light leading-relaxed">${loc.Address || 'ไม่มีข้อมูลที่อยู่'}</p>
+              <p class="text-xs text-slate-500 mt-0.5 font-light leading-relaxed">${locAddr}</p>
             </div>
 
             <div class="bg-slate-50 rounded-xl p-2.5 flex items-center justify-between text-[11px] text-slate-600">
               <div class="space-y-0.5">
-                <div><b>พิกัด:</b> ${Number(loc.Latitude).toFixed(5)}, ${Number(loc.Longitude).toFixed(5)}</div>
-                <div><b>รัศมีลงเวลา:</b> ${loc.RadiusMeter || 200} เมตร</div>
+                <div><b>พิกัด:</b> ${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
+                <div><b>รัศมีลงเวลา:</b> ${radius} เมตร</div>
               </div>
-              <a href="${mapUrl}" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-blue-600 flex items-center gap-1 shadow-2xs font-medium text-[11px]">
+              <a href="${mapUrl}" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-blue-600 flex items-center gap-1 shadow-sm font-medium text-[11px]">
                 <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
                 <span>ดูแผนที่</span>
               </a>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
-              <button onclick="toggleLocationStatus('${loc.LocationID}')" class="px-3 py-1 text-xs rounded-lg border transition ${isActive ? 'border-amber-200 text-amber-700 hover:bg-amber-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'}">
+              <button onclick="toggleLocationStatus('${locId}')" class="px-3 py-1 text-xs rounded-lg border transition ${isActive ? 'border-amber-200 text-amber-700 hover:bg-amber-50' : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'}">
                 <i class="fa-solid ${isActive ? 'fa-pause' : 'fa-play'} text-[10px] mr-1"></i>
                 <span>${isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}</span>
               </button>
-              <button onclick="openLocationFormModal('${loc.LocationID}')" class="px-3 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition flex items-center gap-1">
+              <button onclick="openLocationFormModal('${locId}')" class="px-3 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition flex items-center gap-1">
                 <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                 <span>แก้ไข</span>
               </button>
