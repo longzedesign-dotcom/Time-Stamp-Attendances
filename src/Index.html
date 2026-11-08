@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.27
+      Version 1.0.28
     </div>
   </div>
 
@@ -373,17 +373,23 @@
           </div>
         </div>
 
-        <!-- Floating Re-center Target Button -->
-        <button onclick="recenterMap()" class="absolute bottom-28 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-lg border border-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition active:scale-95">
-          <i class="fa-solid fa-crosshairs text-base"></i>
+        <!-- Floating Re-center Target Button (ตรวจสอบ GPS) -->
+        <button id="btn-recenter-gps" onclick="recenterMap(true)" title="ตรวจสอบพิกัด GPS" class="absolute bottom-28 right-4 z-20 w-12 h-12 bg-white rounded-full shadow-xl border border-slate-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition active:scale-95">
+          <i class="fa-solid fa-crosshairs text-lg"></i>
         </button>
 
-        <!-- Work Mode Selector Bar -->
-        <div class="absolute bottom-24 left-4 z-20">
-          <select id="work-mode-select" class="text-xs font-medium bg-white/90 backdrop-blur border border-slate-200 rounded-xl px-3 py-2 shadow-sm focus:outline-none">
+        <!-- Work Mode & Office Location Selector Bar -->
+        <div class="absolute bottom-24 left-4 z-20 flex flex-col gap-1.5 max-w-[240px]">
+          <!-- Mode Select (ONSITE / WFH / OFFSITE) -->
+          <select id="work-mode-select" onchange="onWorkModeChanged()" class="text-xs font-semibold bg-white/95 backdrop-blur border border-slate-200 rounded-xl px-3 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-700">
             <option value="ONSITE">🏢 ประจำสำนักงาน (Onsite)</option>
             <option value="WFH">🏠 ปฏิบัติงานที่บ้าน (WFH)</option>
             <option value="OFFSITE">🚗 ปฏิบัติงานนอกสถานที่ (Field)</option>
+          </select>
+
+          <!-- Office Location Select (Visible when ONSITE) -->
+          <select id="office-location-select" onchange="onOfficeLocationChanged()" class="text-[11px] font-medium bg-emerald-50/95 border border-emerald-300 rounded-xl px-2.5 py-1.5 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400 text-emerald-900">
+            <option value="ALL">📍 ตรวจสอบทุกสำนักงาน (อัตโนมัติ)</option>
           </select>
         </div>
 
@@ -886,6 +892,7 @@
       currentCoords: { lat: 13.91094031, lng: 100.5946153, accuracy: 25 },
       mapInstance: null,
       userMarker: null,
+      geofenceLayers: [],
       detailMapInstance: null,
       cachedHistory: [],
       calendarStatusMap: {},
@@ -1338,6 +1345,8 @@
           const labelCount = document.getElementById('label-locations-count');
           if (labelCount) labelCount.innerText = `${state.locations.length} แห่ง`;
           updateGPSStatusPill();
+          updateOfficeLocationSelect();
+          renderOfficeGeofenceCircles();
         }
       });
     }
@@ -1549,8 +1558,10 @@
         state.userMarker = L.marker([state.currentCoords.lat, state.currentCoords.lng], { icon: customIcon }).addTo(state.mapInstance);
       } else {
         state.mapInstance.invalidateSize();
-        recenterMap();
       }
+      updateOfficeLocationSelect();
+      renderOfficeGeofenceCircles();
+      recenterMap(false);
     }
 
     function updateMapPin() {
@@ -1559,9 +1570,223 @@
       }
     }
 
-    function recenterMap() {
-      if (state.mapInstance && state.currentCoords) {
-        state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 17);
+    // Work Mode & Office Selector Events
+    function onWorkModeChanged() {
+      const mode = document.getElementById('work-mode-select') ? document.getElementById('work-mode-select').value : 'ONSITE';
+      const officeSelect = document.getElementById('office-location-select');
+      if (officeSelect) {
+        if (mode === 'ONSITE') {
+          officeSelect.classList.remove('hidden');
+        } else {
+          officeSelect.classList.add('hidden');
+        }
+      }
+      renderOfficeGeofenceCircles();
+      updateGPSStatusPill();
+      recenterMap(false);
+    }
+
+    function onOfficeLocationChanged() {
+      renderOfficeGeofenceCircles();
+      updateGPSStatusPill();
+      recenterMap(true);
+    }
+
+    function updateOfficeLocationSelect() {
+      const select = document.getElementById('office-location-select');
+      if (!select) return;
+      const currentVal = select.value;
+      const activeLocs = (state.locations && state.locations.length > 0)
+        ? state.locations.filter(l => l.Status !== 'Inactive')
+        : [
+            { LocationID: 'LOC001', LocationName: 'สำนักงานหลัก', RadiusMeter: 200 },
+            { LocationID: 'LOC002', LocationName: 'สำนักงานประจำ (Site Office)', RadiusMeter: 300 }
+          ];
+
+      select.innerHTML = '<option value="ALL">📍 ตรวจสอบทุกสำนักงาน (อัตโนมัติ)</option>' +
+        activeLocs.map(l => `<option value="${l.LocationID}">🏢 ${l.LocationName} (${l.RadiusMeter || 200} ม.)</option>`).join('');
+
+      if (currentVal && activeLocs.some(l => String(l.LocationID) === String(currentVal))) {
+        select.value = currentVal;
+      }
+    }
+
+    function renderOfficeGeofenceCircles() {
+      if (!state.mapInstance) return;
+
+      // Clear previous geofence layers
+      if (state.geofenceLayers && state.geofenceLayers.length > 0) {
+        state.geofenceLayers.forEach(layer => {
+          try { state.mapInstance.removeLayer(layer); } catch(e) {}
+        });
+      }
+      state.geofenceLayers = [];
+
+      const mode = document.getElementById('work-mode-select') ? document.getElementById('work-mode-select').value : 'ONSITE';
+      if (mode !== 'ONSITE') return;
+
+      const activeLocs = (state.locations && state.locations.length > 0)
+        ? state.locations.filter(l => l.Status !== 'Inactive')
+        : [
+            { LocationID: 'LOC001', LocationName: 'สำนักงานหลัก', Latitude: 13.91094031, Longitude: 100.5946153, RadiusMeter: 200 },
+            { LocationID: 'LOC002', LocationName: 'สำนักงานประจำ (Site Office)', Latitude: 13.9105, Longitude: 100.5942, RadiusMeter: 300 }
+          ];
+
+      const selectedLocId = document.getElementById('office-location-select') ? document.getElementById('office-location-select').value : 'ALL';
+      const locsToRender = (selectedLocId && selectedLocId !== 'ALL')
+        ? activeLocs.filter(l => String(l.LocationID) === String(selectedLocId))
+        : activeLocs;
+
+      locsToRender.forEach(loc => {
+        const lat = parseFloat(loc.Latitude);
+        const lng = parseFloat(loc.Longitude);
+        const radius = parseInt(loc.RadiusMeter, 10) || 200;
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        // วงกลมสีเขียว กางรัศมีสำนักงาน (Green Circular Geofence Boundary)
+        const circle = L.circle([lat, lng], {
+          radius: radius,
+          color: '#10b981',         // ขอบสีเขียว Emerald
+          weight: 2.5,
+          opacity: 0.9,
+          fillColor: '#34d399',     // พื้นที่สีเขียวโปร่งใส
+          fillOpacity: 0.22,
+          dashArray: '5, 5'
+        }).addTo(state.mapInstance);
+
+        // หมุดไอคอนสำนักงานตรงจุดศูนย์กลาง
+        const officeIcon = L.divIcon({
+          className: 'office-pin',
+          html: `<div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md border-2 border-white text-xs">
+                   <i class="fa-solid fa-building"></i>
+                 </div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+
+        const marker = L.marker([lat, lng], { icon: officeIcon }).addTo(state.mapInstance);
+        marker.bindPopup(`
+          <div class="text-xs font-sans p-1">
+            <b class="text-slate-800 text-sm block mb-1">🏢 ${loc.LocationName}</b>
+            <p class="text-slate-500 mb-1 leading-tight">${loc.Address || 'ไม่มีข้อมูลที่อยู่'}</p>
+            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              🟢 รัศมีลงเวลา ${radius} เมตร
+            </span>
+          </div>
+        `);
+
+        state.geofenceLayers.push(circle);
+        state.geofenceLayers.push(marker);
+      });
+    }
+
+    // Recenter Map & Check GPS Status (ตรวจสอบ GPS ตามสถานที่ที่เลือก)
+    function recenterMap(showToast = false) {
+      if (!state.mapInstance) return;
+
+      const btn = document.getElementById('btn-recenter-gps');
+      if (btn) {
+        btn.classList.add('animate-spin');
+        setTimeout(() => btn.classList.remove('animate-spin'), 1000);
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            state.currentCoords.lat = pos.coords.latitude;
+            state.currentCoords.lng = pos.coords.longitude;
+            state.currentCoords.accuracy = Math.round(pos.coords.accuracy);
+
+            updateMapPin();
+            renderOfficeGeofenceCircles();
+            updateGPSStatusPill();
+
+            const mode = document.getElementById('work-mode-select') ? document.getElementById('work-mode-select').value : 'ONSITE';
+            const selectedLocId = document.getElementById('office-location-select') ? document.getElementById('office-location-select').value : 'ALL';
+
+            const activeLocs = (state.locations && state.locations.length > 0)
+              ? state.locations.filter(l => l.Status !== 'Inactive')
+              : [
+                  { LocationID: 'LOC001', LocationName: 'สำนักงานหลัก', Latitude: 13.91094031, Longitude: 100.5946153, RadiusMeter: 200 },
+                  { LocationID: 'LOC002', LocationName: 'สำนักงานประจำ (Site Office)', Latitude: 13.9105, Longitude: 100.5942, RadiusMeter: 300 }
+                ];
+
+            let targetLoc = null;
+            if (selectedLocId && selectedLocId !== 'ALL') {
+              targetLoc = activeLocs.find(l => String(l.LocationID) === String(selectedLocId));
+            }
+            if (!targetLoc && activeLocs.length > 0) {
+              let minDist = 9999999;
+              activeLocs.forEach(l => {
+                const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, Number(l.Latitude), Number(l.Longitude));
+                if (d < minDist) {
+                  minDist = d;
+                  targetLoc = l;
+                }
+              });
+            }
+
+            if (mode === 'ONSITE' && targetLoc) {
+              const d = calcDistance(state.currentCoords.lat, state.currentCoords.lng, Number(targetLoc.Latitude), Number(targetLoc.Longitude));
+              const radius = Number(targetLoc.RadiusMeter) || 200;
+              const isInside = d <= radius;
+
+              // Fit bounds to display both user pin and the green circle on map
+              if (d <= 2500) {
+                const group = L.featureGroup([
+                  L.marker([state.currentCoords.lat, state.currentCoords.lng]),
+                  L.circle([targetLoc.Latitude, targetLoc.Longitude], { radius: radius })
+                ]);
+                state.mapInstance.fitBounds(group.getBounds().pad(0.2), { animate: true });
+              } else {
+                state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 16, { animate: true });
+              }
+
+              if (showToast) {
+                Swal.fire({
+                  icon: isInside ? 'success' : 'warning',
+                  title: isInside ? 'อยู่ในรัศมีสำนักงาน (สีเขียว)' : 'อยู่นอกรัศมีสำนักงาน',
+                  html: `
+                    <div class="text-xs text-slate-600 space-y-1.5 pt-1">
+                      <p><b>🏢 ${targetLoc.LocationName}</b> (รัศมีลงเวลา ${radius} ม.)</p>
+                      <p>ระยะห่างจากสำนักงาน: <b class="${isInside ? 'text-emerald-600' : 'text-amber-600'}">${d < 1000 ? d + ' เมตร' : (d/1000).toFixed(1) + ' กม.'}</b></p>
+                      <p class="text-[11px] text-slate-400">ความแม่นยำ GPS: ±${state.currentCoords.accuracy} ม.</p>
+                    </div>
+                  `,
+                  timer: 2800,
+                  showConfirmButton: false
+                });
+              }
+            } else {
+              state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 16, { animate: true });
+              if (showToast) {
+                const modeName = mode === 'WFH' ? 'ปฏิบัติงานที่บ้าน (WFH)' : 'ปฏิบัติงานนอกสถานที่ (Field)';
+                Swal.fire({
+                  icon: 'info',
+                  title: `โหมด ${modeName}`,
+                  html: `<p class="text-xs text-slate-600">พิกัด GPS: ${state.currentCoords.lat.toFixed(6)}, ${state.currentCoords.lng.toFixed(6)}<br>(ลงเวลาได้ทุกที่)</p>`,
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              }
+            }
+          },
+          err => {
+            console.warn('GPS error on recenter:', err);
+            state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 16);
+            if (showToast) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'ไม่สามารถระบุพิกัดได้',
+                text: 'กรุณาเปิดบริการระบุตำแหน่ง (GPS) บนอุปกรณ์ของท่าน',
+                confirmButtonColor: '#1b4b8a'
+              });
+            }
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        state.mapInstance.setView([state.currentCoords.lat, state.currentCoords.lng], 16);
       }
     }
 
@@ -1900,6 +2125,8 @@
           if (labelCount) labelCount.innerText = `${state.locations.length} แห่ง`;
           renderLocationsList(state.locations);
           updateGPSStatusPill();
+          updateOfficeLocationSelect();
+          renderOfficeGeofenceCircles();
         } else {
           if (container && (!state.locations || state.locations.length === 0)) {
             container.innerHTML = '<div class="text-center py-8 text-xs text-rose-500">ไม่สามารถโหลดรายการสถานที่ได้ กรุณาลองใหม่อีกครั้ง</div>';
