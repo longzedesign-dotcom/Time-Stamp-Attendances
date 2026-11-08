@@ -15,6 +15,8 @@
   <!-- Leaflet Map CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
     tailwind.config = {
@@ -125,7 +127,7 @@
         </div>
         <div>
           <label class="text-xs font-medium text-slate-500">รหัสผ่าน</label>
-          <input type="password" id="login-password" value="12345678" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+          <input type="password" id="login-password" value="12345" class="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
         </div>
         <button type="submit" class="w-full bg-[#1b4b8a] text-white py-2.5 rounded-lg text-sm font-medium shadow hover:bg-blue-800 transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-right-to-bracket text-xs"></i>
@@ -833,24 +835,61 @@
           applyUserData(state.user);
           hideLoginScreen();
           loadDashboardData();
+          Swal.fire({
+            icon: 'success',
+            title: 'เข้าสู่ระบบสำเร็จ',
+            text: `ยินดีต้อนรับ ${state.user.FullName}`,
+            timer: 1500,
+            showConfirmButton: false
+          });
         } else {
-          alert(res.error.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'เข้าสู่ระบบไม่สำเร็จ',
+            text: res.error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE',
+            confirmButtonColor: '#1b4b8a'
+          });
         }
       });
     }
 
     function handleGoogleLogin() {
-      const email = prompt('เข้าสู่ระบบด้วย Google Account (ระบุอีเมล Google ของท่าน):', state.user ? state.user.Email : 'thakot.ch@gmail.com') || 'thakot.ch@gmail.com';
-      callAPI('LOGIN_GOOGLE', { email: email, deviceInfo: 'Google Workspace Account' }, res => {
-        if (res.success) {
-          state.token = res.data.token;
-          state.user = res.data.user;
-          localStorage.setItem('tsa_token', state.token);
-          applyUserData(state.user);
-          hideLoginScreen();
-          loadDashboardData();
-        } else {
-          alert(res.error.message);
+      Swal.fire({
+        title: 'เข้าสู่ระบบด้วย Google Account',
+        input: 'email',
+        inputLabel: 'ระบุอีเมลบัญชี Google ของท่าน',
+        inputValue: state.user ? state.user.Email : 'thakot.ch@gmail.com',
+        showCancelButton: true,
+        confirmButtonColor: '#1b4b8a',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'เข้าสู่ระบบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed && result.value) {
+          callAPI('LOGIN_GOOGLE', { email: result.value, deviceInfo: 'Google Workspace Account' }, res => {
+            if (res.success) {
+              state.token = res.data.token;
+              state.user = res.data.user;
+              localStorage.setItem('tsa_token', state.token);
+              applyUserData(state.user);
+              hideLoginScreen();
+              loadDashboardData();
+              Swal.fire({
+                icon: 'success',
+                title: 'เข้าสู่ระบบสำเร็จ',
+                text: `ยินดีต้อนรับ ${state.user.FullName}`,
+                timer: 1500,
+                showConfirmButton: false
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'เข้าสู่ระบบไม่สำเร็จ',
+                text: res.error.message,
+                confirmButtonColor: '#1b4b8a'
+              });
+            }
+          });
         }
       });
     }
@@ -867,21 +906,51 @@
           applyUserData(state.user);
           hideLoginScreen();
           loadDashboardData();
+          Swal.fire({
+            icon: 'success',
+            title: 'เข้าสู่ระบบสำเร็จ',
+            text: `ยินดีต้อนรับ ${state.user.FullName}`,
+            timer: 1500,
+            showConfirmButton: false
+          });
         } else {
-          alert(res.error.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'เข้าสู่ระบบไม่สำเร็จ',
+            text: res.error.message || 'รหัสผ่านไม่ถูกต้อง',
+            confirmButtonColor: '#1b4b8a',
+            confirmButtonText: 'ตกลง'
+          });
         }
       });
     }
 
     function handleLogout() {
-      if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
-        callAPI('LOGOUT', { token: state.token }, () => {
-          localStorage.removeItem('tsa_token');
-          state.token = '';
-          state.user = null;
-          showLoginScreen();
-        });
-      }
+      Swal.fire({
+        title: 'ยืนยันออกจากระบบ?',
+        text: 'คุณต้องการออกจากระบบใช่หรือไม่',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#1b4b8a',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed) {
+          callAPI('LOGOUT', { token: state.token }, () => {
+            localStorage.removeItem('tsa_token');
+            state.token = '';
+            state.user = null;
+            showLoginScreen();
+            Swal.fire({
+              icon: 'success',
+              title: 'ออกจากระบบแล้ว',
+              timer: 1200,
+              showConfirmButton: false
+            });
+          });
+        }
+      });
     }
 
     // Tab Navigation
@@ -1178,27 +1247,51 @@
     // Punch Clock Trigger
     function triggerPunch(type) {
       const mode = document.getElementById('work-mode-select').value;
-      const confirmMsg = type === 'CHECK_IN' ? 'ยืนยันลงเวลาเข้างาน?' : 'ยืนยันลงเวลาออกงาน?';
-      if (!confirm(confirmMsg)) return;
+      const isCheckIn = type === 'CHECK_IN';
+      const actionName = isCheckIn ? 'ลงเวลาเข้างาน' : 'ลงเวลาออกงาน';
 
-      const payload = {
-        token: state.token,
-        type: type,
-        latitude: state.currentCoords.lat,
-        longitude: state.currentCoords.lng,
-        accuracy: state.currentCoords.accuracy,
-        workMode: mode,
-        deviceInfo: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
-        userAgent: navigator.userAgent
-      };
+      Swal.fire({
+        title: `ยืนยัน${actionName}?`,
+        html: `<p class="text-xs text-slate-500">โหมดปฏิบัติงาน: <b>${mode}</b></p>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: isCheckIn ? '#38a169' : '#b91c1c',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: `ยืนยัน${actionName}`,
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed) {
+          const payload = {
+            token: state.token,
+            type: type,
+            latitude: state.currentCoords.lat,
+            longitude: state.currentCoords.lng,
+            accuracy: state.currentCoords.accuracy,
+            workMode: mode,
+            deviceInfo: navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Browser',
+            userAgent: navigator.userAgent
+          };
 
-      callAPI('RECORD_ATTENDANCE', payload, res => {
-        if (res.success) {
-          alert(`✅ ${res.message}`);
-          loadDashboardData();
-          switchTab('calendar');
-        } else {
-          alert(`❌ ${res.error.message}`);
+          callAPI('RECORD_ATTENDANCE', payload, res => {
+            if (res.success) {
+              Swal.fire({
+                icon: 'success',
+                title: `${actionName}สำเร็จ`,
+                text: res.message,
+                confirmButtonColor: '#1b4b8a',
+                timer: 2000
+              });
+              loadDashboardData();
+              switchTab('calendar');
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: `ไม่สามารถ${actionName}ได้`,
+                text: res.error.message,
+                confirmButtonColor: '#1b4b8a'
+              });
+            }
+          });
         }
       });
     }
@@ -1295,16 +1388,16 @@
       const reason = document.getElementById('req-corr-reason').value;
 
       if (!targetDate || !reason) {
-        alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุข้อมูลให้ครบถ้วน', confirmButtonColor: '#1b4b8a' });
         return;
       }
 
       callAPI('SUBMIT_CORRECTION', { token: state.token, targetDate, type, correctTime, reason }, res => {
         if (res.success) {
-          alert('ส่งคำขอปรับปรุงเวลาเรียบร้อยแล้ว');
+          Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'ส่งคำขอปรับปรุงเวลาเรียบร้อยแล้ว', confirmButtonColor: '#1b4b8a' });
           closeWorkflowModal();
         } else {
-          alert(res.error.message);
+          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: res.error.message, confirmButtonColor: '#1b4b8a' });
         }
       });
     }
@@ -1315,16 +1408,16 @@
       const reason = document.getElementById('req-ot-reason').value;
 
       if (!otDate || !reason) {
-        alert('กรุณาระบุข้อมูลให้ครบถ้วน');
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุข้อมูลให้ครบถ้วน', confirmButtonColor: '#1b4b8a' });
         return;
       }
 
       callAPI('SUBMIT_OVERTIME', { token: state.token, otDate, startTime, endTime, reason }, res => {
         if (res.success) {
-          alert('ส่งคำขอทำ OT เรียบร้อยแล้ว');
+          Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'ส่งคำขอทำ OT เรียบร้อยแล้ว', confirmButtonColor: '#1b4b8a' });
           closeWorkflowModal();
         } else {
-          alert(res.error.message);
+          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: res.error.message, confirmButtonColor: '#1b4b8a' });
         }
       });
     }
@@ -1355,16 +1448,37 @@
     function closeFilterModal() { document.getElementById('modal-filter').classList.add('hidden'); }
     function applyDateFilter() {
       closeFilterModal();
-      alert('ปรับตัวกรองข้อมูลเรียบร้อย');
+      Swal.fire({ icon: 'success', title: 'ปรับตัวกรองเรียบร้อย', timer: 1200, showConfirmButton: false });
     }
 
     function openNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.remove('hidden'); }
     function closeNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.add('hidden'); }
-    function showTermsModal() { alert('นโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งาน ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)'); }
-    function showStatusLegend() {
-      alert('คำอธิบายสีสถานะบนปฏิทิน:\n🟢 จุดสีเขียว = บันทึกเวลาเข้างาน\n🔴 จุดสีแดง = บันทึกเวลาออกงาน\n⚪ จุดสีเทา = ยังไม่มีการบันทึกเวลา');
+    function showTermsModal() {
+      Swal.fire({
+        title: 'นโยบายความเป็นส่วนตัว',
+        html: '<p class="text-sm text-slate-600 leading-relaxed">ข้อกำหนดการใช้งานและนโยบายคุ้มครองข้อมูลส่วนบุคคล ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)</p>',
+        icon: 'info',
+        confirmButtonColor: '#1b4b8a',
+        confirmButtonText: 'เข้าใจแล้ว'
+      });
     }
-    function promptAvatarUpload() { alert('คุณสามารถอัปโหลดรูปภาพโปรไฟล์ใหม่ผ่าน Google Drive'); }
+    function showStatusLegend() {
+      Swal.fire({
+        title: 'คำอธิบายสีสถานะบนปฏิทิน',
+        html: '<div class="text-left text-xs space-y-2 py-2"><p>🟢 <b>จุดสีเขียว</b> = บันทึกเวลาเข้างาน</p><p>🔴 <b>จุดสีแดง</b> = บันทึกเวลาออกงาน</p><p>⚪ <b>จุดสีเทา</b> = ยังไม่มีการบันทึกเวลา / วันหยุด</p></div>',
+        icon: 'info',
+        confirmButtonColor: '#1b4b8a',
+        confirmButtonText: 'ตกลง'
+      });
+    }
+    function promptAvatarUpload() {
+      Swal.fire({
+        title: 'อัปโหลดรูปโปรไฟล์',
+        text: 'ระบบกำลังเชื่อมต่อ Google Drive เพื่อรองรับการอัปโหลดภาพถ่ายโปรไฟล์',
+        icon: 'info',
+        confirmButtonColor: '#1b4b8a'
+      });
+    }
 
     // Thai Date String Formatter
     function formatThaiDateStr(isoOrDate) {
