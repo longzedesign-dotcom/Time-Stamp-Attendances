@@ -131,5 +131,21 @@ const Db = {
 
       return updatedCount;
     });
+  },
+
+  delete(sheetName, predicate) {
+    return this.withLock(() => {
+      const all = this.getAll(sheetName);
+      const sheet = this.getSheet(sheetName);
+      let deletedCount = 0;
+      // Loop backward to keep row indices accurate when deleting
+      for (let i = all.length - 1; i >= 0; i--) {
+        if (predicate(all[i])) {
+          sheet.deleteRow(all[i]._rowIndex);
+          deletedCount++;
+        }
+      }
+      return deletedCount;
+    });
   }
 };

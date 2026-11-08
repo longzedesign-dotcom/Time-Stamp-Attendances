@@ -154,5 +154,50 @@ const Admin = {
     const cleanDate = Utils.formatISODate(holidayDate);
     Db.update(CONFIG.SHEETS.HOLIDAY, h => h.HolidayDate === cleanDate, { Status: 'Inactive' });
     return Utils.success({}, 'ปิดการใช้งานวันหยุดเรียบร้อย');
+  },
+
+  /**
+   * Import multiple holidays for the entire year at once - Admin Only
+   */
+  importHolidays(token, holidayList) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+      return Utils.error('ไม่มีสิทธิ์นำเข้าวันหยุด (เฉพาะผู้ดูแลระบบ Admin เท่านั้น)', 'FORBIDDEN');
+    }
+
+    if (!Array.isArray(holidayList) || holidayList.length === 0) {
+      return Utils.error('ไม่พบรายการวันหยุดสำหรับนำเข้า');
+    }
+
+    let importedCount = 0;
+    const existing = Db.getAll(CONFIG.SHEETS.HOLIDAY) || [];
+    const dateMap = {};
+    existing.forEach(h => {
+      if (h && h.HolidayDate) {
+        dateMap[Utils.formatISODate(h.HolidayDate)] = true;
+      }
+    });
+
+    holidayList.forEach(item => {
+      if (!item || !item.HolidayDate || !item.HolidayName) return;
+      const cleanDate = Utils.formatISODate(item.HolidayDate);
+      const row = {
+        HolidayDate: cleanDate,
+        HolidayName: String(item.HolidayName).trim(),
+        Type: item.Type || 'Public',
+        Status: item.Status === 'Inactive' ? 'Inactive' : 'Active'
+      };
+
+      if (dateMap[cleanDate]) {
+        Db.update(CONFIG.SHEETS.HOLIDAY, h => Utils.formatISODate(h.HolidayDate) === cleanDate, row);
+      } else {
+        Db.insert(CONFIG.SHEETS.HOLIDAY, row);
+        dateMap[cleanDate] = true;
+      }
+      importedCount++;
+    });
+
+    return Utils.success({ importedCount: importedCount }, `นำเข้าข้อมูลวันหยุดสำเร็จ ${importedCount} วัน`);
   }
 };

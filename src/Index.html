@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.29
+      Version 1.0.30
     </div>
   </div>
 
@@ -255,6 +255,11 @@
 
       <!-- TAB 1: CALENDAR VIEW (IMG_1191) -->
       <div id="tab-calendar" class="h-full overflow-y-auto custom-scroll p-4 pb-20">
+        <!-- Emergency & Special Announcements Banner for All Employees -->
+        <div id="banner-special-announcements" class="hidden mb-3 space-y-2">
+          <!-- Populated by JS -->
+        </div>
+
         <div class="flex items-center justify-between mb-4 px-1">
           <h3 class="text-lg font-bold text-slate-800">ปฏิทิน</h3>
           <button onclick="showStatusLegend()" class="text-xs text-slate-500 hover:text-blue-600 flex items-center gap-1">
@@ -518,7 +523,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.29
+          Version 1.0.30
         </div>
       </div>
 
@@ -639,9 +644,12 @@
       <button onclick="closeNotificationSettingsModal()" class="p-1 hover:text-blue-200 text-lg">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <h3 class="text-base font-semibold tracking-wide">การแจ้งเตือน</h3>
+      <div>
+        <h3 class="text-base font-semibold tracking-wide">การแจ้งเตือน</h3>
+        <p class="text-[10px] text-blue-200">ตั้งค่าการแจ้งเตือนและประกาศข่าวสารสำคัญ</p>
+      </div>
     </div>
-    <div class="p-4 space-y-4">
+    <div class="p-4 space-y-4 flex-1 overflow-y-auto custom-scroll">
       <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center justify-between">
         <span class="text-sm font-medium text-slate-700">แจ้งเตือนผ่านแอป</span>
         <label class="relative inline-flex items-center cursor-pointer">
@@ -657,6 +665,85 @@
           <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1b4b8a]"></div>
         </label>
       </div>
+
+      <!-- Admin Special Broadcast Management Section (ADMIN ONLY) -->
+      <div id="admin-broadcast-section" class="hidden space-y-3 pt-3 border-t border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-bullhorn text-amber-500"></i>
+              <span>การแจ้งเตือนพิเศษถึงพนักงานทุกคน</span>
+            </h4>
+            <p class="text-[10px] text-slate-500">โรคระบาด, น้ำท่วม, แผ่นดินไหว, วันหยุดพิเศษ</p>
+          </div>
+          <button onclick="openBroadcastModal()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>เพิ่มประกาศพิเศษ</span>
+          </button>
+        </div>
+
+        <!-- Active Broadcast Announcements List Container -->
+        <div id="broadcast-list-container" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Broadcast Alert Modal -->
+  <div id="modal-broadcast-form" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-bullhorn text-amber-500"></i>
+          <span>สร้างการแจ้งเตือนพิเศษถึงพนักงาน</span>
+        </h3>
+        <button onclick="closeBroadcastModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="broadcast-create-form" onsubmit="handleSendBroadcast(event)" class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700">ประเภทเหตุการณ์ / หมวดหมู่ <span class="text-red-500">*</span></label>
+          <select id="broadcast-form-type" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none">
+            <option value="EPIDEMIC">🦠 โรคระบาด / มาตรการด้านสาธารณสุข</option>
+            <option value="FLOOD">🌊 อุทกภัย / น้ำท่วมเส้นทาง</option>
+            <option value="EARTHQUAKE">🏢 แผ่นดินไหว / ภัยธรรมชาติ</option>
+            <option value="SPECIAL_HOLIDAY">⭐ วันหยุดพิเศษที่บริษัทกำหนด</option>
+            <option value="EMERGENCY">🚨 เหตุฉุกเฉิน / ภัยพิบัติเร่งด่วน</option>
+            <option value="GENERAL">📢 ประกาศข่าวสารสำคัญทั่วไป</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">หัวข้อการแจ้งเตือน <span class="text-red-500">*</span></label>
+          <input type="text" id="broadcast-form-title" required placeholder="เช่น แจ้งปิดสำนักงานชั่วคราวเนื่องจากสถานการณ์น้ำท่วม" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700">รายละเอียดข้อความแจ้งเตือน <span class="text-red-500">*</span></label>
+          <textarea id="broadcast-form-message" rows="4" required placeholder="ระบุรายละเอียดให้พนักงานทุกคนรับทราบ เช่น ให้พนักงานปฏิบัติงานที่บ้าน (WFH) หรือรายละเอียดคำสั่ง" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"></textarea>
+        </div>
+
+        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 text-[11px] text-amber-800 flex items-start gap-2">
+          <i class="fa-solid fa-circle-exclamation text-amber-600 mt-0.5"></i>
+          <div>
+            <b>การแจ้งเตือนนี้จะแสดงที่หน้าหลักของพนักงานทุกคน</b>
+            <p class="text-[10px] text-amber-700 mt-0.5">พนักงานทุกคนจะเห็นแถบประกาศนี้ทันทีบนหน้าหลัก</p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeBroadcastModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-save-broadcast" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-md">
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+            <span>ส่งประกาศทันที</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -796,10 +883,16 @@
           <p class="text-[10px] text-blue-200">จัดการวันหยุดประจำปี วันหยุดนักขัตฤกษ์ และวันหยุดบริษัท</p>
         </div>
       </div>
-      <button onclick="openHolidayFormModal()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm">
-        <i class="fa-solid fa-plus text-[10px]"></i>
-        <span>เพิ่มวันหยุด</span>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button onclick="openImportHolidayModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm border border-white/20 active:scale-95">
+          <i class="fa-solid fa-file-import text-[11px]"></i>
+          <span>นำเข้าข้อมูล</span>
+        </button>
+        <button onclick="openHolidayFormModal()" class="text-xs bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm active:scale-95">
+          <i class="fa-solid fa-plus text-[10px]"></i>
+          <span>เพิ่มวันหยุด</span>
+        </button>
+      </div>
     </div>
 
     <!-- Holiday List Content -->
@@ -875,6 +968,99 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Import Holidays Modal -->
+  <div id="modal-holiday-import" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-file-import text-blue-600"></i>
+          <span>นำเข้าข้อมูลวันหยุดตลอดทั้งปี</span>
+        </h3>
+        <button onclick="closeImportHolidayModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Tab Buttons: Presets vs Text/CSV -->
+      <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <button type="button" id="tab-btn-preset-holidays" onclick="switchImportTab('preset')" class="flex-1 py-2 rounded-lg bg-white shadow-sm text-blue-700 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+          <span>วันหยุดราชการไทย (Preset ทั้งปี)</span>
+        </button>
+        <button type="button" id="tab-btn-csv-holidays" onclick="switchImportTab('csv')" class="flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-table-list text-[11px]"></i>
+          <span>กำหนดเอง / วางข้อความ CSV</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: 1-Click Thai Public Holidays Preset -->
+      <div id="import-panel-preset" class="space-y-3">
+        <div class="flex items-center justify-between bg-blue-50/70 border border-blue-100 p-3 rounded-2xl">
+          <div>
+            <label class="text-xs font-bold text-blue-900 block">เลือกปีที่ต้องการนำเข้า</label>
+            <p class="text-[10px] text-blue-600">วันหยุดราชการและวันหยุดนักขัตฤกษ์ตามประกาศทางการ</p>
+          </div>
+          <select id="select-preset-year" onchange="renderPresetHolidaysPreview()" class="bg-white border border-blue-200 rounded-xl px-3 py-1.5 text-xs font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <option value="2026" selected>ปี 2569 (2026)</option>
+            <option value="2027">ปี 2570 (2027)</option>
+            <option value="2025">ปี 2568 (2025)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-semibold text-slate-600">รายการวันหยุดที่จะนำเข้า (<span id="preset-holidays-count">0</span> วัน)</span>
+          <button type="button" onclick="toggleAllPresetHolidays()" id="btn-toggle-all-preset" class="text-[11px] text-blue-600 hover:text-blue-800 font-medium">
+            เลือกทั้งหมด
+          </button>
+        </div>
+
+        <!-- Scrollable Preset List Preview -->
+        <div id="preset-holidays-preview-list" class="max-h-60 overflow-y-auto space-y-1.5 p-2 border border-slate-100 rounded-2xl bg-slate-50 custom-scroll">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeImportHolidayModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="submitImportPresetHolidays()" id="btn-submit-preset-holidays" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-file-import text-xs"></i>
+            <span>นำเข้าวันหยุดทั้งปีทันที</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: Custom Text / CSV Bulk Import -->
+      <div id="import-panel-csv" class="hidden space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700 block mb-1">
+            วางข้อมูลวันหยุด (บรรทัดละ 1 วัน หรือ CSV)
+          </label>
+          <p class="text-[10px] text-slate-500 mb-2">
+            รูปแบบ: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-rose-600">YYYY-MM-DD, ชื่อวันหยุด, ประเภท</code> (ประเภท: Public, Company, Special)
+          </p>
+          <textarea id="import-csv-text" rows="7" placeholder="ตัวอย่าง:
+2026-01-01, วันขึ้นปีใหม่, Public
+2026-04-13, วันสงกรานต์, Public
+2026-04-14, วันสงกรานต์, Public
+2026-04-15, วันสงกรานต์, Public
+2026-07-28, วันเฉลิมพระชนมพรรษา ร.10, Public
+2026-12-25, วันหยุดบริษัทส่งท้ายปี, Company" class="w-full border border-slate-300 rounded-2xl p-3 text-xs font-mono focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeImportHolidayModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-xs font-medium transition">
+            ยกเลิก
+          </button>
+          <button type="button" onclick="submitImportCustomHolidays()" id="btn-submit-custom-holidays" class="flex-1 bg-[#1b4b8a] hover:bg-[#153d70] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>ยืนยันการนำเข้า</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1003,6 +1189,7 @@
       cachedHistory: [],
       calendarStatusMap: {},
       holidays: [],
+      broadcastAnnouncements: [],
       thaiMonths: [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -1168,6 +1355,17 @@
         } else {
           holidayBtn.classList.add('hidden');
           holidayBtn.classList.remove('flex');
+        }
+      }
+
+      // Admin Broadcast Section is ONLY visible for ADMIN users
+      const adminBroadcastSec = document.getElementById('admin-broadcast-section');
+      if (adminBroadcastSec) {
+        if (user.Role === 'Admin') {
+          adminBroadcastSec.classList.remove('hidden');
+          fetchBroadcastAnnouncements();
+        } else {
+          adminBroadcastSec.classList.add('hidden');
         }
       }
     }
@@ -1475,6 +1673,7 @@
           if (labelHoliday) labelHoliday.innerText = `${state.holidays.length} วัน`;
         }
       });
+      loadBroadcastBanners();
     }
 
     // Calendar Generation
@@ -2123,7 +2322,14 @@
       Swal.fire({ icon: 'success', title: 'ปรับตัวกรองเรียบร้อย', timer: 1200, showConfirmButton: false });
     }
 
-    function openNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.remove('hidden'); }
+    function openNotificationSettingsModal() {
+      document.getElementById('modal-notif-settings').classList.remove('hidden');
+      if (state.user && state.user.Role === 'Admin') {
+        const sec = document.getElementById('admin-broadcast-section');
+        if (sec) sec.classList.remove('hidden');
+        fetchBroadcastAnnouncements();
+      }
+    }
     function closeNotificationSettingsModal() { document.getElementById('modal-notif-settings').classList.add('hidden'); }
 
     // ==========================================
@@ -2760,6 +2966,532 @@
         } else {
           checkbox.checked = !willBeActive;
         }
+      });
+    }
+
+    // ==================== HOLIDAY BULK IMPORT LOGIC ====================
+    const THAI_PUBLIC_HOLIDAYS_PRESETS = {
+      '2026': [
+        { HolidayDate: '2026-01-01', HolidayName: 'วันขึ้นปีใหม่', Type: 'Public' },
+        { HolidayDate: '2026-01-02', HolidayName: 'วันหยุดพิเศษช่วงเทศกาลปีใหม่', Type: 'Public' },
+        { HolidayDate: '2026-03-03', HolidayName: 'วันมาฆบูชา', Type: 'Public' },
+        { HolidayDate: '2026-04-06', HolidayName: 'วันจักรี', Type: 'Public' },
+        { HolidayDate: '2026-04-13', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2026-04-14', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2026-04-15', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2026-05-01', HolidayName: 'วันแรงงานแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2026-05-04', HolidayName: 'วันฉัตรมงคล', Type: 'Public' },
+        { HolidayDate: '2026-05-31', HolidayName: 'วันวิสาขบูชา', Type: 'Public' },
+        { HolidayDate: '2026-06-01', HolidayName: 'วันหยุดชดเชยวันวิสาขบูชา', Type: 'Public' },
+        { HolidayDate: '2026-06-03', HolidayName: 'วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี', Type: 'Public' },
+        { HolidayDate: '2026-07-28', HolidayName: 'วันเฉลิมพระชนมพรรษาพระบาทสมเด็จพระเจ้าอยู่หัว', Type: 'Public' },
+        { HolidayDate: '2026-07-29', HolidayName: 'วันอาสาฬหบูชา', Type: 'Public' },
+        { HolidayDate: '2026-07-30', HolidayName: 'วันเข้าพรรษา', Type: 'Public' },
+        { HolidayDate: '2026-08-12', HolidayName: 'วันแม่แห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2026-10-13', HolidayName: 'วันนวมินทรมหาราช', Type: 'Public' },
+        { HolidayDate: '2026-10-23', HolidayName: 'วันปิยมหาราช', Type: 'Public' },
+        { HolidayDate: '2026-12-05', HolidayName: 'วันคล้ายวันพระบรมราชสมภพ ร.9 วันชาติ และวันพ่อแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2026-12-07', HolidayName: 'วันหยุดชดเชยวันพ่อแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2026-12-10', HolidayName: 'วันรัฐธรรมนูญ', Type: 'Public' },
+        { HolidayDate: '2026-12-31', HolidayName: 'วันสิ้นปี', Type: 'Public' }
+      ],
+      '2027': [
+        { HolidayDate: '2027-01-01', HolidayName: 'วันขึ้นปีใหม่', Type: 'Public' },
+        { HolidayDate: '2027-02-21', HolidayName: 'วันมาฆบูชา', Type: 'Public' },
+        { HolidayDate: '2027-02-22', HolidayName: 'วันหยุดชดเชยวันมาฆบูชา', Type: 'Public' },
+        { HolidayDate: '2027-04-06', HolidayName: 'วันจักรี', Type: 'Public' },
+        { HolidayDate: '2027-04-13', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2027-04-14', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2027-04-15', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2027-05-01', HolidayName: 'วันแรงงานแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2027-05-04', HolidayName: 'วันฉัตรมงคล', Type: 'Public' },
+        { HolidayDate: '2027-05-20', HolidayName: 'วันวิสาขบูชา', Type: 'Public' },
+        { HolidayDate: '2027-06-03', HolidayName: 'วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี', Type: 'Public' },
+        { HolidayDate: '2027-07-18', HolidayName: 'วันอาสาฬหบูชา', Type: 'Public' },
+        { HolidayDate: '2027-07-19', HolidayName: 'วันเข้าพรรษา', Type: 'Public' },
+        { HolidayDate: '2027-07-28', HolidayName: 'วันเฉลิมพระชนมพรรษาพระบาทสมเด็จพระเจ้าอยู่หัว', Type: 'Public' },
+        { HolidayDate: '2027-08-12', HolidayName: 'วันแม่แห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2027-10-13', HolidayName: 'วันนวมินทรมหาราช', Type: 'Public' },
+        { HolidayDate: '2027-10-23', HolidayName: 'วันปิยมหาราช', Type: 'Public' },
+        { HolidayDate: '2027-10-25', HolidayName: 'วันหยุดชดเชยวันปิยมหาราช', Type: 'Public' },
+        { HolidayDate: '2027-12-05', HolidayName: 'วันพ่อแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2027-12-06', HolidayName: 'วันหยุดชดเชยวันพ่อแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2027-12-10', HolidayName: 'วันรัฐธรรมนูญ', Type: 'Public' },
+        { HolidayDate: '2027-12-31', HolidayName: 'วันสิ้นปี', Type: 'Public' }
+      ],
+      '2025': [
+        { HolidayDate: '2025-01-01', HolidayName: 'วันขึ้นปีใหม่', Type: 'Public' },
+        { HolidayDate: '2025-02-12', HolidayName: 'วันมาฆบูชา', Type: 'Public' },
+        { HolidayDate: '2025-04-06', HolidayName: 'วันจักรี', Type: 'Public' },
+        { HolidayDate: '2025-04-07', HolidayName: 'วันหยุดชดเชยวันจักรี', Type: 'Public' },
+        { HolidayDate: '2025-04-13', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2025-04-14', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2025-04-15', HolidayName: 'วันสงกรานต์', Type: 'Public' },
+        { HolidayDate: '2025-05-01', HolidayName: 'วันแรงงานแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2025-05-05', HolidayName: 'วันหยุดชดเชยวันฉัตรมงคล', Type: 'Public' },
+        { HolidayDate: '2025-05-11', HolidayName: 'วันวิสาขบูชา', Type: 'Public' },
+        { HolidayDate: '2025-05-12', HolidayName: 'วันหยุดชดเชยวันวิสาขบูชา', Type: 'Public' },
+        { HolidayDate: '2025-06-03', HolidayName: 'วันเฉลิมพระชนมพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี', Type: 'Public' },
+        { HolidayDate: '2025-07-10', HolidayName: 'วันอาสาฬหบูชา', Type: 'Public' },
+        { HolidayDate: '2025-07-11', HolidayName: 'วันเข้าพรรษา', Type: 'Public' },
+        { HolidayDate: '2025-07-28', HolidayName: 'วันเฉลิมพระชนมพรรษาพระบาทสมเด็จพระเจ้าอยู่หัว', Type: 'Public' },
+        { HolidayDate: '2025-08-12', HolidayName: 'วันแม่แห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2025-10-13', HolidayName: 'วันนวมินทรมหาราช', Type: 'Public' },
+        { HolidayDate: '2025-10-23', HolidayName: 'วันปิยมหาราช', Type: 'Public' },
+        { HolidayDate: '2025-12-05', HolidayName: 'วันพ่อแห่งชาติ', Type: 'Public' },
+        { HolidayDate: '2025-12-10', HolidayName: 'วันรัฐธรรมนูญ', Type: 'Public' },
+        { HolidayDate: '2025-12-31', HolidayName: 'วันสิ้นปี', Type: 'Public' }
+      ]
+    };
+
+    function openImportHolidayModal() {
+      if (!state.user || state.user.Role !== 'Admin') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีสิทธิ์เข้าถึง',
+          text: 'เมนูนำเข้าวันหยุดสงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+      document.getElementById('modal-holiday-import').classList.remove('hidden');
+      switchImportTab('preset');
+      renderPresetHolidaysPreview();
+    }
+
+    function closeImportHolidayModal() {
+      document.getElementById('modal-holiday-import').classList.add('hidden');
+    }
+
+    function switchImportTab(tab) {
+      const btnPreset = document.getElementById('tab-btn-preset-holidays');
+      const btnCsv = document.getElementById('tab-btn-csv-holidays');
+      const panelPreset = document.getElementById('import-panel-preset');
+      const panelCsv = document.getElementById('import-panel-csv');
+
+      if (tab === 'preset') {
+        btnPreset.className = 'flex-1 py-2 rounded-lg bg-white shadow-sm text-blue-700 transition flex items-center justify-center gap-1.5';
+        btnCsv.className = 'flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5';
+        panelPreset.classList.remove('hidden');
+        panelCsv.classList.add('hidden');
+      } else {
+        btnCsv.className = 'flex-1 py-2 rounded-lg bg-white shadow-sm text-blue-700 transition flex items-center justify-center gap-1.5';
+        btnPreset.className = 'flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5';
+        panelCsv.classList.remove('hidden');
+        panelPreset.classList.add('hidden');
+      }
+    }
+
+    function renderPresetHolidaysPreview() {
+      const year = document.getElementById('select-preset-year').value;
+      const list = THAI_PUBLIC_HOLIDAYS_PRESETS[year] || [];
+      const container = document.getElementById('preset-holidays-preview-list');
+      const countEl = document.getElementById('preset-holidays-count');
+      const btnSubmit = document.getElementById('btn-submit-preset-holidays');
+
+      if (countEl) countEl.innerText = list.length;
+      if (btnSubmit) btnSubmit.querySelector('span').innerText = `นำเข้าวันหยุดปี ${parseInt(year, 10) + 543} ทั้งหมด (${list.length} วัน)`;
+
+      if (!container) return;
+      container.innerHTML = list.map((h, idx) => `
+        <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-100 hover:border-blue-200 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="checkbox" name="chk-preset-holiday" value="${idx}" checked class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-400">
+            <div>
+              <div class="text-xs font-bold text-slate-800">${h.HolidayName}</div>
+              <div class="text-[10px] text-slate-500">${formatThaiDateStr(h.HolidayDate)}</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+            วันหยุดราชการ
+          </span>
+        </label>
+      `).join('');
+    }
+
+    function toggleAllPresetHolidays() {
+      const checkboxes = document.querySelectorAll('input[name="chk-preset-holiday"]');
+      const allChecked = Array.from(checkboxes).every(c => c.checked);
+      checkboxes.forEach(c => c.checked = !allChecked);
+      const btn = document.getElementById('btn-toggle-all-preset');
+      if (btn) btn.innerText = allChecked ? 'เลือกทั้งหมด' : 'ยกเลิกการเลือก';
+    }
+
+    function submitImportPresetHolidays() {
+      const year = document.getElementById('select-preset-year').value;
+      const allList = THAI_PUBLIC_HOLIDAYS_PRESETS[year] || [];
+      const checkboxes = document.querySelectorAll('input[name="chk-preset-holiday"]:checked');
+      const selectedIndices = Array.from(checkboxes).map(c => parseInt(c.value, 10));
+      const selectedHolidays = selectedIndices.map(idx => allList[idx]).filter(Boolean);
+
+      if (selectedHolidays.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่ได้เลือกรายการ',
+          text: 'กรุณาเลือกวันหยุดที่ต้องการนำเข้าอย่างน้อย 1 วัน',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-preset-holidays');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังนำเข้าข้อมูล...</span>';
+      }
+
+      callAPI('IMPORT_HOLIDAYS', { token: state.token, holidayList: selectedHolidays }, res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-file-import text-xs"></i><span>นำเข้าวันหยุดทั้งปีทันที</span>';
+        }
+        if (res && res.success) {
+          closeImportHolidayModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'นำเข้าสำเร็จ!',
+            text: res.message || `นำเข้าวันหยุดปี ${parseInt(year, 10) + 543} เรียบร้อยแล้ว`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+          fetchHolidayList();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'นำเข้าไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการนำเข้าข้อมูลวันหยุด',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function submitImportCustomHolidays() {
+      const text = document.getElementById('import-csv-text').value.trim();
+      if (!text) {
+        Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูล', text: 'กรุณาวางข้อมูลวันหยุดก่อนกดยืนยัน', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+
+      const lines = text.split('\n');
+      const holidaysToImport = [];
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) return;
+        const parts = trimmed.split(',').map(p => p.trim());
+        if (parts.length >= 2) {
+          holidaysToImport.push({
+            HolidayDate: parts[0],
+            HolidayName: parts[1],
+            Type: parts[2] || 'Public',
+            Status: 'Active'
+          });
+        }
+      });
+
+      if (holidaysToImport.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'รูปแบบไม่ถูกต้อง',
+          text: 'กรุณาระบุข้อมูลในรูปแบบ: YYYY-MM-DD, ชื่อวันหยุด',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-custom-holidays');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังนำเข้า...</span>';
+      }
+
+      callAPI('IMPORT_HOLIDAYS', { token: state.token, holidayList: holidaysToImport }, res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span>ยืนยันการนำเข้า</span>';
+        }
+        if (res && res.success) {
+          closeImportHolidayModal();
+          document.getElementById('import-csv-text').value = '';
+          Swal.fire({
+            icon: 'success',
+            title: 'นำเข้าสำเร็จ!',
+            text: res.message || `นำเข้าวันหยุดสำเร็จ ${holidaysToImport.length} วัน`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+          fetchHolidayList();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'นำเข้าไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการนำเข้า',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    // ==================== SPECIAL BROADCAST ALERTS LOGIC ====================
+    function openBroadcastModal() {
+      if (!state.user || state.user.Role !== 'Admin') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไม่มีสิทธิ์เข้าถึง',
+          text: 'ฟังก์ชันสร้างการแจ้งเตือนพิเศษสงวนสิทธิ์เฉพาะ Admin เท่านั้น',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+      document.getElementById('modal-broadcast-form').classList.remove('hidden');
+      document.getElementById('broadcast-create-form').reset();
+    }
+
+    function closeBroadcastModal() {
+      document.getElementById('modal-broadcast-form').classList.add('hidden');
+    }
+
+    function fetchBroadcastAnnouncements() {
+      const container = document.getElementById('broadcast-list-container');
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="text-center py-4 text-xs text-slate-400">
+          <i class="fa-solid fa-circle-notch fa-spin mb-1 text-amber-500"></i>
+          <p>กำลังโหลดประกาศพิเศษ...</p>
+        </div>
+      `;
+
+      callAPI('GET_BROADCASTS', { token: state.token }, res => {
+        if (res && res.success && res.data) {
+          state.broadcastAnnouncements = res.data.announcements || [];
+          renderBroadcastList(state.broadcastAnnouncements);
+          renderBroadcastBanners(state.broadcastAnnouncements);
+        } else {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">ยังไม่มีประกาศพิเศษ</div>';
+        }
+      });
+    }
+
+    function renderBroadcastList(broadcasts) {
+      const container = document.getElementById('broadcast-list-container');
+      if (!container) return;
+
+      if (!broadcasts || broadcasts.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-400">
+            <i class="fa-solid fa-bullhorn text-2xl text-slate-300 mb-1"></i>
+            <p>ยังไม่มีการแจ้งเตือนพิเศษในขณะนี้</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = broadcasts.map(b => {
+        const typeInfo = getBroadcastTypeInfo(b.Type);
+        return `
+          <div class="bg-white rounded-2xl p-3 border border-slate-100 shadow-sm flex items-start justify-between gap-3">
+            <div class="flex items-start gap-2.5 flex-1 min-w-0">
+              <div class="w-8 h-8 rounded-xl ${typeInfo.bgClass} ${typeInfo.textClass} flex items-center justify-center shrink-0 text-sm">
+                <i class="${typeInfo.icon}"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${typeInfo.bgClass} ${typeInfo.textClass}">
+                    ${typeInfo.label}
+                  </span>
+                  <span class="text-[10px] text-slate-400">${formatThaiDateStr(b.CreatedAt)}</span>
+                </div>
+                <h5 class="text-xs font-bold text-slate-800 truncate mt-1">${b.Title}</h5>
+                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 font-light">${b.Message}</p>
+              </div>
+            </div>
+            <button onclick="handleDeleteBroadcast('${b.NotificationID}', '${b.Title.replace(/'/g, "\\'")}')" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition" title="ลบประกาศ">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getBroadcastTypeInfo(type) {
+      switch (type) {
+        case 'EPIDEMIC':
+          return { label: '🦠 โรคระบาด', icon: 'fa-solid fa-virus-covid', bgClass: 'bg-rose-100', textClass: 'text-rose-700', bannerBg: 'from-rose-500 to-red-600', borderClass: 'border-rose-300' };
+        case 'FLOOD':
+          return { label: '🌊 น้ำท่วม', icon: 'fa-solid fa-house-flood-water', bgClass: 'bg-blue-100', textClass: 'text-blue-700', bannerBg: 'from-blue-600 to-cyan-700', borderClass: 'border-blue-300' };
+        case 'EARTHQUAKE':
+          return { label: '🏢 แผ่นดินไหว', icon: 'fa-solid fa-house-crack', bgClass: 'bg-amber-100', textClass: 'text-amber-700', bannerBg: 'from-amber-600 to-orange-700', borderClass: 'border-amber-300' };
+        case 'SPECIAL_HOLIDAY':
+          return { label: '⭐ วันหยุดพิเศษ', icon: 'fa-solid fa-star', bgClass: 'bg-purple-100', textClass: 'text-purple-700', bannerBg: 'from-purple-600 to-indigo-700', borderClass: 'border-purple-300' };
+        case 'EMERGENCY':
+          return { label: '🚨 เหตุฉุกเฉิน', icon: 'fa-solid fa-triangle-exclamation', bgClass: 'bg-red-100', textClass: 'text-red-700', bannerBg: 'from-red-600 to-rose-700', borderClass: 'border-red-300' };
+        default:
+          return { label: '📢 ประกาศสำคัญ', icon: 'fa-solid fa-bullhorn', bgClass: 'bg-amber-100', textClass: 'text-amber-700', bannerBg: 'from-amber-600 to-amber-700', borderClass: 'border-amber-300' };
+      }
+    }
+
+    function handleSendBroadcast(e) {
+      e.preventDefault();
+      const type = document.getElementById('broadcast-form-type').value;
+      const title = document.getElementById('broadcast-form-title').value.trim();
+      const message = document.getElementById('broadcast-form-message').value.trim();
+      const btn = document.getElementById('btn-save-broadcast');
+
+      if (!title || !message) {
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกหัวข้อและรายละเอียดข้อความ', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>กำลังส่งประกาศ...</span>';
+      }
+
+      const payload = {
+        token: state.token,
+        broadcastData: {
+          Title: title,
+          Message: message,
+          Type: type
+        }
+      };
+
+      callAPI('SEND_BROADCAST', payload, res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i><span>ส่งประกาศทันที</span>';
+        }
+        if (res && res.success) {
+          closeBroadcastModal();
+          Swal.fire({
+            icon: 'success',
+            title: 'ส่งประกาศสำเร็จ!',
+            text: 'การแจ้งเตือนพิเศษได้ถูกส่งไปยังหน้าหลักของพนักงานทุกคนแล้ว',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          fetchBroadcastAnnouncements();
+          loadBroadcastBanners();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'ส่งประกาศไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการส่งประกาศ',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function handleDeleteBroadcast(notificationId, title) {
+      Swal.fire({
+        title: 'ยืนยันลบประกาศ?',
+        text: `คุณต้องการลบประกาศ "${title}" ออกจากหน้าหลักใช่หรือไม่`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ลบประกาศ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (result.isConfirmed) {
+          callAPI('DELETE_BROADCAST', { token: state.token, notificationId: notificationId }, res => {
+            if (res && res.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'ลบประกาศสำเร็จ',
+                timer: 1500,
+                showConfirmButton: false
+              });
+              fetchBroadcastAnnouncements();
+              loadBroadcastBanners();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'ลบประกาศไม่สำเร็จ',
+                text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาด',
+                confirmButtonColor: '#1b4b8a'
+              });
+            }
+          });
+        }
+      });
+    }
+
+    function loadBroadcastBanners() {
+      callAPI('GET_BROADCASTS', { token: state.token }, res => {
+        if (res && res.success && res.data && res.data.announcements) {
+          state.broadcastAnnouncements = res.data.announcements;
+          renderBroadcastBanners(res.data.announcements);
+        }
+      });
+    }
+
+    function renderBroadcastBanners(announcements) {
+      const bannerContainer = document.getElementById('banner-special-announcements');
+      if (!bannerContainer) return;
+
+      if (!announcements || announcements.length === 0) {
+        bannerContainer.classList.add('hidden');
+        bannerContainer.innerHTML = '';
+        return;
+      }
+
+      bannerContainer.classList.remove('hidden');
+      bannerContainer.innerHTML = announcements.map(b => {
+        const typeInfo = getBroadcastTypeInfo(b.Type);
+        return `
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r ${typeInfo.bannerBg} p-3.5 text-white shadow-lg border border-white/20 transition hover:shadow-xl">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-start gap-2.5 flex-1 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 text-base shadow-sm">
+                  <i class="${typeInfo.icon}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/30 text-white backdrop-blur-sm">
+                      ${typeInfo.label}
+                    </span>
+                    <span class="inline-flex items-center gap-1 text-[10px] text-white/80">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span>ประกาศด่วน</span>
+                    </span>
+                  </div>
+                  <h4 class="text-xs font-bold text-white mt-1 leading-snug">${b.Title}</h4>
+                  <p class="text-[11px] text-white/90 font-light mt-0.5 leading-relaxed line-clamp-2">${b.Message}</p>
+                </div>
+              </div>
+              <button onclick="showBroadcastDetail('${b.NotificationID}')" class="shrink-0 self-center px-2.5 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white text-[11px] font-semibold backdrop-blur-sm transition border border-white/30 shadow-sm active:scale-95">
+                ดูรายละเอียด
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showBroadcastDetail(notificationId) {
+      const item = (state.broadcastAnnouncements || []).find(b => String(b.NotificationID) === String(notificationId));
+      if (!item) return;
+
+      const typeInfo = getBroadcastTypeInfo(item.Type);
+      Swal.fire({
+        title: `<span class="text-base font-bold flex items-center justify-center gap-2">${typeInfo.label}</span>`,
+        html: `
+          <div class="text-left space-y-3 pt-2">
+            <h4 class="text-sm font-bold text-slate-800">${item.Title}</h4>
+            <div class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100 whitespace-pre-wrap">${item.Message}</div>
+            <div class="text-[10px] text-slate-400 flex items-center gap-1">
+              <i class="fa-regular fa-clock"></i>
+              <span>ประกาศเมื่อ: ${formatThaiDateStr(item.CreatedAt)}</span>
+            </div>
+          </div>
+        `,
+        icon: 'info',
+        confirmButtonColor: '#1b4b8a',
+        confirmButtonText: 'รับทราบข้อความ'
       });
     }
     function showTermsModal() {

@@ -137,6 +137,20 @@ function apiDispatcher(action, payload) {
       case 'DELETE_HOLIDAY':
         res = Admin.deleteHoliday(token, data.holidayDate);
         break;
+      case 'IMPORT_HOLIDAYS':
+        res = Admin.importHolidays(token, data.holidayList);
+        break;
+
+      // Broadcast & Special Alerts
+      case 'SEND_BROADCAST':
+        res = Notify.sendBroadcast(token, data.broadcastData);
+        break;
+      case 'GET_BROADCASTS':
+        res = Notify.getBroadcastAnnouncements(token);
+        break;
+      case 'DELETE_BROADCAST':
+        res = Notify.deleteBroadcast(token, data.notificationId);
+        break;
 
       default:
         res = Utils.error(`Unknown API action: "${action}"`);
