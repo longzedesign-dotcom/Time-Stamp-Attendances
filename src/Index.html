@@ -80,78 +80,94 @@
 <body class="bg-slate-50 text-slate-800 antialiased h-screen w-screen overflow-hidden flex flex-col justify-between">
 
   <!-- ==================== 1. SCREEN: LOGIN ==================== -->
-  <div id="screen-login" class="fixed inset-0 z-50 bg-gradient-to-b from-[#1b4b8a] via-[#163f75] to-[#0e274a] flex flex-col justify-between items-center py-10 px-6 overflow-y-auto">
-    <div class="w-full max-w-sm flex flex-col items-center mt-8">
-      <div class="w-20 h-20 mb-3 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
-        <i class="fa-solid fa-business-time text-3xl text-sky-400"></i>
-      </div>
-      <h1 class="text-xl md:text-2xl font-bold text-white text-center leading-snug tracking-wide">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน</h1>
-      <p class="text-sm font-semibold text-sky-300 mt-1 text-center tracking-wider">Time Stamp Attendances</p>
+  <div id="screen-login" class="fixed inset-0 z-50 bg-[#d9e8f8] flex flex-col justify-between items-center py-6 px-4 overflow-y-auto">
+    <!-- Header Branding -->
+    <div class="w-full max-w-sm flex flex-col items-center mt-2 mb-2">
+      <h1 class="text-base md:text-lg font-bold text-[#1b4b8a] text-center leading-snug tracking-wide">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน</h1>
+      <p class="text-xs font-semibold text-sky-700 mt-0.5 text-center tracking-wider">Time Stamp Attendances</p>
     </div>
 
-    <!-- Login Card -->
-    <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 my-auto">
-      <h2 class="text-lg font-semibold text-center text-slate-800 mb-6">เข้าสู่ระบบ login</h2>
-
-      <!-- LINE Login Button -->
-      <button onclick="handleLineLogin()" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl py-3 px-4 flex items-center justify-center gap-3 transition shadow-sm mb-3 font-medium active:scale-[0.99]">
-        <i class="fa-brands fa-line text-2xl"></i>
-        <span>เข้าสู่ระบบด้วย LINE</span>
-      </button>
-
-      <!-- Google Account Login Button -->
-      <button onclick="handleGoogleLogin()" class="w-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl py-3 px-4 flex items-center justify-center gap-3 transition shadow-sm mb-4 font-medium active:scale-[0.99]">
-        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+    <!-- Login Card (UX/UI matching reference design) -->
+    <div class="w-full max-w-sm bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 sm:p-8 my-auto border border-white/60">
+      
+      <!-- User Circle Avatar Icon -->
+      <div class="w-24 h-24 rounded-full border-[3px] border-[#1976d2] bg-white flex items-center justify-center mx-auto mb-6 shadow-sm">
+        <svg class="w-16 h-16 text-[#1976d2]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
         </svg>
-        <span>เข้าสู่ระบบด้วย Google Account</span>
-      </button>
-
-      <!-- Toggle Employee / Member Login -->
-      <div class="text-center pt-2">
-        <button onclick="toggleStandardLogin()" class="text-xs text-slate-500 hover:text-blue-800 transition flex items-center justify-center gap-1.5 mx-auto font-medium">
-          <i class="fa-solid fa-id-card-clip text-blue-600"></i>
-          <span>รหัสสมาชิก / พนักงานบริษัท</span>
-          <i id="toggle-icon" class="fa-solid fa-chevron-up text-[10px] ml-0.5"></i>
-        </button>
       </div>
 
       <!-- Employee / Member Login Form -->
-      <form id="standard-login-form" onsubmit="handleStandardLogin(event)" class="mt-4 pt-4 border-t border-slate-100 space-y-3.5">
-        <div>
-          <label class="text-xs font-medium text-slate-600 block mb-1">รหัสพนักงาน (Employee Code)</label>
-          <div class="relative flex items-center">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <i class="fa-solid fa-user text-sm"></i>
-            </span>
-            <input type="text" id="login-email" value="E0001" placeholder="เช่น E0001" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition shadow-sm" required>
-          </div>
+      <form id="standard-login-form" onsubmit="handleStandardLogin(event)">
+        <!-- Username / EmployeeCode Input -->
+        <div class="relative flex items-center mb-4">
+          <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#1976d2]">
+            <i class="fa-solid fa-user text-base"></i>
+          </span>
+          <input type="text" id="login-email" value="E0001" placeholder="Username" class="w-full pl-11 pr-4 py-3 bg-[#eef5fc] border-2 border-[#1976d2] rounded-xl text-slate-800 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition" required>
         </div>
-        <div>
-          <label class="text-xs font-medium text-slate-600 block mb-1">รหัสผ่าน (Password)</label>
-          <div class="relative flex items-center">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <i class="fa-solid fa-key text-sm"></i>
-            </span>
-            <input type="password" id="login-password" value="12345" placeholder="กรอกรหัสผ่าน" class="w-full pl-9 pr-10 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition shadow-sm" required>
-            <button type="button" onclick="togglePasswordVisibility()" aria-label="แสดง/ซ่อนรหัสผ่าน" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer">
-              <i id="eye-icon" class="fa-solid fa-eye-slash text-sm"></i>
-            </button>
-          </div>
+
+        <!-- Password Input -->
+        <div class="relative flex items-center mb-3">
+          <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#1976d2]">
+            <i class="fa-solid fa-lock text-base"></i>
+          </span>
+          <input type="password" id="login-password" value="12345" placeholder="Password" class="w-full pl-11 pr-11 py-3 bg-[#eef5fc] border-2 border-[#1976d2] rounded-xl text-slate-800 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+          <button type="button" onclick="togglePasswordVisibility()" aria-label="แสดง/ซ่อนรหัสผ่าน" class="absolute inset-y-0 right-0 pr-4 flex items-center text-[#1976d2] hover:text-[#0d47a1] focus:outline-none cursor-pointer">
+            <i id="eye-icon" class="fa-solid fa-eye-slash text-base"></i>
+          </button>
         </div>
-        <button type="submit" id="btn-standard-login" class="w-full bg-[#1b4b8a] text-white py-2.5 rounded-xl text-sm font-medium shadow-md hover:bg-blue-800 transition flex items-center justify-center gap-2 active:scale-[0.99]">
-          <i class="fa-solid fa-right-to-bracket text-xs"></i>
-          <span>เข้าใช้งานระบบ</span>
+
+        <!-- Remember me & Forgot Password -->
+        <div class="flex items-center justify-between text-xs text-[#1976d2] font-medium mb-6 px-1">
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded text-[#1976d2] focus:ring-[#1976d2] border-[#1976d2]">
+            <span>Remember me</span>
+          </label>
+          <a href="javascript:void(0)" onclick="handleForgotPassword()" class="hover:underline">Forgot password?</a>
+        </div>
+
+        <!-- LOGIN Button -->
+        <button type="submit" id="btn-standard-login" class="w-full bg-[#1976d2] hover:bg-[#1565c0] text-white font-bold py-3 px-6 rounded-xl shadow-md transition active:scale-[0.99] text-base tracking-wider uppercase flex items-center justify-center gap-2">
+          <span>LOGIN</span>
         </button>
+
+        <!-- Divider with Text -->
+        <div class="relative flex py-5 items-center">
+          <div class="flex-grow border-t border-slate-300"></div>
+          <span class="flex-shrink mx-3 text-xs text-slate-500 font-medium">หรือเข้าสู่ระบบด้วย</span>
+          <div class="flex-grow border-t border-slate-300"></div>
+        </div>
+
+        <!-- Social Logins (LINE & Google) -->
+        <div class="flex items-center justify-center gap-6">
+          <!-- LINE Login -->
+          <button type="button" onclick="handleLineLogin()" title="เข้าสู่ระบบด้วย LINE Account" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 rounded-full bg-[#06C755] hover:bg-[#05b34c] text-white flex items-center justify-center shadow-md hover:shadow-lg transition active:scale-95 group-hover:scale-105">
+              <i class="fa-brands fa-line text-2xl"></i>
+            </div>
+            <span class="text-[11px] font-medium text-slate-600 group-hover:text-emerald-700">LINE</span>
+          </button>
+
+          <!-- Google Login -->
+          <button type="button" onclick="handleGoogleLogin()" title="เข้าสู่ระบบด้วย Google Account" class="flex flex-col items-center gap-1.5 group">
+            <div class="w-12 h-12 rounded-full bg-white hover:bg-slate-50 border border-slate-200 flex items-center justify-center shadow-md hover:shadow-lg transition active:scale-95 group-hover:scale-105">
+              <svg class="w-6 h-6" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+            </div>
+            <span class="text-[11px] font-medium text-slate-600 group-hover:text-blue-700">Google</span>
+          </button>
+        </div>
       </form>
     </div>
 
     <!-- Version Footer -->
-    <div class="text-center text-xs text-blue-200/70 font-light pb-2">
-      Version 1.0.20
+    <div class="text-center text-xs text-slate-500 font-light pb-2">
+      Version 1.0.21
     </div>
   </div>
 
@@ -863,6 +879,16 @@
           eyeIcon.classList.add('fa-eye-slash');
         }
       }
+    }
+
+    function handleForgotPassword() {
+      Swal.fire({
+        title: 'ลืมรหัสผ่าน?',
+        html: '<div class="text-sm text-slate-600 space-y-2 text-left p-1"><p>กรุณาติดต่อผู้ดูแลระบบ (Admin) หรือฝ่ายบุคคล เพื่อขอรีเซ็ตรหัสผ่านใหม่</p><p class="text-xs text-slate-500 mt-2">📧 อีเมลติดต่อ: <b>thakot.ch@gmail.com</b></p><p class="text-xs text-slate-500">🏢 สังกัด: ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร</p></div>',
+        icon: 'info',
+        confirmButtonColor: '#1976d2',
+        confirmButtonText: 'รับทราบ'
+      });
     }
 
     // Login Handlers
