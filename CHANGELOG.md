@@ -4,6 +4,16 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.34] - 2026-11-11
+
+### Added
+- **Mobile Profile Photo Upload & Camera Capture:** Updated `promptAvatarUpload()` in `src/Index.html` with mobile camera capture (`capture="user"`), photo library picker, square center-crop & compression (`compressAvatarImage`), live preview confirmation, and avatar removal (`removeUserAvatar`).
+- **Google Drive Avatar Storage:** Added `Files.getOrCreateSubfolder()` and `Files.uploadAvatar()` in `src/Files.gs` storing profile photos in `Profile_Avatars` with `lh3.googleusercontent.com` direct image URLs and resilient thumbnail/Data-URL fallbacks (`renderUserAvatars`, `handleAvatarImgError`).
+
+### Changed
+- **Profile Update & Session Sync:** Updated `Auth.updateProfile()` and `Auth.createSession()` in `src/Auth.gs` to handle `avatarBase64` uploads, ensure `Users` sheet headers, clear session cache on update, and include `AvatarUrl` in login responses.
+- **Release Sync:** Updated `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `V1.0.34`.
+
 ## [1.0.33] - 2026-11-11
 
 ### Performance

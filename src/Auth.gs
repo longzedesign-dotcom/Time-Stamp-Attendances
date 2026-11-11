@@ -184,7 +184,8 @@ const Auth = {
       WorkStart: String(user.WorkStart || '08:30'),
       WorkEnd: String(user.WorkEnd || '16:30'),
       Role: String(user.Role || 'Admin'),
-      Status: String(user.Status || 'Active')
+      Status: String(user.Status || 'Active'),
+      AvatarUrl: String(user.AvatarUrl || '')
     };
 
     return Utils.success({
@@ -262,16 +263,39 @@ const Auth = {
   },
 
   /**
-   * Update Profile
+   * Update Profile (supports FullName, AvatarUrl, and avatarBase64 mobile image upload)
    */
   updateProfile(token, profileData) {
     const valid = this.validateSession(token);
     if (!valid.success) return valid;
+    if (!profileData) return Utils.error('ไม่พบข้อมูลสำหรับอัปเดตโปรไฟล์');
+
+    Db.ensureHeaders(CONFIG.SHEETS.USERS, [
+      'UserID', 'EmployeeCode', 'FullName', 'Email', 'PasswordHash',
+      'Position', 'DepartmentID', 'WorkStart', 'WorkEnd', 'Role',
+      'Status', 'AvatarUrl', 'CreatedAt', 'UpdatedAt'
+    ]);
 
     const user = valid.data.user;
     const allowed = {};
     if (profileData.FullName) allowed.FullName = profileData.FullName;
-    if (profileData.AvatarUrl !== undefined) allowed.AvatarUrl = profileData.AvatarUrl;
+
+    if (profileData.avatarBase64) {
+      const uploaded = Files.uploadAvatar(profileData.avatarBase64, user.EmployeeCode || user.UserID);
+      if (uploaded && uploaded.shared && uploaded.imageUrl) {
+        allowed.AvatarUrl = uploaded.imageUrl;
+      } else if (String(profileData.avatarBase64).length <= 45000) {
+        // Fallback to compact Data URL if Drive public sharing is restricted
+        allowed.AvatarUrl = String(profileData.avatarBase64);
+      } else if (uploaded && uploaded.imageUrl) {
+        allowed.AvatarUrl = uploaded.imageUrl;
+      } else {
+        return Utils.error('ไม่สามารถอัปโหลดรูปโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง');
+      }
+    } else if (profileData.AvatarUrl !== undefined) {
+      allowed.AvatarUrl = profileData.AvatarUrl;
+    }
+
     allowed.UpdatedAt = new Date().toISOString();
 
     Db.update(CONFIG.SHEETS.USERS, u => u.UserID === user.UserID, allowed);

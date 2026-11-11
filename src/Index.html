@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.33
+      Version 1.0.34
     </div>
   </div>
 
@@ -426,12 +426,14 @@
         <!-- Avatar and Name -->
         <div class="flex flex-col items-center mt-2 mb-6">
           <div class="relative">
-            <div id="profile-avatar" class="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 text-4xl shadow-inner border-2 border-white">
+            <div id="profile-avatar" onclick="promptAvatarUpload()" class="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 text-4xl shadow-inner border-2 border-white overflow-hidden cursor-pointer hover:opacity-95 transition">
               <i class="fa-solid fa-user"></i>
             </div>
-            <button onclick="promptAvatarUpload()" class="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full text-white flex items-center justify-center text-xs shadow-md hover:bg-blue-700 transition">
-              <i class="fa-solid fa-plus"></i>
+            <button onclick="promptAvatarUpload()" class="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full text-white flex items-center justify-center text-xs shadow-md hover:bg-blue-700 transition" title="เปลี่ยนรูปโปรไฟล์">
+              <i class="fa-solid fa-camera text-[11px]"></i>
             </button>
+            <input type="file" id="avatar-input-gallery" accept="image/*" class="hidden" onchange="handleAvatarFileSelected(event)">
+            <input type="file" id="avatar-input-camera" accept="image/*" capture="user" class="hidden" onchange="handleAvatarFileSelected(event)">
           </div>
           <h3 id="profile-fullname" class="text-lg font-bold text-slate-800 mt-3">เฉลิมพร ถาโคตร</h3>
           <p id="profile-position" class="text-xs text-slate-400">IT Support</p>
@@ -523,7 +525,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.33
+          Version 1.0.34
         </div>
       </div>
 
@@ -1420,6 +1422,7 @@
       document.getElementById('profile-position').innerText = user.Position || 'IT Support';
       document.getElementById('profile-email').innerText = user.Email || '';
       document.getElementById('profile-dept').innerText = user.DepartmentID === 'IT' ? 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' : user.DepartmentID;
+      renderUserAvatars(user.AvatarUrl || '');
 
       // Location Settings button is ONLY visible for ADMIN users
       const locBtn = document.getElementById('btn-location-settings-menu');
@@ -1665,6 +1668,7 @@
             localStorage.removeItem('tsa_token');
             state.token = '';
             state.user = null;
+            renderUserAvatars('');
             showLoginScreen();
             Swal.fire({
               icon: 'success',
@@ -3946,12 +3950,265 @@
         confirmButtonText: 'ตกลง'
       });
     }
+    function extractDriveFileId(url) {
+      if (!url) return '';
+      const str = String(url);
+      let m = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (m) return m[1];
+      m = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      return m ? m[1] : '';
+    }
+
+    function handleAvatarImgError(imgEl) {
+      if (!imgEl) return;
+      const driveId = imgEl.getAttribute('data-drive-id') || '';
+      const triedFallback = imgEl.getAttribute('data-fallback-tried') === '1';
+      if (driveId && !triedFallback) {
+        imgEl.setAttribute('data-fallback-tried', '1');
+        imgEl.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w400`;
+        return;
+      }
+      if (imgEl.parentElement) {
+        imgEl.parentElement.innerHTML = '<i class="fa-solid fa-user"></i>';
+      }
+    }
+
+    function renderUserAvatars(avatarUrl) {
+      const targets = [document.getElementById('header-avatar'), document.getElementById('profile-avatar')];
+      const cleanUrl = String(avatarUrl || '').trim();
+      const driveId = extractDriveFileId(cleanUrl);
+      const displayUrl = driveId && !cleanUrl.startsWith('data:')
+        ? `https://lh3.googleusercontent.com/d/${driveId}=s400`
+        : cleanUrl;
+
+      targets.forEach(el => {
+        if (!el) return;
+        if (!displayUrl) {
+          el.innerHTML = '<i class="fa-solid fa-user"></i>';
+          return;
+        }
+        el.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = displayUrl;
+        img.alt = 'Profile Avatar';
+        img.className = 'w-full h-full object-cover';
+        if (driveId) img.setAttribute('data-drive-id', driveId);
+        img.onerror = () => handleAvatarImgError(img);
+        el.appendChild(img);
+      });
+    }
+
     function promptAvatarUpload() {
+      const hasAvatar = Boolean(state.user && state.user.AvatarUrl);
       Swal.fire({
-        title: 'อัปโหลดรูปโปรไฟล์',
-        text: 'ระบบกำลังเชื่อมต่อ Google Drive เพื่อรองรับการอัปโหลดภาพถ่ายโปรไฟล์',
-        icon: 'info',
-        confirmButtonColor: '#1b4b8a'
+        title: 'เปลี่ยนรูปโปรไฟล์',
+        html: `
+          <div class="space-y-2.5 pt-2 text-left">
+            <button type="button" onclick="triggerAvatarPicker('camera')" class="w-full flex items-center gap-3 p-3 rounded-2xl border border-blue-100 bg-blue-50/70 hover:bg-blue-100 text-slate-700 transition">
+              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">ถ่ายรูปใหม่ด้วยกล้อง</div>
+                <div class="text-[10px] text-slate-500">เปิดกล้องมือถือเพื่อถ่ายภาพโปรไฟล์</div>
+              </div>
+            </button>
+            <button type="button" onclick="triggerAvatarPicker('gallery')" class="w-full flex items-center gap-3 p-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 hover:bg-emerald-100 text-slate-700 transition">
+              <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                <i class="fa-regular fa-images"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">เลือกรูปจากเครื่องมือถือ</div>
+                <div class="text-[10px] text-slate-500">รองรับไฟล์ภาพจากคลังรูปภาพหรือไฟล์ในเครื่อง</div>
+              </div>
+            </button>
+            ${hasAvatar ? `
+              <button type="button" onclick="removeUserAvatar()" class="w-full flex items-center gap-3 p-3 rounded-2xl border border-rose-100 bg-rose-50/70 hover:bg-rose-100 text-rose-700 transition">
+                <div class="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0">
+                  <i class="fa-regular fa-trash-can"></i>
+                </div>
+                <div>
+                  <div class="text-xs font-bold">ลบรูปโปรไฟล์ปัจจุบัน</div>
+                  <div class="text-[10px] text-rose-500">กลับไปใช้ไอคอนโปรไฟล์มาตรฐาน</div>
+                </div>
+              </button>
+            ` : ''}
+          </div>
+        `,
+        showConfirmButton: false,
+        showCancelButton: true,
+        cancelButtonText: 'ปิด',
+        cancelButtonColor: '#64748b'
+      });
+    }
+
+    function triggerAvatarPicker(mode) {
+      Swal.close();
+      const inputId = mode === 'camera' ? 'avatar-input-camera' : 'avatar-input-gallery';
+      const input = document.getElementById(inputId);
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function compressAvatarImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์รูปภาพได้'));
+        reader.onload = ev => {
+          const img = new Image();
+          img.onerror = () => reject(new Error('ไฟล์ที่เลือกไม่ใช่รูปภาพที่รองรับ'));
+          img.onload = () => {
+            const targetSize = 360;
+            const canvas = document.createElement('canvas');
+            canvas.width = targetSize;
+            canvas.height = targetSize;
+            const ctx = canvas.getContext('2d');
+
+            // Center-crop square
+            const minSide = Math.min(img.width, img.height);
+            const sx = (img.width - minSide) / 2;
+            const sy = (img.height - minSide) / 2;
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, targetSize, targetSize);
+            ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, targetSize, targetSize);
+
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            // Keep compact size if needed for fast GAS RPC and fallback storage
+            if (dataUrl.length > 42000) {
+              dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+            }
+            if (dataUrl.length > 42000) {
+              const smallCanvas = document.createElement('canvas');
+              smallCanvas.width = 240;
+              smallCanvas.height = 240;
+              const sctx = smallCanvas.getContext('2d');
+              sctx.drawImage(canvas, 0, 0, 240, 240);
+              dataUrl = smallCanvas.toDataURL('image/jpeg', 0.72);
+            }
+            resolve(dataUrl);
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleAvatarFileSelected(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+
+      if (file.type && !file.type.startsWith('image/')) {
+        Swal.fire({ icon: 'warning', title: 'ไฟล์ไม่ถูกต้อง', text: 'กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP)', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+
+      Swal.fire({
+        title: 'กำลังเตรียมรูปภาพ...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const compressedBase64 = await compressAvatarImage(file);
+        const confirmRes = await Swal.fire({
+          title: 'ตัวอย่างรูปโปรไฟล์ใหม่',
+          html: `
+            <div class="flex flex-col items-center py-2">
+              <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-100 shadow-lg mb-2">
+                <img src="${compressedBase64}" class="w-full h-full object-cover" alt="Preview">
+              </div>
+              <p class="text-[11px] text-slate-500">รูปจะถูกปรับขนาดและบันทึกเป็นรูปโปรไฟล์ของคุณ</p>
+            </div>
+          `,
+          showCancelButton: true,
+          showDenyButton: true,
+          confirmButtonColor: '#1b4b8a',
+          denyButtonColor: '#64748b',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: 'บันทึกรูปโปรไฟล์',
+          denyButtonText: 'เลือกใหม่',
+          cancelButtonText: 'ยกเลิก'
+        });
+
+        if (confirmRes.isDenied) {
+          promptAvatarUpload();
+          return;
+        }
+        if (!confirmRes.isConfirmed) return;
+
+        saveUserAvatar(compressedBase64);
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ไม่สามารถประมวลผลรูปภาพ',
+          text: err.message || 'กรุณาลองเลือกไฟล์รูปอื่น',
+          confirmButtonColor: '#1b4b8a'
+        });
+      }
+    }
+
+    function saveUserAvatar(base64Data) {
+      const prevUrl = state.user ? (state.user.AvatarUrl || '') : '';
+      renderUserAvatars(base64Data);
+
+      Swal.fire({
+        title: 'กำลังบันทึกรูปโปรไฟล์...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      callAPI('UPDATE_PROFILE', { token: state.token, profileData: { avatarBase64: base64Data } }, res => {
+        if (res && res.success && res.data && res.data.user) {
+          state.user = res.data.user;
+          applyUserData(state.user);
+          Swal.fire({
+            icon: 'success',
+            title: 'บันทึกรูปโปรไฟล์สำเร็จ!',
+            timer: 1600,
+            showConfirmButton: false
+          });
+        } else {
+          renderUserAvatars(prevUrl);
+          Swal.fire({
+            icon: 'error',
+            title: 'บันทึกไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการอัปโหลดรูปโปรไฟล์',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function removeUserAvatar() {
+      Swal.close();
+      Swal.fire({
+        title: 'กำลังลบรูปโปรไฟล์...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      callAPI('UPDATE_PROFILE', { token: state.token, profileData: { AvatarUrl: '' } }, res => {
+        if (res && res.success && res.data && res.data.user) {
+          state.user = res.data.user;
+          applyUserData(state.user);
+          Swal.fire({
+            icon: 'success',
+            title: 'ลบรูปโปรไฟล์แล้ว',
+            timer: 1400,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'ดำเนินการไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาด',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
       });
     }
 
