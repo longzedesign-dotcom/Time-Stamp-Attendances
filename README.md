@@ -5,7 +5,7 @@
 # ระบบลงเวลาเข้างานออนไลน์อัจฉริยะ (Enterprise Edition)
 ### Next-Gen GPS Geofencing, Full-Screen Map, Thai Buddhist Calendar, Real-time Broadcast & Admin Suite
 
-[![Version](https://img.shields.io/badge/Version-1.0.30%20(Build%2025)-blue?style=flat-square)](https://github.com/longzedesign-dotcom/Time-Stamp-Attendances)
+[![Version](https://img.shields.io/badge/Version-1.0.31%20(Build%2028)-blue?style=flat-square)](https://github.com/longzedesign-dotcom/Time-Stamp-Attendances)
 [![Platform](https://img.shields.io/badge/Platform-Google%20Apps%20Script%20%7C%20Web%20App-34A853?style=flat-square&logo=google)](https://script.google.com/)
 [![Database](https://img.shields.io/badge/Database-Google%20Sheets%20(14%20Tables)-0F9D58?style=flat-square&logo=googlesheets)](https://www.google.com/sheets/about/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -84,6 +84,7 @@
   - 🚨 **เหตุฉุกเฉิน / ภัยพิบัติเร่งด่วน** (Emergency Alert)
   - 📢 **ประกาศสำคัญทั่วไป** (General Urgent Notice)
 - **แถบประกาศฉุกเฉินบนหน้าหลัก (Dashboard Banner):** แสดงผลแบบ Gradient สีสันตามหมวดหมู่ พร้อมจุดไฟกระพริบ `animate-pulse` และปุ่มกดเปิดอ่านประกาศฉบับเต็ม
+- **ตั้งเวลาแสดงผลและปิด/ลบอัตโนมัติ (Scheduled & Auto-Expire):** กำหนด **วันที่เริ่มแสดง (`StartDate`)** และ **วันที่สิ้นสุด (`EndDate`)** ได้ พร้อมเลือกว่าจะให้เปลี่ยนสถานะเป็น **`Disable`** หรือ **ลบประกาศอัตโนมัติ (`Delete`)** เมื่อครบกำหนด และสลับสถานะเปิด/ปิดได้ตลอดเวลาจากรายการผู้ดูแล
 
 ### 5. ปฏิทิน พ.ศ. และประวัติการลงเวลา (Calendar & History View)
 - แสดงชื่อ-สกุล กะเวลาทำงานประจำตัว และสถิติสะสมประจำเดือน:
@@ -126,7 +127,7 @@
 | **`Attendance`** | ประวัติการลงเวลา: `AttendanceID`, `UserID`, `WorkDate`, `CheckInTime`, `CheckOutTime`, `Status`, `WorkMode`, `LocationID`, `Latitude`, `Longitude`, `DistanceMeters`, `SelfieUrl` |
 | **`Locations`** | พิกัดสถานที่ทำงาน: `LocationID`, `LocationName`, `Address`, `Latitude`, `Longitude`, `RadiusMeter`, `MinAccuracy`, `Status` |
 | **`Sessions`** | เซสชันล็อกอิน: `SessionID`, `UserID`, `Token`, `LoginAt`, `ExpireAt`, `DeviceInfo`, `UserAgent`, `Status` |
-| **`Notifications`** | ประวัติการแจ้งเตือนและประกาศด่วน: `NotificationID`, `UserID`, `Title`, `Message`, `Type`, `ReadStatus`, `CreatedAt` |
+| **`Notifications`** | ประวัติการแจ้งเตือนและประกาศด่วน: `NotificationID`, `UserID`, `Title`, `Message`, `Type`, `ReadStatus`, `CreatedAt`, `StartDate`, `EndDate`, `ExpireAction`, `Status` |
 | **`Departments`** | รายชื่อหน่วยงาน/แผนก: `DepartmentID`, `DepartmentName`, `ParentDepartmentID`, `Status` |
 | **`Settings`** | ค่าคอนฟิกูเรชันระบบ: `Key`, `Value`, `Description` |
 | **`Auditlogs`** | บันทึกประวัติการเข้าใช้งานและความปลอดภัย: `LogID`, `UserID`, `Action`, `Detail`, `IPAddress`, `UserAgent`, `CreatedAt` |
@@ -186,8 +187,8 @@ clasp login
 clasp push --force
 
 # 4. สร้าง Release Version และ Deploy Web App
-clasp version "TimeStampAttendances V1.0.30"
-clasp deploy -i <DEPLOYMENT_ID> -V <VERSION_NUMBER> -d "TimeStampAttendances V1.0.30"
+clasp version "TimeStampAttendances V1.0.31"
+clasp deploy -i <DEPLOYMENT_ID> -V <VERSION_NUMBER> -d "TimeStampAttendances V1.0.31"
 ```
 
 ### ขั้นตอนที่ 3: สร้างโครงสร้างตารางเริ่มต้น (Database Seeding)

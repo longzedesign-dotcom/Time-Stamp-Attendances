@@ -9,8 +9,8 @@ const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.30',
-  APP_UPDATED_AT: '2026-11-08',
+  APP_VERSION: '1.0.31',
+  APP_UPDATED_AT: '2026-11-11',
   TIMEZONE: 'Asia/Bangkok',
 
   // Google Drive & Spreadsheet Target IDs
