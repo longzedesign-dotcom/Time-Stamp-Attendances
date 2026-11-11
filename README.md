@@ -5,7 +5,7 @@
 # ระบบลงเวลาเข้างานออนไลน์อัจฉริยะ (Enterprise Edition)
 ### Next-Gen GPS Geofencing, Full-Screen Map, Thai Buddhist Calendar, Real-time Broadcast & Admin Suite
 
-[![Version](https://img.shields.io/badge/Version-1.0.32%20(Build%2029)-blue?style=flat-square)](https://github.com/longzedesign-dotcom/Time-Stamp-Attendances)
+[![Version](https://img.shields.io/badge/Version-1.0.33%20(Build%2030)-blue?style=flat-square)](https://github.com/longzedesign-dotcom/Time-Stamp-Attendances)
 [![Platform](https://img.shields.io/badge/Platform-Google%20Apps%20Script%20%7C%20Web%20App-34A853?style=flat-square&logo=google)](https://script.google.com/)
 [![Database](https://img.shields.io/badge/Database-Google%20Sheets%20(14%20Tables)-0F9D58?style=flat-square&logo=googlesheets)](https://www.google.com/sheets/about/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -187,8 +187,8 @@ clasp login
 clasp push --force
 
 # 4. สร้าง Release Version และ Deploy Web App
-clasp version "TimeStampAttendances V1.0.32"
-clasp deploy -i <DEPLOYMENT_ID> -V <VERSION_NUMBER> -d "TimeStampAttendances V1.0.32"
+clasp version "TimeStampAttendances V1.0.33"
+clasp deploy -i <DEPLOYMENT_ID> -V <VERSION_NUMBER> -d "TimeStampAttendances V1.0.33"
 ```
 
 ### ขั้นตอนที่ 3: สร้างโครงสร้างตารางเริ่มต้น (Database Seeding)

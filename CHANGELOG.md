@@ -4,6 +4,18 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.33] - 2026-11-11
+
+### Performance
+- **Instant Optimistic Chat Send:** Updated `sendChatMessage()` in `src/Index.html` to render sent bubbles immediately (`0ms` perceived latency) with `Enter`-to-send, retry on failure, and in-place confirmation without triggering a redundant `GET_MESSAGES` round-trip.
+- **Server-Side Cache & Delta Sync:** Added 60s `CacheService` session caching in `src/Auth.gs` (`validateSession`, invalidated on `logout` / `updateProfile`) and 300s channel message caching + `afterMessageId` incremental delta sync in `src/Chat.gs` & `src/Code.gs`, returning `{ unchanged: true }` with zero Sheet reads when no new messages exist.
+
+### Added
+- **Smart 5-Second Chat Polling:** Added `startChatPolling()` / `stopChatPolling()` in `src/Index.html` (auto-refreshes every 5s only while the chat modal is open and the tab is visible, with in-flight guard, smart scroll preservation, manual refresh button, and `escapeChatHtml()` XSS escaping).
+
+### Changed
+- **Release Sync:** Updated `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `V1.0.33`.
+
 ## [1.0.32] - 2026-11-11
 
 ### Fixed

@@ -86,7 +86,7 @@ function apiDispatcher(action, payload) {
 
       // Chat & Support
       case 'GET_MESSAGES':
-        res = Chat.getMessages(token, data.channelId);
+        res = Chat.getMessages(token, data.channelId, data.afterMessageId);
         break;
       case 'SEND_MESSAGE':
         res = Chat.sendMessage(token, data.channelId, data.content, data.attachmentUrl);

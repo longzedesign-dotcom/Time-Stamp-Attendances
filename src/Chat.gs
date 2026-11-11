@@ -4,21 +4,106 @@
  */
 
 const Chat = {
-  /**
-   * Get Messages for a channel
-   */
-  getMessages(token, channelId = 'GENERAL') {
-    const valid = Auth.validateSession(token);
-    if (!valid.success) return valid;
+  CACHE_TTL_SECONDS: 300,
+  CACHE_MAX_MESSAGES: 100,
 
-    let messages = Db.find(CONFIG.SHEETS.CHAT_MESSAGES, m => m.ChannelID === channelId);
-    messages.sort((a, b) => new Date(a.CreatedAt) - new Date(b.CreatedAt));
+  getChannelCacheKey(channelId = 'GENERAL') {
+    return 'chat_v1_' + String(channelId || 'GENERAL').replace(/[^a-zA-Z0-9_-]/g, '_');
+  },
 
-    return Utils.success({ messages: messages });
+  sortMessages(messages) {
+    return messages.sort((a, b) => {
+      const tDiff = new Date(a.CreatedAt) - new Date(b.CreatedAt);
+      if (!isNaN(tDiff) && tDiff !== 0) return tDiff;
+      return String(a.MessageID || '').localeCompare(String(b.MessageID || ''));
+    });
+  },
+
+  readCachedChannel(channelId = 'GENERAL') {
+    try {
+      const raw = CacheService.getScriptCache().get(this.getChannelCacheKey(channelId));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  writeCachedChannel(channelId = 'GENERAL', messages = []) {
+    try {
+      const recent = messages.slice(-this.CACHE_MAX_MESSAGES);
+      const lastMessageId = recent.length > 0 ? String(recent[recent.length - 1].MessageID || '') : '';
+      const payload = JSON.stringify({ lastMessageId: lastMessageId, messages: recent });
+      if (payload.length < 95000) {
+        CacheService.getScriptCache().put(this.getChannelCacheKey(channelId), payload, this.CACHE_TTL_SECONDS);
+      }
+    } catch (e) { /* ignore cache write error */ }
   },
 
   /**
-   * Send Message in channel
+   * Get Messages for a channel (supports CacheService & incremental delta sync via afterMessageId)
+   */
+  getMessages(token, channelId = 'GENERAL', afterMessageId = '') {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+
+    const cleanAfterId = String(afterMessageId || '').trim();
+    const cached = this.readCachedChannel(channelId);
+    if (cached && Array.isArray(cached.messages)) {
+      if (cleanAfterId && cleanAfterId === String(cached.lastMessageId || '')) {
+        return Utils.success({
+          messages: [],
+          unchanged: true,
+          incremental: true,
+          lastMessageId: cached.lastMessageId || ''
+        });
+      }
+      if (cleanAfterId) {
+        const idx = cached.messages.findIndex(m => String(m.MessageID) === cleanAfterId);
+        if (idx !== -1) {
+          return Utils.success({
+            messages: cached.messages.slice(idx + 1),
+            unchanged: false,
+            incremental: true,
+            lastMessageId: cached.lastMessageId || ''
+          });
+        }
+      } else {
+        return Utils.success({
+          messages: cached.messages,
+          unchanged: false,
+          incremental: false,
+          lastMessageId: cached.lastMessageId || ''
+        });
+      }
+    }
+
+    let messages = Db.find(CONFIG.SHEETS.CHAT_MESSAGES, m => m.ChannelID === channelId);
+    this.sortMessages(messages);
+    this.writeCachedChannel(channelId, messages);
+
+    const lastMessageId = messages.length > 0 ? String(messages[messages.length - 1].MessageID || '') : '';
+    if (cleanAfterId) {
+      const idx = messages.findIndex(m => String(m.MessageID) === cleanAfterId);
+      if (idx !== -1) {
+        return Utils.success({
+          messages: messages.slice(idx + 1),
+          unchanged: idx === messages.length - 1,
+          incremental: true,
+          lastMessageId: lastMessageId
+        });
+      }
+    }
+
+    return Utils.success({
+      messages: messages,
+      unchanged: false,
+      incremental: false,
+      lastMessageId: lastMessageId
+    });
+  },
+
+  /**
+   * Send Message in channel (updates ScriptCache immediately for fast polling)
    */
   sendMessage(token, channelId = 'GENERAL', content = '', attachmentUrl = '') {
     const valid = Auth.validateSession(token);
@@ -40,6 +125,16 @@ const Chat = {
     };
 
     Db.insert(CONFIG.SHEETS.CHAT_MESSAGES, msgObj);
+
+    const cached = this.readCachedChannel(channelId);
+    if (cached && Array.isArray(cached.messages)) {
+      cached.messages.push(msgObj);
+      this.writeCachedChannel(channelId, cached.messages);
+    } else {
+      const all = this.sortMessages(Db.find(CONFIG.SHEETS.CHAT_MESSAGES, m => m.ChannelID === channelId));
+      this.writeCachedChannel(channelId, all);
+    }
+
     return Utils.success({ message: msgObj });
   },
 

@@ -195,12 +195,32 @@ const Auth = {
   },
 
   /**
-   * Validate Session Token
+   * Build safe CacheService key for session token
+   */
+  getSessionCacheKey(token) {
+    return 'sess_' + String(token || '').slice(0, 180);
+  },
+
+  /**
+   * Validate Session Token (with 60s ScriptCache acceleration)
    */
   validateSession(token) {
     if (!token) {
       return Utils.error('Token ไม่ถูกต้อง', 'UNAUTHORIZED');
     }
+
+    const cacheKey = this.getSessionCacheKey(token);
+    const cache = CacheService.getScriptCache();
+    try {
+      const cachedRaw = cache.get(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && cached.session && new Date() <= new Date(cached.session.ExpireAt)) {
+          return Utils.success({ user: cached.user, session: cached.session });
+        }
+        cache.remove(cacheKey);
+      }
+    } catch (e) { /* fallback to sheet lookup */ }
 
     const session = Db.findOne(CONFIG.SHEETS.SESSIONS, s => s.Token === token && s.Status === 'Active');
     if (!session) {
@@ -222,6 +242,10 @@ const Auth = {
     const safeUser = Object.assign({}, user);
     delete safeUser.PasswordHash;
 
+    try {
+      cache.put(cacheKey, JSON.stringify({ user: safeUser, session: session }), 60);
+    } catch (e) { /* ignore cache write error */ }
+
     return Utils.success({ user: safeUser, session: session });
   },
 
@@ -230,6 +254,9 @@ const Auth = {
    */
   logout(token) {
     if (!token) return Utils.success({}, 'ออกจากระบบแล้ว');
+    try {
+      CacheService.getScriptCache().remove(this.getSessionCacheKey(token));
+    } catch (e) {}
     Db.update(CONFIG.SHEETS.SESSIONS, s => s.Token === token, { Status: 'Revoked' });
     return Utils.success({}, 'ออกจากระบบเรียบร้อยแล้ว');
   },
@@ -248,6 +275,9 @@ const Auth = {
     allowed.UpdatedAt = new Date().toISOString();
 
     Db.update(CONFIG.SHEETS.USERS, u => u.UserID === user.UserID, allowed);
+    try {
+      CacheService.getScriptCache().remove(this.getSessionCacheKey(token));
+    } catch (e) {}
 
     const updated = Db.findOne(CONFIG.SHEETS.USERS, u => u.UserID === user.UserID);
     delete updated.PasswordHash;

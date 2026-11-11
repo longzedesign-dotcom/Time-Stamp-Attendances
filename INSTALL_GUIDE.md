@@ -3,7 +3,7 @@
 <div align="center">
 
 # ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
-### เวอร์ชันปัจจุบัน: TimeStampAttendances V1.0.32 (Deployment Version 29)
+### เวอร์ชันปัจจุบัน: TimeStampAttendances V1.0.33 (Deployment Version 30)
 
 </div>
 
@@ -51,10 +51,10 @@ npx clasp login
 npx clasp push --force
 
 # 4. สร้าง Release Version ใหม่
-npx clasp version "TimeStampAttendances V1.0.32"
+npx clasp version "TimeStampAttendances V1.0.33"
 
 # 5. สั่ง Deploy อัปเดตไปยัง Deployment เดิม
-npx clasp deploy -i AKfycby3WoJljZRlZ3NvFY-wrQcKIcw8lLZCgxVk75-_B1zDUYFZRFNP_opcGfPfm1QX09P56Q -V 29 -d "TimeStampAttendances V1.0.32"
+npx clasp deploy -i AKfycby3WoJljZRlZ3NvFY-wrQcKIcw8lLZCgxVk75-_B1zDUYFZRFNP_opcGfPfm1QX09P56Q -V 30 -d "TimeStampAttendances V1.0.33"
 ```
 
 #### วิธีที่ B: คัดลอกโค้ดผ่าน Google Apps Script Editor
