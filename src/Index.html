@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.31
+      Version 1.0.32
     </div>
   </div>
 
@@ -273,12 +273,12 @@
           <div class="flex items-center justify-between px-2 mb-4 font-semibold text-slate-700">
             <div class="flex items-center gap-3">
               <button onclick="prevMonth()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-left"></i></button>
-              <span id="cal-month-name" class="w-28 text-center text-base">กรกฎาคม</span>
+              <span id="cal-month-name" class="w-28 text-center text-base">-</span>
               <button onclick="nextMonth()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="prevYear()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-left"></i></button>
-              <span id="cal-year-val" class="w-16 text-center text-base">2569</span>
+              <span id="cal-year-val" class="w-16 text-center text-base">-</span>
               <button onclick="nextYear()" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
           </div>
@@ -326,7 +326,7 @@
 
         <!-- Selected Date Details Panel -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-          <h4 id="selected-date-header" class="text-sm font-bold text-slate-800 mb-3">13 กรกฎาคม 2569</h4>
+          <h4 id="selected-date-header" class="text-sm font-bold text-slate-800 mb-3">-</h4>
           <div id="selected-date-logs" class="space-y-2 text-xs text-slate-400 text-center py-6">
             ไม่พบประวัติการลงเวลา
           </div>
@@ -523,7 +523,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.31
+          Version 1.0.32
         </div>
       </div>
 
@@ -1210,15 +1210,39 @@
 
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
+    // Thailand Standard Date Helpers (Asia/Bangkok, UTC+7)
+    function getThailandDateParts() {
+      const parts = {};
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date()).forEach(p => {
+        if (p.type !== 'literal') parts[p.type] = p.value;
+      });
+      const year = Number(parts.year);
+      const monthIndex = Number(parts.month) - 1;
+      const day = Number(parts.day);
+      return {
+        year: year,
+        monthIndex: monthIndex,
+        day: day,
+        isoDate: `${parts.year}-${parts.month}-${parts.day}`
+      };
+    }
+
+    const initialThailandDate = getThailandDateParts();
+
     // System Global State
     const state = {
       token: localStorage.getItem('tsa_token') || '',
       user: null,
       currentTab: 'calendar',
       currentSubTab: 'calendar',
-      currentYear: 2026,
-      currentMonth: 6, // 0-indexed: 6 = กรกฎาคม
-      selectedDate: '2026-07-13',
+      currentYear: initialThailandDate.year,
+      currentMonth: initialThailandDate.monthIndex, // 0-indexed ตามเวลาประเทศไทย
+      selectedDate: initialThailandDate.isoDate,
       currentCoords: { lat: 13.91094031, lng: 100.5946153, accuracy: 25 },
       mapInstance: null,
       userMarker: null,
@@ -1234,8 +1258,18 @@
       ]
     };
 
+    function resetCalendarToThailandToday() {
+      const th = getThailandDateParts();
+      state.currentYear = th.year;
+      state.currentMonth = th.monthIndex;
+      state.selectedDate = th.isoDate;
+      return th;
+    }
+
     // Initialize App on DOM Ready
     document.addEventListener('DOMContentLoaded', () => {
+      const th = resetCalendarToThailandToday();
+      selectCalendarDate(th.isoDate, th.day);
       startLiveClock();
       initLocationWatch();
       checkAuthSession();
@@ -1659,6 +1693,10 @@
         topHeader.classList.remove('hidden');
       }
 
+      if (tabId === 'calendar') {
+        const th = resetCalendarToThailandToday();
+        selectCalendarDate(th.isoDate, th.day);
+      }
       if (tabId === 'notifications') loadNotifications();
     }
 
@@ -1685,11 +1723,14 @@
 
     // Dashboard Data Loading
     function loadDashboardData() {
+      const thToday = resetCalendarToThailandToday();
+      selectCalendarDate(thToday.isoDate, thToday.day);
       callAPI('GET_ATTENDANCE_HISTORY', { token: state.token }, res => {
         if (res && res.success) {
           state.cachedHistory = res.data.historyList || [];
           state.calendarStatusMap = res.data.calendarStatusMap || {};
-          renderCalendar();
+          const th = resetCalendarToThailandToday();
+          selectCalendarDate(th.isoDate, th.day);
           renderHistoryList();
         }
       });
@@ -1738,9 +1779,10 @@
       const grid = document.getElementById('calendar-days-grid');
       grid.innerHTML = '';
 
-      const firstDay = new Date(state.currentYear, state.currentMonth, 1).getDay();
-      const daysInMonth = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
-      const prevDays = new Date(state.currentYear, state.currentMonth, 0).getDate();
+      const firstDay = new Date(Date.UTC(state.currentYear, state.currentMonth, 1)).getUTCDay();
+      const daysInMonth = new Date(Date.UTC(state.currentYear, state.currentMonth + 1, 0)).getUTCDate();
+      const prevDays = new Date(Date.UTC(state.currentYear, state.currentMonth, 0)).getUTCDate();
+      const todayISO = getThailandDateParts().isoDate;
 
       // Leading days from previous month
       for (let i = firstDay - 1; i >= 0; i--) {
@@ -1752,6 +1794,7 @@
       for (let d = 1; d <= daysInMonth; d++) {
         const isoDate = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const isSelected = state.selectedDate === isoDate;
+        const isToday = isoDate === todayISO;
         const status = state.calendarStatusMap[isoDate] || { hasIn: false, hasOut: false };
 
         let dotsHtml = '<div class="flex items-center justify-center gap-1 mt-1 h-1.5">';
@@ -1761,7 +1804,7 @@
         dotsHtml += '</div>';
 
         const dayBtn = document.createElement('div');
-        dayBtn.className = `py-1 cursor-pointer rounded-xl transition ${isSelected ? 'bg-blue-500 text-white font-bold shadow' : 'hover:bg-slate-100 text-slate-700'}`;
+        dayBtn.className = `py-1 cursor-pointer rounded-xl transition ${isSelected ? 'bg-blue-500 text-white font-bold shadow' : (isToday ? 'border border-blue-400 text-blue-600 font-semibold hover:bg-blue-50' : 'hover:bg-slate-100 text-slate-700')}`;
         dayBtn.innerHTML = `<span>${d}</span>${dotsHtml}`;
         dayBtn.onclick = () => selectCalendarDate(isoDate, d);
         grid.appendChild(dayBtn);

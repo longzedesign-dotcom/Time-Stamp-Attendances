@@ -4,6 +4,15 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.32] - 2026-11-11
+
+### Fixed
+- **Calendar Default Month (Thailand Time):** Removed hardcoded July 2026 calendar defaults (`2026`, month `6`, `2026-07-13`) and added `getThailandDateParts()` / `resetCalendarToThailandToday()` in `src/Index.html` using `Asia/Bangkok` (`UTC+7`) so the Calendar tab always loads on the current Thailand month and today's date across `DOMContentLoaded`, `loadDashboardData()`, and `switchTab('calendar')`.
+
+### Changed
+- **Timezone-Safe Calendar Grid & Today Highlight:** Updated `renderCalendar()` in `src/Index.html` to use `Date.UTC` day calculations and highlight today's Thailand date cell.
+- **Release Sync:** Updated `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `V1.0.32`.
+
 ## [1.0.31] - 2026-11-11
 
 ### Added
