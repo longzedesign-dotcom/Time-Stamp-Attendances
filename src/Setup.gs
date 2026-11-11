@@ -8,7 +8,7 @@ function setupDatabase() {
     [CONFIG.SHEETS.USERS]: [
       'UserID', 'EmployeeCode', 'FullName', 'Email', 'PasswordHash',
       'Position', 'DepartmentID', 'WorkStart', 'WorkEnd', 'Role',
-      'Status', 'AvatarUrl', 'CreatedAt', 'UpdatedAt'
+      'Status', 'AvatarUrl', 'CreatedAt', 'UpdatedAt', 'LineUserID', 'GoogleSub'
     ],
     [CONFIG.SHEETS.ATTENDANCE]: [
       'AttendanceID', 'UserID', 'EmployeeCode', 'FullName', 'WorkDate',

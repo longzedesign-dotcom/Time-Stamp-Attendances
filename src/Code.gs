@@ -5,7 +5,14 @@
  */
 
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  let oauthBoot = null;
+  const params = (e && e.parameter) ? e.parameter : {};
+  if (params.state || params.code || params.error) {
+    oauthBoot = Auth.handleOAuthCallback(params);
+  }
+  const tpl = HtmlService.createTemplateFromFile('Index');
+  tpl.oauthBootJson = JSON.stringify(oauthBoot || null).replace(/</g, '\\u003c');
+  return tpl.evaluate()
     .setTitle(CONFIG.APP_NAME + ' - ' + CONFIG.APP_ORGANIZATION)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -51,6 +58,18 @@ function apiDispatcher(action, payload) {
         break;
       case 'UPDATE_PROFILE':
         res = Auth.updateProfile(token, data.profileData);
+        break;
+      case 'START_OAUTH':
+        res = Auth.createOAuthAuthUrl(data.provider);
+        break;
+      case 'LINK_OAUTH_ACCOUNT':
+        res = Auth.linkOAuthAccount(data.linkToken, data.identifier || data.email, data.password, data.deviceInfo, data.userAgent);
+        break;
+      case 'GET_OAUTH_SETTINGS':
+        res = Auth.getOAuthConfigStatus(token);
+        break;
+      case 'SAVE_OAUTH_SETTINGS':
+        res = Auth.saveOAuthConfig(token, data.oauthConfig);
         break;
 
       // Attendance

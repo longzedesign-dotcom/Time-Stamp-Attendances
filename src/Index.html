@@ -213,7 +213,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.34
+      Version 1.0.35
     </div>
   </div>
 
@@ -496,6 +496,17 @@
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
           </div>
+          <!-- [icon Key] ตั้งค่าเชื่อมต่อ Google & LINE Login (แสดงเฉพาะ ADMIN) -->
+          <div id="btn-oauth-settings-menu" onclick="openOAuthSettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-indigo-600 border-t border-slate-100 mt-2 transition">
+            <div class="flex items-center gap-2 text-xs font-medium">
+              <i class="fa-solid fa-key text-indigo-600 w-4 text-center"></i>
+              <span>เชื่อมต่อ Google &amp; LINE Login</span>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-slate-400">
+              <span id="label-oauth-status">OAuth 2.0</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </div>
+          </div>
         </div>
 
         <!-- Additional Feature Shortcuts (Chat / Workflow / Q&A) -->
@@ -525,7 +536,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.34
+          Version 1.0.35
         </div>
       </div>
 
@@ -785,6 +796,102 @@
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- Admin OAuth 2.0 Settings Modal (Google & LINE Login) -->
+  <div id="modal-oauth-settings" class="hidden fixed inset-0 z-50 bg-slate-50 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
+      <div class="flex items-center gap-3">
+        <button onclick="closeOAuthSettingsModal()" class="p-1 hover:text-blue-200 text-lg">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div>
+          <h3 class="text-base font-semibold tracking-wide">เชื่อมต่อ Google &amp; LINE Login</h3>
+          <p class="text-[10px] text-blue-200">ตั้งค่า OAuth 2.0 Client / Channel สำหรับผู้ดูแลระบบ</p>
+        </div>
+      </div>
+    </div>
+
+    <form onsubmit="saveOAuthSettings(event)" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
+      <!-- Callback URL Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-700">Callback URL (Redirect URI)</span>
+          <button type="button" onclick="copyOAuthCallbackUrl()" class="text-[11px] bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg font-medium transition flex items-center gap-1">
+            <i class="fa-regular fa-copy"></i>
+            <span>คัดลอก</span>
+          </button>
+        </div>
+        <input type="text" id="oauth-callback-url" readonly class="w-full text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-600 select-all" value="">
+        <p class="text-[10px] text-slate-400 leading-relaxed">
+          นำ URL นี้ไปใส่ใน <b>Authorized redirect URIs</b> (Google Cloud Console) และ <b>Callback URL</b> (LINE Developers Console)
+        </p>
+      </div>
+
+      <!-- Google OAuth Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-google text-red-500"></i>
+            <h4 class="text-xs font-bold text-slate-800">Google OAuth 2.0</h4>
+          </div>
+          <span id="oauth-google-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">ยังไม่ตั้งค่า</span>
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Google Client ID</label>
+          <input type="text" id="oauth-google-client-id" placeholder="xxxxx.apps.googleusercontent.com" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">Google Client Secret</label>
+          <input type="password" id="oauth-google-client-secret" placeholder="GOCSPX-..." autocomplete="new-password" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <!-- LINE Login Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-brands fa-line text-[#06C755]"></i>
+            <h4 class="text-xs font-bold text-slate-800">LINE Login v2.1</h4>
+          </div>
+          <span id="oauth-line-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">ยังไม่ตั้งค่า</span>
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">LINE Channel ID</label>
+          <input type="text" id="oauth-line-channel-id" placeholder="200xxxxxxx" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-600 mb-1">LINE Channel Secret</label>
+          <input type="password" id="oauth-line-channel-secret" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="new-password" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+      </div>
+
+      <!-- Advanced Redirect Override -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 space-y-2">
+        <label class="block text-[11px] font-medium text-slate-600">กำหนด Callback URL เอง (ไม่บังคับ)</label>
+        <input type="url" id="oauth-redirect-override" placeholder="เว้นว่างเพื่อใช้ Web App /exec URL อัตโนมัติ" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-3 text-[11px] text-indigo-900 space-y-1">
+        <div class="font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-indigo-600"></i>
+          <span>ความปลอดภัย &amp; การผูกบัญชีพนักงาน</span>
+        </div>
+        <p class="text-[10px] text-indigo-800 leading-relaxed">
+          ข้อมูล Secret จะถูกเก็บเข้ารหัสฝั่งเซิร์ฟเวอร์ (ScriptProperties) และไม่แสดงซ้ำในหน้าเว็บ หากบัญชี Google/LINE ยังไม่ตรงกับอีเมลพนักงาน ระบบจะให้ยืนยันด้วยรหัสพนักงาน+รหัสผ่าน 1 ครั้งเพื่อผูกบัญชี
+        </p>
+      </div>
+
+      <div class="pt-1 flex gap-2 pb-6">
+        <button type="button" onclick="closeOAuthSettingsModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl text-xs font-medium transition">
+          ปิด
+        </button>
+        <button type="submit" id="btn-save-oauth-settings" class="flex-1 bg-[#1b4b8a] hover:bg-blue-900 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>บันทึกการตั้งค่า</span>
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- Workplace / Locations Settings Modal -->
@@ -1221,6 +1328,11 @@
   </div>
 
 
+  <!-- ==================== SERVER OAUTH BOOT PAYLOAD ==================== -->
+  <script>
+    window.__OAUTH_BOOT__ = <?!= typeof oauthBootJson !== 'undefined' ? oauthBootJson : 'null' ?>;
+  </script>
+
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     // Thailand Standard Date Helpers (Asia/Bangkok, UTC+7)
@@ -1289,7 +1401,9 @@
       selectCalendarDate(th.isoDate, th.day);
       startLiveClock();
       initLocationWatch();
-      checkAuthSession();
+      if (!handleOAuthBoot()) {
+        checkAuthSession();
+      }
     });
 
     // Realtime Clock Updater
@@ -1448,6 +1562,18 @@
         }
       }
 
+      // OAuth Settings button is ONLY visible for ADMIN users
+      const oauthBtn = document.getElementById('btn-oauth-settings-menu');
+      if (oauthBtn) {
+        if (user.Role === 'Admin') {
+          oauthBtn.classList.remove('hidden');
+          oauthBtn.classList.add('flex');
+        } else {
+          oauthBtn.classList.add('hidden');
+          oauthBtn.classList.remove('flex');
+        }
+      }
+
       // Admin Broadcast Section is ONLY visible for ADMIN users
       const adminBroadcastSec = document.getElementById('admin-broadcast-section');
       if (adminBroadcastSec) {
@@ -1513,85 +1639,294 @@
       });
     }
 
-    // Login Handlers
-    function handleLineLogin() {
+    // Login & Real OAuth 2.0 Handlers (Google & LINE)
+    function completeClientLoginSession(data, successTitle = 'เข้าสู่ระบบสำเร็จ') {
+      if (!data || !data.token || !data.user) return;
+      state.token = data.token;
+      state.user = data.user;
+      try { localStorage.setItem('tsa_token', state.token); } catch (e) {}
+      applyUserData(state.user);
+      hideLoginScreen();
+      loadDashboardData();
       Swal.fire({
-        title: 'กำลังเข้าสู่ระบบด้วย LINE...',
-        text: 'กรุณารอสักครู่ กำลังเชื่อมต่อข้อมูล',
+        icon: 'success',
+        title: successTitle,
+        text: `ยินดีต้อนรับ ${state.user.FullName}`,
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+
+    function redirectTopToOAuthUrl(authUrl) {
+      try {
+        if (window.top && window.top !== window) {
+          window.top.location.href = authUrl;
+          return;
+        }
+      } catch (e) {
+        try {
+          window.open(authUrl, '_top');
+          return;
+        } catch (err2) {}
+      }
+      window.location.href = authUrl;
+    }
+
+    function startOAuthLogin(provider) {
+      const label = provider === 'google' ? 'Google Account' : 'LINE Login';
+      Swal.fire({
+        title: `กำลังเชื่อมต่อไปยัง ${label}...`,
+        text: 'กรุณารอสักครู่ ระบบกำลังพาท่านไปยังหน้ายืนยันตัวตน',
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
       });
-      callAPI('LOGIN_LINE', { deviceInfo: 'LINE Mobile Client' }, res => {
-        Swal.close();
-        if (res && res.success) {
-          state.token = res.data.token;
-          state.user = res.data.user;
-          try { localStorage.setItem('tsa_token', state.token); } catch(e) {}
-          applyUserData(state.user);
-          hideLoginScreen();
-          loadDashboardData();
-          Swal.fire({
-            icon: 'success',
-            title: 'เข้าสู่ระบบสำเร็จ',
-            text: `ยินดีต้อนรับ ${state.user.FullName}`,
-            timer: 1500,
-            showConfirmButton: false
-          });
+
+      callAPI('START_OAUTH', { provider: provider }, res => {
+        if (res && res.success && res.data && res.data.authUrl) {
+          redirectTopToOAuthUrl(res.data.authUrl);
         } else {
+          Swal.close();
+          const msg = (res && res.error && res.error.message) || (res && res.message) || `ไม่สามารถเชื่อมต่อ ${label} ได้`;
           Swal.fire({
             icon: 'error',
-            title: 'เข้าสู่ระบบไม่สำเร็จ',
-            text: (res && res.error && res.error.message) || (res && res.message) || 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE',
+            title: 'ไม่สามารถเข้าสู่ระบบได้',
+            text: msg,
             confirmButtonColor: '#1b4b8a'
           });
         }
       });
     }
 
+    function handleLineLogin() {
+      startOAuthLogin('line');
+    }
+
     function handleGoogleLogin() {
+      startOAuthLogin('google');
+    }
+
+    function handleOAuthBoot() {
+      const boot = window.__OAUTH_BOOT__;
+      window.__OAUTH_BOOT__ = null;
+      if (!boot || !boot.handled) return false;
+
+      try {
+        if (window.history && window.history.replaceState && window.location.search) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (e) {}
+
+      if (boot.success && boot.data && boot.data.token) {
+        completeClientLoginSession(boot.data);
+        return true;
+      }
+
+      showLoginScreen();
+
+      if (boot.requiresLink && boot.linkToken) {
+        promptLinkOAuthAccount(boot);
+        return true;
+      }
+
+      if (boot.error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เข้าสู่ระบบไม่สำเร็จ',
+          text: boot.error,
+          confirmButtonColor: '#1b4b8a'
+        });
+        return true;
+      }
+
+      return false;
+    }
+
+    function promptLinkOAuthAccount(boot) {
+      const providerLabel = boot.provider === 'google' ? 'Google' : 'LINE';
+      const safeName = escapeChatHtml(boot.displayName || boot.email || providerLabel);
+      const safeEmail = boot.email ? `<div class="text-[11px] text-slate-500">${escapeChatHtml(boot.email)}</div>` : '';
+      const safeAvatar = boot.avatarUrl
+        ? `<img src="${escapeChatHtml(boot.avatarUrl)}" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0" alt="">`
+        : `<div class="w-11 h-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0"><i class="fa-solid fa-user-check"></i></div>`;
+
       Swal.fire({
-        title: 'เข้าสู่ระบบด้วย Google Account',
-        input: 'email',
-        inputLabel: 'ระบุอีเมลบัญชี Google ของท่าน',
-        inputValue: state.user ? state.user.Email : 'thakot.ch@gmail.com',
+        title: `ผูกบัญชี ${providerLabel} ครั้งแรก`,
+        html: `
+          <div class="text-left space-y-3 mt-1">
+            <div class="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              ${safeAvatar}
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-800 truncate">${safeName}</div>
+                ${safeEmail}
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              ยืนยันตัวตนกับ ${providerLabel} สำเร็จแล้ว กรุณากรอกรหัสพนักงาน (หรืออีเมล) และรหัสผ่านของระบบ <b>1 ครั้ง</b> เพื่อผูกบัญชีถาวร
+            </p>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-600 mb-1">รหัสพนักงาน หรือ อีเมล</label>
+              <input id="swal-link-identifier" type="text" class="swal2-input !m-0 !w-full !text-xs !h-10" placeholder="เช่น E0001 หรือ name@company.com">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-600 mb-1">รหัสผ่านระบบ</label>
+              <input id="swal-link-password" type="password" class="swal2-input !m-0 !w-full !text-xs !h-10" placeholder="กรอกรหัสผ่านของท่าน">
+            </div>
+          </div>
+        `,
         showCancelButton: true,
+        confirmButtonText: 'ยืนยันและผูกบัญชี',
+        cancelButtonText: 'ยกเลิก',
         confirmButtonColor: '#1b4b8a',
         cancelButtonColor: '#64748b',
-        confirmButtonText: 'เข้าสู่ระบบ',
-        cancelButtonText: 'ยกเลิก'
+        showLoaderOnConfirm: true,
+        allowOutsideClick: false,
+        preConfirm: () => {
+          const identifier = String(document.getElementById('swal-link-identifier').value || '').trim();
+          const password = String(document.getElementById('swal-link-password').value || '');
+          if (!identifier || !password) {
+            Swal.showValidationMessage('กรุณากรอกรหัสพนักงาน/อีเมล และรหัสผ่านให้ครบถ้วน');
+            return false;
+          }
+          return new Promise(resolve => {
+            callAPI('LINK_OAUTH_ACCOUNT', {
+              linkToken: boot.linkToken,
+              identifier: identifier,
+              password: password,
+              deviceInfo: boot.provider === 'google' ? 'Google OAuth2 (Linked)' : 'LINE Login v2.1 (Linked)',
+              userAgent: navigator.userAgent
+            }, res => {
+              if (res && res.success && res.data && res.data.token) {
+                resolve(res.data);
+              } else {
+                const errMsg = (res && res.error && res.error.message) || (res && res.message) || 'ผูกบัญชีไม่สำเร็จ';
+                Swal.showValidationMessage(errMsg);
+                resolve(false);
+              }
+            });
+          });
+        }
       }).then(result => {
-        if (result.isConfirmed && result.value) {
+        if (result.isConfirmed && result.value && result.value.token) {
+          completeClientLoginSession(result.value, `ผูกบัญชี ${providerLabel} และเข้าสู่ระบบสำเร็จ`);
+        }
+      });
+    }
+
+    // Admin OAuth 2.0 Settings Modal Handlers
+    function openOAuthSettingsModal() {
+      const modal = document.getElementById('modal-oauth-settings');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      callAPI('GET_OAUTH_SETTINGS', { token: state.token }, res => {
+        if (res && res.success && res.data) {
+          renderOAuthSettingsData(res.data);
+        } else {
+          const errMsg = (res && res.error && res.error.message) || 'ไม่สามารถโหลดการตั้งค่า OAuth ได้';
+          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: errMsg, confirmButtonColor: '#1b4b8a' });
+        }
+      });
+    }
+
+    function closeOAuthSettingsModal() {
+      const modal = document.getElementById('modal-oauth-settings');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderOAuthSettingsData(data) {
+      const cbInput = document.getElementById('oauth-callback-url');
+      const gIdInput = document.getElementById('oauth-google-client-id');
+      const gSecInput = document.getElementById('oauth-google-client-secret');
+      const gBadge = document.getElementById('oauth-google-badge');
+      const lIdInput = document.getElementById('oauth-line-channel-id');
+      const lSecInput = document.getElementById('oauth-line-channel-secret');
+      const lBadge = document.getElementById('oauth-line-badge');
+      const overrideInput = document.getElementById('oauth-redirect-override');
+
+      if (cbInput) cbInput.value = data.redirectUri || '';
+      if (gIdInput) gIdInput.value = data.googleClientId || '';
+      if (gSecInput) {
+        gSecInput.value = '';
+        gSecInput.placeholder = data.hasGoogleSecret
+          ? 'บันทึก Secret แล้ว (เว้นว่างหากไม่เปลี่ยน)'
+          : 'GOCSPX-...';
+      }
+      if (gBadge) {
+        gBadge.innerText = data.googleConfigured ? 'พร้อมใช้งาน' : 'ยังไม่ตั้งค่า';
+        gBadge.className = data.googleConfigured
+          ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold'
+          : 'text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium';
+      }
+
+      if (lIdInput) lIdInput.value = data.lineChannelId || '';
+      if (lSecInput) {
+        lSecInput.value = '';
+        lSecInput.placeholder = data.hasLineSecret
+          ? 'บันทึก Secret แล้ว (เว้นว่างหากไม่เปลี่ยน)'
+          : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+      }
+      if (lBadge) {
+        lBadge.innerText = data.lineConfigured ? 'พร้อมใช้งาน' : 'ยังไม่ตั้งค่า';
+        lBadge.className = data.lineConfigured
+          ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold'
+          : 'text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium';
+      }
+
+      if (overrideInput) overrideInput.value = data.redirectUriOverride || '';
+    }
+
+    function copyOAuthCallbackUrl() {
+      const el = document.getElementById('oauth-callback-url');
+      if (!el || !el.value) return;
+      const doneToast = () => Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'success',
+        title: 'คัดลอก Callback URL แล้ว',
+        timer: 1400,
+        showConfirmButton: false
+      });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(el.value).then(doneToast).catch(() => {
+          el.select();
+          document.execCommand('copy');
+          doneToast();
+        });
+      } else {
+        el.select();
+        document.execCommand('copy');
+        doneToast();
+      }
+    }
+
+    function saveOAuthSettings(e) {
+      if (e) e.preventDefault();
+      const btn = document.getElementById('btn-save-oauth-settings');
+      if (btn) btn.disabled = true;
+
+      const payload = {
+        token: state.token,
+        oauthConfig: {
+          googleClientId: document.getElementById('oauth-google-client-id').value.trim(),
+          googleClientSecret: document.getElementById('oauth-google-client-secret').value.trim(),
+          lineChannelId: document.getElementById('oauth-line-channel-id').value.trim(),
+          lineChannelSecret: document.getElementById('oauth-line-channel-secret').value.trim(),
+          redirectUriOverride: document.getElementById('oauth-redirect-override').value.trim()
+        }
+      };
+
+      callAPI('SAVE_OAUTH_SETTINGS', payload, res => {
+        if (btn) btn.disabled = false;
+        if (res && res.success && res.data) {
+          renderOAuthSettingsData(res.data);
           Swal.fire({
-            title: 'กำลังตรวจสอบบัญชี Google...',
-            text: 'กรุณารอสักครู่',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
+            icon: 'success',
+            title: 'บันทึกสำเร็จ',
+            text: res.message || 'บันทึกการตั้งค่า Google & LINE OAuth เรียบร้อยแล้ว',
+            confirmButtonColor: '#1b4b8a'
           });
-          callAPI('LOGIN_GOOGLE', { email: result.value, deviceInfo: 'Google Workspace Account' }, res => {
-            Swal.close();
-            if (res && res.success) {
-              state.token = res.data.token;
-              state.user = res.data.user;
-              try { localStorage.setItem('tsa_token', state.token); } catch(e) {}
-              applyUserData(state.user);
-              hideLoginScreen();
-              loadDashboardData();
-              Swal.fire({
-                icon: 'success',
-                title: 'เข้าสู่ระบบสำเร็จ',
-                text: `ยินดีต้อนรับ ${state.user.FullName}`,
-                timer: 1500,
-                showConfirmButton: false
-              });
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'เข้าสู่ระบบไม่สำเร็จ',
-                text: (res && res.error && res.error.message) || (res && res.message) || 'ไม่พบบัญชีพนักงานที่ผูกกับ Google Account นี้',
-                confirmButtonColor: '#1b4b8a'
-              });
-            }
-          });
+        } else {
+          const errMsg = (res && res.error && res.error.message) || 'ไม่สามารถบันทึกการตั้งค่าได้';
+          Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: errMsg, confirmButtonColor: '#1b4b8a' });
         }
       });
     }
