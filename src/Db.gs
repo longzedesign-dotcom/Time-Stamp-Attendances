@@ -58,6 +58,22 @@ const Db = {
     sheet.setFrozenRows(1);
   },
 
+  ensureHeaders(sheetName, requiredHeaders) {
+    const sheet = this.getSheet(sheetName);
+    const existing = this.getHeaders(sheetName);
+    if (existing.length === 0) {
+      this.setHeaders(sheetName, requiredHeaders);
+      return requiredHeaders;
+    }
+    const missing = requiredHeaders.filter(h => !existing.includes(h));
+    if (missing.length > 0) {
+      const startCol = existing.length + 1;
+      sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+      sheet.getRange(1, startCol, 1, missing.length).setFontWeight('bold').setBackground('#2B6CB0').setFontColor('#FFFFFF');
+    }
+    return existing.concat(missing);
+  },
+
   getAll(sheetName) {
     const sheet = this.getSheet(sheetName);
     const lastRow = sheet.getLastRow();

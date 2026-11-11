@@ -26,7 +26,7 @@ function setupDatabase() {
     ],
     [CONFIG.SHEETS.NOTIFICATIONS]: [
       'NotificationID', 'UserID', 'Title', 'Message', 'Type',
-      'ReadStatus', 'CreatedAt'
+      'ReadStatus', 'CreatedAt', 'StartDate', 'EndDate', 'ExpireAction', 'Status'
     ],
     [CONFIG.SHEETS.DEPARTMENTS]: [
       'DepartmentID', 'DepartmentName', 'ParentDepartmentID', 'Status'

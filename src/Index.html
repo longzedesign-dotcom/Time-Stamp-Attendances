@@ -462,9 +462,9 @@
         <!-- Settings Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
           <h4 class="text-xs font-semibold text-slate-400 mb-3">ตั้งค่า</h4>
-          <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1.5 text-slate-700 hover:text-blue-600 transition">
+          <div onclick="openNotificationSettingsModal()" class="flex items-center justify-between cursor-pointer py-1.5 text-slate-700 hover:text-orange-600 transition">
             <div class="flex items-center gap-2 text-xs font-medium">
-              <i class="fa-solid fa-bell text-amber-500 w-4 text-center"></i>
+              <i class="fa-solid fa-bell text-orange-500 w-4 text-center"></i>
               <span>การแจ้งเตือน</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
@@ -473,9 +473,9 @@
             </div>
           </div>
           <!-- [icon Pin] สถานที่ทำงาน ต่อจาก การแจ้งเตือน (แสดงเฉพาะ ADMIN) -->
-          <div id="btn-location-settings-menu" onclick="openLocationSettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
+          <div id="btn-location-settings-menu" onclick="openLocationSettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-emerald-600 border-t border-slate-100 mt-2 transition">
             <div class="flex items-center gap-2 text-xs font-medium">
-              <i class="fa-solid fa-location-dot text-rose-500 w-4 text-center"></i>
+              <i class="fa-solid fa-location-dot text-emerald-600 w-4 text-center"></i>
               <span>สถานที่ทำงาน</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
@@ -484,9 +484,9 @@
             </div>
           </div>
           <!-- [icon Alarm] ตั้งค่าวันหยุด ถัดจาก ปุ่ม สถานที่ทำงาน (แสดงเฉพาะ ADMIN) -->
-          <div id="btn-holiday-settings-menu" onclick="openHolidaySettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-blue-600 border-t border-slate-100 mt-2 transition">
+          <div id="btn-holiday-settings-menu" onclick="openHolidaySettingsModal()" class="hidden items-center justify-between cursor-pointer py-2 text-slate-700 hover:text-purple-600 border-t border-slate-100 mt-2 transition">
             <div class="flex items-center gap-2 text-xs font-medium">
-              <i class="fa-solid fa-stopwatch text-red-500 w-4 text-center"></i>
+              <i class="fa-solid fa-stopwatch text-purple-600 w-4 text-center"></i>
               <span>ตั้งค่าวันหยุด</span>
             </div>
             <div class="flex items-center gap-1 text-xs text-slate-400">
@@ -723,14 +723,52 @@
 
         <div>
           <label class="text-xs font-semibold text-slate-700">รายละเอียดข้อความแจ้งเตือน <span class="text-red-500">*</span></label>
-          <textarea id="broadcast-form-message" rows="4" required placeholder="ระบุรายละเอียดให้พนักงานทุกคนรับทราบ เช่น ให้พนักงานปฏิบัติงานที่บ้าน (WFH) หรือรายละเอียดคำสั่ง" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"></textarea>
+          <textarea id="broadcast-form-message" rows="3" required placeholder="ระบุรายละเอียดให้พนักงานทุกคนรับทราบ เช่น ให้พนักงานปฏิบัติงานที่บ้าน (WFH) หรือรายละเอียดคำสั่ง" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="text-xs font-semibold text-slate-700">วันที่เริ่มแสดง <span class="text-red-500">*</span></label>
+            <input type="date" id="broadcast-form-start-date" required onchange="syncBroadcastDateBounds()" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-700">วันที่สิ้นสุด</label>
+            <input type="date" id="broadcast-form-end-date" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white">
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 -mt-1.5">หากไม่ระบุวันที่สิ้นสุด ประกาศจะแสดงต่อเนื่องจนกว่าผู้ดูแลจะปิดสถานะ (Disable) หรือลบออก</p>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700 block mb-1.5">เมื่อครบกำหนดวันที่สิ้นสุด</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="broadcast-expire-action" value="DISABLE" checked class="sr-only peer">
+              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-amber-500 peer-checked:bg-amber-50/70 transition h-full">
+                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                  <i class="fa-solid fa-eye-slash text-amber-600 text-[11px]"></i>
+                  <span>เปลี่ยนเป็น Disable</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-0.5 leading-snug">ปิดการแจ้งเตือนอัตโนมัติ (เก็บประวัติไว้)</p>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="broadcast-expire-action" value="DELETE" class="sr-only peer">
+              <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-red-500 peer-checked:bg-red-50/70 transition h-full">
+                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                  <i class="fa-regular fa-trash-can text-red-500 text-[11px]"></i>
+                  <span>ลบประกาศอัตโนมัติ</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-0.5 leading-snug">ลบออกจากระบบทันทีเมื่อพ้นกำหนด</p>
+              </div>
+            </label>
+          </div>
         </div>
 
         <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 text-[11px] text-amber-800 flex items-start gap-2">
           <i class="fa-solid fa-circle-exclamation text-amber-600 mt-0.5"></i>
           <div>
             <b>การแจ้งเตือนนี้จะแสดงที่หน้าหลักของพนักงานทุกคน</b>
-            <p class="text-[10px] text-amber-700 mt-0.5">พนักงานทุกคนจะเห็นแถบประกาศนี้ทันทีบนหน้าหลัก</p>
+            <p class="text-[10px] text-amber-700 mt-0.5">แสดงตามช่วงวันที่กำหนด และปิดหรือลบอัตโนมัติเมื่อครบกำหนด</p>
           </div>
         </div>
 
@@ -3234,6 +3272,28 @@
     }
 
     // ==================== SPECIAL BROADCAST ALERTS LOGIC ====================
+    function getTodayBangkokISO() {
+      return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+    }
+
+    function normalizeBroadcastDate(val) {
+      if (!val) return '';
+      const match = String(val).trim().match(/^(\d{4}-\d{2}-\d{2})/);
+      return match ? match[1] : '';
+    }
+
+    function syncBroadcastDateBounds() {
+      const startInput = document.getElementById('broadcast-form-start-date');
+      const endInput = document.getElementById('broadcast-form-end-date');
+      if (!startInput || !endInput) return;
+      const today = getTodayBangkokISO();
+      const minEnd = startInput.value && startInput.value > today ? startInput.value : today;
+      endInput.min = minEnd;
+      if (endInput.value && endInput.value < minEnd) {
+        endInput.value = minEnd;
+      }
+    }
+
     function openBroadcastModal() {
       if (!state.user || state.user.Role !== 'Admin') {
         Swal.fire({
@@ -3246,6 +3306,16 @@
       }
       document.getElementById('modal-broadcast-form').classList.remove('hidden');
       document.getElementById('broadcast-create-form').reset();
+      const today = getTodayBangkokISO();
+      const startInput = document.getElementById('broadcast-form-start-date');
+      const endInput = document.getElementById('broadcast-form-end-date');
+      if (startInput) startInput.value = today;
+      if (endInput) {
+        endInput.value = '';
+        endInput.min = today;
+      }
+      const defaultRadio = document.querySelector('input[name="broadcast-expire-action"][value="DISABLE"]');
+      if (defaultRadio) defaultRadio.checked = true;
     }
 
     function closeBroadcastModal() {
@@ -3265,9 +3335,12 @@
 
       callAPI('GET_BROADCASTS', { token: state.token }, res => {
         if (res && res.success && res.data) {
-          state.broadcastAnnouncements = res.data.announcements || [];
-          renderBroadcastList(state.broadcastAnnouncements);
-          renderBroadcastBanners(state.broadcastAnnouncements);
+          const activeList = res.data.announcements || [];
+          const adminList = res.data.allAnnouncements || activeList;
+          state.broadcastAnnouncements = activeList;
+          state.allBroadcastAnnouncements = adminList;
+          renderBroadcastList(adminList);
+          renderBroadcastBanners(activeList);
         } else {
           container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">ยังไม่มีประกาศพิเศษ</div>';
         }
@@ -3288,10 +3361,35 @@
         return;
       }
 
+      const today = getTodayBangkokISO();
       container.innerHTML = broadcasts.map(b => {
         const typeInfo = getBroadcastTypeInfo(b.Type);
+        const isDisabled = String(b.Status || 'Active') === 'Disable';
+        const startDate = normalizeBroadcastDate(b.StartDate);
+        const endDate = normalizeBroadcastDate(b.EndDate);
+        const isScheduled = !isDisabled && startDate && today < startDate;
+        const expireAction = String(b.ExpireAction || 'DISABLE').toUpperCase();
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">Active</span>';
+        if (isDisabled) {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-600">Disable</span>';
+        } else if (isScheduled) {
+          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">รอเริ่มแสดง</span>';
+        }
+
+        const dateLabel = startDate || endDate
+          ? `${startDate ? formatThaiDateStr(startDate) : 'ทันที'} - ${endDate ? formatThaiDateStr(endDate) : 'ไม่กำหนด'}`
+          : formatThaiDateStr(b.CreatedAt);
+
+        const expireBadge = endDate
+          ? `<span class="text-[10px] px-1.5 py-0.5 rounded-md ${expireAction === 'DELETE' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'}">${expireAction === 'DELETE' ? 'ครบกำหนด: ลบอัตโนมัติ' : 'ครบกำหนด: Disable'}</span>`
+          : '';
+
+        const nextStatus = isDisabled ? 'Active' : 'Disable';
+        const escapedTitle = String(b.Title || '').replace(/'/g, "\\'");
+
         return `
-          <div class="bg-white rounded-2xl p-3 border border-slate-100 shadow-sm flex items-start justify-between gap-3">
+          <div class="bg-white rounded-2xl p-3 border ${isDisabled ? 'border-slate-200 opacity-75' : 'border-slate-100'} shadow-sm flex items-start justify-between gap-2">
             <div class="flex items-start gap-2.5 flex-1 min-w-0">
               <div class="w-8 h-8 rounded-xl ${typeInfo.bgClass} ${typeInfo.textClass} flex items-center justify-center shrink-0 text-sm">
                 <i class="${typeInfo.icon}"></i>
@@ -3301,15 +3399,26 @@
                   <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${typeInfo.bgClass} ${typeInfo.textClass}">
                     ${typeInfo.label}
                   </span>
-                  <span class="text-[10px] text-slate-400">${formatThaiDateStr(b.CreatedAt)}</span>
+                  ${statusBadge}
+                  ${expireBadge}
                 </div>
                 <h5 class="text-xs font-bold text-slate-800 truncate mt-1">${b.Title}</h5>
                 <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 font-light">${b.Message}</p>
+                <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                  <i class="fa-regular fa-calendar"></i>
+                  <span>${dateLabel}</span>
+                </div>
               </div>
             </div>
-            <button onclick="handleDeleteBroadcast('${b.NotificationID}', '${b.Title.replace(/'/g, "\\'")}')" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition" title="ลบประกาศ">
-              <i class="fa-regular fa-trash-can text-xs"></i>
-            </button>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="handleToggleBroadcastStatus('${b.NotificationID}', '${nextStatus}', '${escapedTitle}')" class="px-2 py-1 rounded-lg text-[10px] font-semibold transition ${isDisabled ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'}" title="${isDisabled ? 'เปิดใช้งานประกาศ' : 'ปิดการแจ้งเตือน (Disable)'}">
+                <i class="fa-solid ${isDisabled ? 'fa-eye' : 'fa-eye-slash'} mr-0.5"></i>
+                <span>${isDisabled ? 'เปิด' : 'Disable'}</span>
+              </button>
+              <button onclick="handleDeleteBroadcast('${b.NotificationID}', '${escapedTitle}')" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition" title="ลบประกาศ">
+                <i class="fa-regular fa-trash-can text-xs"></i>
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -3337,10 +3446,23 @@
       const type = document.getElementById('broadcast-form-type').value;
       const title = document.getElementById('broadcast-form-title').value.trim();
       const message = document.getElementById('broadcast-form-message').value.trim();
+      const startDate = document.getElementById('broadcast-form-start-date').value;
+      const endDate = document.getElementById('broadcast-form-end-date').value;
+      const expireRadio = document.querySelector('input[name="broadcast-expire-action"]:checked');
+      const expireAction = expireRadio ? expireRadio.value : 'DISABLE';
+      const today = getTodayBangkokISO();
       const btn = document.getElementById('btn-save-broadcast');
 
       if (!title || !message) {
         Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกหัวข้อและรายละเอียดข้อความ', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+      if (endDate && endDate < today) {
+        Swal.fire({ icon: 'warning', title: 'วันที่ไม่ถูกต้อง', text: 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่ปัจจุบัน', confirmButtonColor: '#1b4b8a' });
+        return;
+      }
+      if (endDate && startDate && endDate < startDate) {
+        Swal.fire({ icon: 'warning', title: 'วันที่ไม่ถูกต้อง', text: 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มแสดง', confirmButtonColor: '#1b4b8a' });
         return;
       }
 
@@ -3354,7 +3476,11 @@
         broadcastData: {
           Title: title,
           Message: message,
-          Type: type
+          Type: type,
+          StartDate: startDate || today,
+          EndDate: endDate || '',
+          ExpireAction: expireAction,
+          Status: 'Active'
         }
       };
 
@@ -3368,7 +3494,9 @@
           Swal.fire({
             icon: 'success',
             title: 'ส่งประกาศสำเร็จ!',
-            text: 'การแจ้งเตือนพิเศษได้ถูกส่งไปยังหน้าหลักของพนักงานทุกคนแล้ว',
+            text: startDate > today
+              ? `ตั้งเวลาแสดงประกาศตั้งแต่วันที่ ${formatThaiDateStr(startDate)} เรียบร้อยแล้ว`
+              : 'การแจ้งเตือนพิเศษได้ถูกส่งไปยังหน้าหลักของพนักงานทุกคนแล้ว',
             timer: 2000,
             showConfirmButton: false
           });
@@ -3379,6 +3507,48 @@
             icon: 'error',
             title: 'ส่งประกาศไม่สำเร็จ',
             text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการส่งประกาศ',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      });
+    }
+
+    function handleToggleBroadcastStatus(notificationId, targetStatus, title, clearExpiredEndDate = false) {
+      callAPI('UPDATE_BROADCAST_STATUS', {
+        token: state.token,
+        notificationId: notificationId,
+        status: targetStatus,
+        clearExpiredEndDate: clearExpiredEndDate
+      }, res => {
+        if (res && res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: targetStatus === 'Disable' ? 'ปิดการแจ้งเตือน (Disable) แล้ว' : 'เปิดใช้งานประกาศแล้ว',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          fetchBroadcastAnnouncements();
+          loadBroadcastBanners();
+        } else if (res && res.error && res.error.code === 'EXPIRED_END_DATE') {
+          Swal.fire({
+            title: 'ประกาศเลยวันที่สิ้นสุดแล้ว',
+            text: `ประกาศ "${title}" ครบกำหนดวันที่สิ้นสุดไปแล้ว ต้องการล้างวันที่สิ้นสุดเพื่อเปิดใช้งานต่อหรือไม่?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1b4b8a',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'เปิดใช้งานต่อ',
+            cancelButtonText: 'ยกเลิก'
+          }).then(result => {
+            if (result.isConfirmed) {
+              handleToggleBroadcastStatus(notificationId, 'Active', title, true);
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'อัปเดตสถานะไม่สำเร็จ',
+            text: (res && res.error && res.error.message) || 'เกิดข้อผิดพลาด',
             confirmButtonColor: '#1b4b8a'
           });
         }
@@ -3433,14 +3603,24 @@
       const bannerContainer = document.getElementById('banner-special-announcements');
       if (!bannerContainer) return;
 
-      if (!announcements || announcements.length === 0) {
+      const today = getTodayBangkokISO();
+      const visibleAnnouncements = (announcements || []).filter(b => {
+        if (!b || String(b.Status || 'Active') === 'Disable') return false;
+        const startDate = normalizeBroadcastDate(b.StartDate);
+        const endDate = normalizeBroadcastDate(b.EndDate);
+        if (startDate && today < startDate) return false;
+        if (endDate && today > endDate) return false;
+        return true;
+      });
+
+      if (visibleAnnouncements.length === 0) {
         bannerContainer.classList.add('hidden');
         bannerContainer.innerHTML = '';
         return;
       }
 
       bannerContainer.classList.remove('hidden');
-      bannerContainer.innerHTML = announcements.map(b => {
+      bannerContainer.innerHTML = visibleAnnouncements.map(b => {
         const typeInfo = getBroadcastTypeInfo(b.Type);
         return `
           <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r ${typeInfo.bannerBg} p-3.5 text-white shadow-lg border border-white/20 transition hover:shadow-xl">
@@ -3473,10 +3653,16 @@
     }
 
     function showBroadcastDetail(notificationId) {
-      const item = (state.broadcastAnnouncements || []).find(b => String(b.NotificationID) === String(notificationId));
+      const item = (state.broadcastAnnouncements || state.allBroadcastAnnouncements || []).find(b => String(b.NotificationID) === String(notificationId));
       if (!item) return;
 
       const typeInfo = getBroadcastTypeInfo(item.Type);
+      const startDate = normalizeBroadcastDate(item.StartDate);
+      const endDate = normalizeBroadcastDate(item.EndDate);
+      const scheduleText = (startDate || endDate)
+        ? `ช่วงแสดงผล: ${startDate ? formatThaiDateStr(startDate) : 'ทันที'} - ${endDate ? formatThaiDateStr(endDate) : 'ไม่กำหนด'}`
+        : `ประกาศเมื่อ: ${formatThaiDateStr(item.CreatedAt)}`;
+
       Swal.fire({
         title: `<span class="text-base font-bold flex items-center justify-center gap-2">${typeInfo.label}</span>`,
         html: `
@@ -3485,7 +3671,7 @@
             <div class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100 whitespace-pre-wrap">${item.Message}</div>
             <div class="text-[10px] text-slate-400 flex items-center gap-1">
               <i class="fa-regular fa-clock"></i>
-              <span>ประกาศเมื่อ: ${formatThaiDateStr(item.CreatedAt)}</span>
+              <span>${scheduleText}</span>
             </div>
           </div>
         `,

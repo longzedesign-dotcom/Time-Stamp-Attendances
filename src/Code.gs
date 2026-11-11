@@ -151,6 +151,9 @@ function apiDispatcher(action, payload) {
       case 'DELETE_BROADCAST':
         res = Notify.deleteBroadcast(token, data.notificationId);
         break;
+      case 'UPDATE_BROADCAST_STATUS':
+        res = Notify.updateBroadcastStatus(token, data.notificationId, data.status, data.clearExpiredEndDate);
+        break;
 
       default:
         res = Utils.error(`Unknown API action: "${action}"`);
