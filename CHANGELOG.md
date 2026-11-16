@@ -4,6 +4,31 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.36`. Every subsequent patch increments the patch number by `+1` (`V1.0.37`, `V1.0.38`, ...).
+
+## [1.0.36] - 2026-11-16
+
+### Added
+- **Apps Script Authorization Helper:** Added `authorizeExternalRequests()` in `src/Code.gs` for one-click `script.external_request` scope authorization inside the Apps Script Editor.
+- **Standardized File Headers:** Standardized header docblocks across all 13 `.gs` files and `src/Index.html` under `Project: Time Stamp Attendances : TSA V1.0.36`.
+
+### Fixed
+- **LINE Login OAuth2 Scope & Token Exchange:** Updated LINE Login scope in `src/Auth.gs` (`createOAuthAuthUrl`) from `profile openid email` to `profile openid` so standard channels without LINE Email Permission work cleanly, and added explicit `contentType: 'application/x-www-form-urlencoded'` for LINE token & verify calls.
+
+### Changed
+- **Release Sync:** Updated `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.36` (Deployment `@35`).
+
+## [1.0.35] - 2026-11-11
+
+### Added
+- **Real Google OAuth 2.0 & LINE Login v2.1:** Implemented Authorization Code Flow via `doGet(e)` (`Auth.createOAuthAuthUrl()`, `Auth.handleOAuthCallback()`, `Auth.completeOAuthLogin()`) with `CacheService` single-use CSRF `state` and `PropertiesService` secret storage.
+- **1-Time Employee Account Linking:** Added `Auth.linkOAuthAccount()` and `promptLinkOAuthAccount()` modal in `src/Index.html` for first-time LINE/Google sign-ins not yet bound to `Users` (`LineUserID`, `GoogleSub` added to `src/Setup.gs`).
+- **Admin OAuth Settings UI:** Added Admin-only `#modal-oauth-settings` (`GET_OAUTH_SETTINGS`, `SAVE_OAUTH_SETTINGS`) showing copyable Callback URL and masked secret inputs.
+- **Manifest Scope:** Added `https://www.googleapis.com/auth/script.external_request` to `src/appsscript.json`.
+
+### Changed
+- **Security Hardening:** Removed mock fallback login from `Auth.loginLINE()` and `Auth.loginGoogle()` and refactored credential checks into `Auth.verifyEmployeeCredentials()`.
+
 ## [1.0.34] - 2026-11-11
 
 ### Added
