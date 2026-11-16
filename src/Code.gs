@@ -19,6 +19,16 @@ function doGet(e) {
 }
 
 /**
+ * Helper function for Admin/Owner to authorize external network requests (UrlFetchApp)
+ * Run this function once from Google Apps Script Editor to grant script.external_request permission.
+ */
+function authorizeExternalRequests() {
+  const resp = UrlFetchApp.fetch('https://api.line.me', { muteHttpExceptions: true });
+  Logger.log('External requests authorized successfully. HTTP Code: ' + resp.getResponseCode());
+  return 'SUCCESS';
+}
+
+/**
  * Universal Client-Server API Dispatcher
  */
 function apiDispatcher(action, payload) {

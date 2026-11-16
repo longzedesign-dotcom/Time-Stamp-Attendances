@@ -308,7 +308,7 @@ const Auth = {
         client_id: cfg.lineChannelId,
         redirect_uri: cfg.redirectUri,
         state: state,
-        scope: 'profile openid email'
+        scope: 'profile openid'
       });
     }
 
@@ -428,6 +428,7 @@ const Auth = {
       } else {
         const tokenResp = UrlFetchApp.fetch('https://api.line.me/oauth2/v2.1/token', {
           method: 'post',
+          contentType: 'application/x-www-form-urlencoded',
           payload: {
             grant_type: 'authorization_code',
             code: String(params.code),
@@ -455,6 +456,7 @@ const Auth = {
           try {
             const verifyResp = UrlFetchApp.fetch('https://api.line.me/oauth2/v2.1/verify', {
               method: 'post',
+              contentType: 'application/x-www-form-urlencoded',
               payload: {
                 id_token: tokenData.id_token,
                 client_id: cfg.lineChannelId
