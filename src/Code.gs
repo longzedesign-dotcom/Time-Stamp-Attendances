@@ -1,7 +1,10 @@
 /**
- * Project: ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
+ * Project: Time Stamp Attendances : TSA V1.0.36
  * File: Code.gs
  * Description: Web App Entry Point and Client-Server API Dispatcher.
+ * Version: 1.0.36
+ * Author: TSA Engineering Team
+ * Last Updated: 2026-11-16
  */
 
 function doGet(e) {

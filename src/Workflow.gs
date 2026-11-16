@@ -1,6 +1,10 @@
 /**
+ * Project: Time Stamp Attendances : TSA V1.0.36
  * File: Workflow.gs
  * Description: Time Correction & Overtime Request Workflow with Supervisor Approvals.
+ * Version: 1.0.36
+ * Author: TSA Engineering Team
+ * Last Updated: 2026-11-16
  */
 
 const Workflow = {

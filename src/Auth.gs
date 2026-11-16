@@ -1,6 +1,10 @@
 /**
+ * Project: Time Stamp Attendances : TSA V1.0.36
  * File: Auth.gs
  * Description: Enterprise Authentication Engine with Brute-Force Protection, LINE, Google, and Member Login.
+ * Version: 1.0.36
+ * Author: TSA Engineering Team
+ * Last Updated: 2026-11-16
  */
 
 const Auth = {

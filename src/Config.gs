@@ -1,8 +1,10 @@
 /**
- * Project: Time Stamp Attendances (Enterprise Edition)
+ * Project: Time Stamp Attendances : TSA V1.0.36
  * File: Config.gs
- * Version: 2.1.0 (Built with TSA Onsite Enterprise Engine V1.7.37)
  * Description: Unified Configuration combining Enterprise GPS Engine, Time Windows, Dual-Office, and Security.
+ * Version: 1.0.36
+ * Author: TSA Engineering Team
+ * Last Updated: 2026-11-16
  */
 
 const CONFIG = Object.freeze({
