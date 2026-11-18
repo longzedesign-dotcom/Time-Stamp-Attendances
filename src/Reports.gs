@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.37
+ * Project: Time Stamp Attendances : TSA V1.0.38
  * File: Reports.gs
  * Description: Timesheet aggregation, Monthly Summaries, and CSV Payroll Export.
- * Version: 1.0.37
+ * Version: 1.0.38
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */

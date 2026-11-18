@@ -1,8 +1,8 @@
 <!--
- * Project: Time Stamp Attendances : TSA V1.0.37
+ * Project: Time Stamp Attendances : TSA V1.0.38
  * File: Index.html
  * Description: Enterprise Front-End Application (Single Page Application)
- * Version: 1.0.37
+ * Version: 1.0.38
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
 -->
@@ -258,7 +258,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.37
+      Version 1.0.38
     </div>
   </div>
 
@@ -592,7 +592,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.37
+          Version 1.0.38
         </div>
       </div>
 
@@ -1037,7 +1037,7 @@
 
     <!-- Scrollable A4 Paper Preview -->
     <div id="report-print-scroll" class="flex-1 overflow-auto p-3 sm:p-6">
-      <div id="report-print-sheet" class="bg-white mx-auto shadow-lg border border-slate-300 w-[760px] max-w-full p-6 sm:p-8 text-black" style="font-family: 'Sarabun', sans-serif;">
+      <div id="report-print-sheet" class="bg-white mx-auto shadow-lg border border-slate-300 w-[760px] p-6 sm:p-8 text-black" style="font-family: 'Sarabun', sans-serif;">
         <div class="text-center text-xs text-slate-400 py-10">กำลังโหลดข้อมูลรายงาน...</div>
       </div>
     </div>
@@ -2304,11 +2304,11 @@
         : '';
 
       const projectHtml = cfg.projectName
-        ? `<div style="font-size:12px;line-height:1.35;margin-top:2px;">${escapeChatHtml(cfg.projectName)}</div>`
+        ? `<div style="font-size:12px;line-height:1.35;margin-top:2px;text-align:center;">${escapeChatHtml(cfg.projectName)}</div>`
         : '';
 
       const contractHtml = cfg.contractNo
-        ? `<div style="font-size:12px;line-height:1.35;margin-top:2px;">${escapeChatHtml(cfg.contractNo)}</div>`
+        ? `<div style="font-size:12px;line-height:1.35;margin-top:2px;text-align:center;">${escapeChatHtml(cfg.contractNo)}</div>`
         : '';
 
       const bodyRowsHtml = rows.map(r => {
@@ -2329,13 +2329,14 @@
       }).join('');
 
       sheet.innerHTML = `
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:6px;">
-          <div style="min-width:90px;max-width:115px;flex-shrink:0;">${logoHtml}</div>
-          <div style="flex:1;text-align:center;color:#000;">
-            <div style="font-size:13.5px;font-weight:700;line-height:1.35;">${escapeChatHtml(cfg.reportTitle || 'ใบบันทึกเวลาการมาปฏิบัติงานของเจ้าหน้าที่')}</div>
+        <div style="display:grid;grid-template-columns:${cfg.logoUrl ? '110px 1fr 110px' : '1fr'};align-items:start;gap:8px;margin-bottom:6px;">
+          ${cfg.logoUrl ? `<div style="display:flex;align-items:flex-start;justify-content:flex-start;">${logoHtml}</div>` : ''}
+          <div style="text-align:center;color:#000;">
+            <div style="font-size:13.5px;font-weight:700;line-height:1.35;text-align:center;">${escapeChatHtml(cfg.reportTitle || 'ใบบันทึกเวลาการมาปฏิบัติงานของเจ้าหน้าที่')}</div>
             ${projectHtml}
             ${contractHtml}
           </div>
+          ${cfg.logoUrl ? '<div></div>' : ''}
         </div>
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#000;">
           ${escapeChatHtml(period.label || '')}
