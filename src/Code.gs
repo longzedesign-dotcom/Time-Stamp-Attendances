@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.41
+ * Project: Time Stamp Attendances : TSA V1.0.42
  * File: Code.gs
  * Description: Web App Entry Point and Client-Server API Dispatcher.
- * Version: 1.0.41
+ * Version: 1.0.42
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -29,6 +29,15 @@ function authorizeExternalRequests() {
   const resp = UrlFetchApp.fetch('https://api.line.me', { muteHttpExceptions: true });
   Logger.log('External requests authorized successfully. HTTP Code: ' + resp.getResponseCode());
   return 'SUCCESS';
+}
+
+/**
+ * Helper function for Admin/Owner to run Oct-Nov 2026 Attendance backfill directly from Apps Script Editor
+ */
+function syncOctNov2026Attendance() {
+  const res = Admin.syncOctNov2026Attendance('', true);
+  Logger.log(JSON.stringify(res));
+  return res;
 }
 
 /**
@@ -180,6 +189,9 @@ function apiDispatcher(action, payload) {
         break;
       case 'IMPORT_HOLIDAYS':
         res = Admin.importHolidays(token, data.holidayList);
+        break;
+      case 'SYNC_OCT_NOV_ATTENDANCE':
+        res = Admin.syncOctNov2026Attendance(token, false);
         break;
 
       // Broadcast & Special Alerts

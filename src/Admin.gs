@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.41
+ * Project: Time Stamp Attendances : TSA V1.0.42
  * File: Admin.gs
  * Description: Administrative management for Users, Locations, and System Configuration.
- * Version: 1.0.41
+ * Version: 1.0.42
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -203,5 +203,185 @@ const Admin = {
     });
 
     return Utils.success({ importedCount: importedCount }, `นำเข้าข้อมูลวันหยุดสำเร็จ ${importedCount} วัน`);
+  },
+
+  /**
+   * Backfill real October–November 2026 (through 2026-11-18) Attendance records
+   * from the provided document time pairs, matching real working days & Holiday sheet.
+   * For 2026-11-18, inserts CHECK_IN only as requested.
+   */
+  syncOctNov2026Attendance(token, skipAuth = false) {
+    if (!skipAuth) {
+      const valid = Auth.validateSession(token);
+      if (!valid.success) return valid;
+      if (valid.data.user.Role !== CONFIG.ROLES.ADMIN) {
+        return Utils.error('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่ปรับปรุงฐานข้อมูลลงเวลาได้', 'FORBIDDEN');
+      }
+    }
+
+    const users = Db.getAll(CONFIG.SHEETS.USERS) || [];
+    const targetUser =
+      users.find(u => String(u.FullName || '').indexOf('เฉลิมพร') !== -1) ||
+      users.find(u => String(u.EmployeeCode || '') === 'E0001') ||
+      users.find(u => u.Role === CONFIG.ROLES.ADMIN && u.Status === 'Active');
+
+    if (!targetUser) {
+      return Utils.error('ไม่พบข้อมูลพนักงานเป้าหมาย (นายเฉลิมพร ถาโคตร) ในตาราง Users');
+    }
+
+    const locations = Db.find(CONFIG.SHEETS.LOCATIONS, l => l.Status !== 'Inactive') || [];
+    const loc = locations[0] || {
+      LocationID: 'LOC001',
+      LocationName: 'สำนักงานหลัก',
+      Address: '567 ถนนนนทบุรี ต.บางกระสอ อ.เมือง จ.นนทบุรี 11000',
+      Latitude: 13.91094031,
+      Longitude: 100.5946153
+    };
+
+    const docTimePairs = [
+      ['08:10:00', '17:11:00'],
+      ['08:13:00', '17:15:00'],
+      ['08:20:00', '17:18:00'],
+      ['08:18:00', '17:07:00'],
+      ['08:19:00', '17:05:00'],
+      ['08:21:00', '17:10:00'],
+      ['08:25:00', '17:11:00'],
+      ['08:20:00', '17:12:00'],
+      ['08:23:00', '17:14:00'],
+      ['08:20:00', '17:28:00'],
+      ['08:10:00', '17:11:00'],
+      ['08:13:00', '17:15:00'],
+      ['08:20:00', '17:18:00'],
+      ['08:21:00', '17:10:00'],
+      ['08:20:00', '17:12:00'],
+      ['08:10:00', '17:14:00'],
+      ['08:10:00', '17:11:00'],
+      ['08:13:00', '17:15:00'],
+      ['08:20:00', '17:18:00'],
+      ['08:20:00', '17:18:00']
+    ];
+
+    const holidays = Db.find(CONFIG.SHEETS.HOLIDAY, h => h.Status !== 'Inactive') || [];
+    const holidayMap = {};
+    holidays.forEach(h => {
+      const dStr = Utils.formatISODate(h.HolidayDate);
+      if (dStr) holidayMap[dStr] = true;
+    });
+
+    const startDate = '2026-10-01';
+    const endDate = '2026-11-18';
+
+    // 1. Remove existing Oct 1 - Nov 18, 2026 attendance rows for this user
+    const deletedCount = Db.delete(CONFIG.SHEETS.ATTENDANCE, a => {
+      if (String(a.UserID) !== String(targetUser.UserID)) return false;
+      const wd = Utils.formatISODate(a.WorkDate);
+      return wd >= startDate && wd <= endDate;
+    });
+
+    // 2. Build real working day rows (Mon-Fri excluding Holidays) from 2026-10-01 to 2026-11-18
+    const records = [];
+    let pairIdx = 0;
+    let workingDaysCount = 0;
+    const baseStamp = Date.now();
+
+    const ranges = [
+      { year: 2026, month: 10, maxDay: 31 },
+      { year: 2026, month: 11, maxDay: 18 }
+    ];
+
+    ranges.forEach(r => {
+      const mm = String(r.month).padStart(2, '0');
+      for (let d = 1; d <= r.maxDay; d++) {
+        const dd = String(d).padStart(2, '0');
+        const isoDate = `${r.year}-${mm}-${dd}`;
+        const dow = new Date(Date.UTC(r.year, r.month - 1, d)).getUTCDay();
+        if (dow === 0 || dow === 6 || holidayMap[isoDate]) {
+          continue;
+        }
+
+        const pair = docTimePairs[pairIdx % docTimePairs.length];
+        pairIdx++;
+        workingDaysCount++;
+
+        const inTime = pair[0];
+        const outTime = pair[1];
+
+        records.push({
+          AttendanceID: `ATT${baseStamp}_${workingDaysCount}_IN`,
+          UserID: String(targetUser.UserID),
+          EmployeeCode: String(targetUser.EmployeeCode || ''),
+          FullName: String(targetUser.FullName || ''),
+          WorkDate: isoDate,
+          WorkTime: inTime,
+          Type: CONFIG.ATTENDANCE_TYPE.CHECK_IN,
+          Status: CONFIG.ATTENDANCE_STATUS.ON_TIME,
+          Latitude: loc.Latitude || 13.91094031,
+          Longitude: loc.Longitude || 100.5946153,
+          Accuracy: 15,
+          DistanceMeter: 0,
+          LocationID: loc.LocationID || 'LOC001',
+          LocationName: loc.LocationName || 'สำนักงานหลัก',
+          Address: loc.Address || '',
+          DeviceInfo: 'Document Import',
+          WorkMode: CONFIG.WORK_MODES.ONSITE,
+          WorkMinutes: 0,
+          SelfieUrl: '',
+          Remark: '',
+          CreatedAt: `${isoDate}T${inTime}+07:00`
+        });
+
+        // For 2026-11-18 (today), insert CHECK_IN only
+        if (isoDate !== endDate) {
+          const workMins = Math.max(0, Utils.timeToMinutes(outTime) - Utils.timeToMinutes(inTime));
+          records.push({
+            AttendanceID: `ATT${baseStamp}_${workingDaysCount}_OUT`,
+            UserID: String(targetUser.UserID),
+            EmployeeCode: String(targetUser.EmployeeCode || ''),
+            FullName: String(targetUser.FullName || ''),
+            WorkDate: isoDate,
+            WorkTime: outTime,
+            Type: CONFIG.ATTENDANCE_TYPE.CHECK_OUT,
+            Status: CONFIG.ATTENDANCE_STATUS.CHECKED_OUT,
+            Latitude: loc.Latitude || 13.91094031,
+            Longitude: loc.Longitude || 100.5946153,
+            Accuracy: 15,
+            DistanceMeter: 0,
+            LocationID: loc.LocationID || 'LOC001',
+            LocationName: loc.LocationName || 'สำนักงานหลัก',
+            Address: loc.Address || '',
+            DeviceInfo: 'Document Import',
+            WorkMode: CONFIG.WORK_MODES.ONSITE,
+            WorkMinutes: workMins,
+            SelfieUrl: '',
+            Remark: '',
+            CreatedAt: `${isoDate}T${outTime}+07:00`
+          });
+        }
+      }
+    });
+
+    // 3. Batch-insert into Attendance sheet under LockService
+    if (records.length > 0) {
+      Db.withLock(() => {
+        const sheet = Db.getSheet(CONFIG.SHEETS.ATTENDANCE);
+        let headers = Db.getHeaders(CONFIG.SHEETS.ATTENDANCE);
+        if (headers.length === 0) {
+          headers = Object.keys(records[0]);
+          Db.setHeaders(CONFIG.SHEETS.ATTENDANCE, headers);
+        }
+        const matrix = records.map(rec =>
+          headers.map(h => (rec[h] !== undefined && rec[h] !== null ? rec[h] : ''))
+        );
+        const startRow = sheet.getLastRow() + 1;
+        sheet.getRange(startRow, 1, matrix.length, headers.length).setValues(matrix);
+      });
+    }
+
+    return Utils.success({
+      user: targetUser.FullName,
+      deletedCount: deletedCount,
+      workingDaysCount: workingDaysCount,
+      insertedRows: records.length
+    }, `ปรับปรุงข้อมูลลงเวลา ต.ค.–พ.ย. 2569 สำเร็จ (${workingDaysCount} วันทำงาน / ${records.length} รายการ)`);
   }
 };

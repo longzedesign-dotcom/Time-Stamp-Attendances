@@ -4,7 +4,18 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.41`. Every subsequent patch increments the patch number by `+1` (`V1.0.42`, `V1.0.43`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.42`. Every subsequent patch increments the patch number by `+1` (`V1.0.43`, `V1.0.44`, ...).
+
+## [1.0.42] - 2026-11-18
+
+### Added
+- **Oct–Nov 2026 Attendance Backfill Tool:** Added `Admin.syncOctNov2026Attendance()` in `src/Admin.gs`, `syncOctNov2026Attendance()` in `src/Code.gs`, and `SYNC_OCT_NOV_ATTENDANCE` route + Admin button `นำเข้าเวลา ต.ค.–พ.ย. (จากเอกสาร)` in `src/Index.html` to replace Oct 1 – Nov 18, 2026 attendance rows for `นายเฉลิมพร ถาโคตร` using real working days & `Holiday` sheet exclusions (inserting `CHECK_IN` only on `2026-11-18`).
+
+### Fixed
+- **Numeric First-In / Last-Out Time Sorting:** Updated `Reports.getMonthlyAttendanceReport()` in `src/Reports.gs` to sort `checkIns` and `checkOuts` numerically via `Utils.timeToMinutes()` so earliest Check-In and latest Check-Out are always selected accurately.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.42` (Deployment `@42`).
 
 ## [1.0.41] - 2026-11-18
 

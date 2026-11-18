@@ -1,8 +1,8 @@
 <!--
- * Project: Time Stamp Attendances : TSA V1.0.41
+ * Project: Time Stamp Attendances : TSA V1.0.42
  * File: Index.html
  * Description: Enterprise Front-End Application (Single Page Application)
- * Version: 1.0.41
+ * Version: 1.0.42
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
 -->
@@ -258,7 +258,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.41
+      Version 1.0.42
     </div>
   </div>
 
@@ -592,7 +592,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.41
+          Version 1.0.42
         </div>
       </div>
 
@@ -1026,7 +1026,11 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-1">
+        <div class="flex flex-wrap justify-between items-center gap-2 pt-1">
+          <button type="button" onclick="syncOctNovAttendanceFromDoc()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>นำเข้าเวลา ต.ค.–พ.ย. (จากเอกสาร)</span>
+          </button>
           <button type="submit" id="btn-save-report-cfg" class="bg-[#1b4b8a] hover:bg-blue-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>บันทึกการตั้งค่าฟอร์ม</span>
@@ -2369,6 +2373,41 @@
 
     function printAttendanceReport() {
       window.print();
+    }
+
+    function syncOctNovAttendanceFromDoc() {
+      Swal.fire({
+        title: 'ยืนยันปรับปรุงเวลา ต.ค.–พ.ย. 2569?',
+        text: 'ระบบจะเขียนทับข้อมูลลงเวลาช่วง 1 ต.ค. – 18 พ.ย. 2569 (วันนี้ลงเฉพาะเวลาเข้า) ตามปฏิทินวันทำงานจริง',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#1b4b8a',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ดำเนินการ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        Swal.fire({
+          title: 'กำลังปรับปรุงฐานข้อมูล Attendance...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+        callAPI('SYNC_OCT_NOV_ATTENDANCE', { token: state.token }, res => {
+          Swal.close();
+          if (res && res.success) {
+            fetchMonthlyAttendanceReport();
+            Swal.fire({
+              icon: 'success',
+              title: 'ปรับปรุงข้อมูลสำเร็จ',
+              text: res.message || 'อัปเดตข้อมูลเวลาทำงาน ต.ค.–พ.ย. 2569 เรียบร้อยแล้ว',
+              confirmButtonColor: '#1b4b8a'
+            });
+          } else {
+            const errMsg = (res && res.error && res.error.message) || 'ไม่สามารถปรับปรุงข้อมูลได้';
+            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: errMsg, confirmButtonColor: '#1b4b8a' });
+          }
+        });
+      });
     }
 
     function handleStandardLogin(e) {
