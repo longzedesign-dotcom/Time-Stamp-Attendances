@@ -6,7 +6,7 @@
  * File          : Reports.gs
  * Module/Layer  : Analytics & Reporting / Monthly Attendance Aggregation & Export Engine
  * Description   : ประมวลผลสรุปเวลาทำงานรายบุคคล, ดึงข้อมูลเวลาเข้าแรก-ออกสุดท้าย และตั้งค่ารายงานแบบฟอร์ม
- * Version       : 1.0.49
+ * Version       : 1.0.50
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -18,6 +18,7 @@
  * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
  * - V1.0.48 (2026-11-18) : Tuned project title font size to 10px in report template rendering
  * - V1.0.49 (2026-11-18) : Scaled project title font to 11.5px (500) for ideal single-line balance without logo collision
+ * - V1.0.50 (2026-11-18) : Aligned version header with TSA V1.0.50 release
  * ==============================================================================
  */
 

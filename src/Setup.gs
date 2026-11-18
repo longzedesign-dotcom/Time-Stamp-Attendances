@@ -6,7 +6,7 @@
  * File          : Setup.gs
  * Module/Layer  : Database Migration / Schema Definition & Self-Healing Seeder
  * Description   : สร้างโครงสร้างตารางเริ่มต้น 14 ตารางบน Google Sheets และตรวจสอบความสมบูรณ์ของ Schema
- * Version       : 1.0.49
+ * Version       : 1.0.50
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -18,6 +18,7 @@
  * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
  * - V1.0.48 (2026-11-18) : Aligned version header with TSA V1.0.48 release
  * - V1.0.49 (2026-11-18) : Aligned version header with TSA V1.0.49 release
+ * - V1.0.50 (2026-11-18) : Aligned version header with TSA V1.0.50 release
  * ==============================================================================
  */
 

@@ -4,7 +4,22 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.49`. Every subsequent patch increments the patch number by `+1` (`V1.0.50`, `V1.0.51`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.50`. Every subsequent patch increments the patch number by `+1` (`V1.0.51`, `V1.0.52`, ...).
+
+## [1.0.50] - 2026-11-18
+
+### Added
+- **Interactive Public & Traditional Holidays on Calendar Grid:**
+  - Built an in-memory `holidayMap` indexed by ISO date (`YYYY-MM-DD`) referencing active records from the `Holiday` sheet.
+  - Highlighted holiday dates on the calendar with soft rose background (`bg-rose-50/90 text-rose-600 font-bold`), hover state, tooltip, amber star badge (`⭐`), and dedicated amber indicator dot.
+  - Added Sunday (red `text-rose-500`) and Saturday (purple `text-purple-600`) color coding to align with standard Thai Buddhist calendar visual conventions.
+  - Added a clean status & holiday indicator legend under the calendar grid (เข้างาน 🟢, ออกงาน 🔴, วันหยุดราชการ 🟠).
+- **Selected Holiday Details Card in Date Panel:**
+  - When clicking on any calendar date that coincides with a holiday, an attractive gradient Holiday Banner/Card appears immediately displaying the holiday title, full Thai date, and category badge (`วันหยุดราชการ` / `วันหยุดประเพณี/องค์กร`).
+  - Added contextual attendance state: If no shift records exist, displays *"เป็นวันหยุด — ไม่มีบันทึกเวลาปฏิบัติงาน"* instead of generic empty logs; if shifts exist, displays an explicit holiday shift / OT header banner above the records.
+
+### Changed
+- **Release Sync:** Updated all source headers in 13 `.gs` files, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.50` (Deployment `@50`).
 
 ## [1.0.49] - 2026-11-18
 

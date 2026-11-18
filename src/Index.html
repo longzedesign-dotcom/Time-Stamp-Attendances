@@ -6,7 +6,7 @@ Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
 File          : Index.html
 Module/Layer  : Presentation / Single Page Application (UI/UX Engine)
 Description   : หน้าจอส่วนติดต่อผู้ใช้, ระบบลงเวลา GPS, แผนที่, ปฏิทิน พ.ศ., รายงาน และตั้งค่า
-Version       : 1.0.49
+Version       : 1.0.50
 Author        : TSA Engineering Team
 Created Date  : 2026-11-08
 Last Modified : 2026-11-18
@@ -266,7 +266,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     <!-- Version & Legal Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
-      <div>Version 1.0.49</div>
+      <div>Version 1.0.50</div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
         <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
         <span>•</span>
@@ -342,19 +342,35 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
           </div>
 
           <!-- Weekday Headers -->
-          <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-400 mb-2">
-            <div>อา.</div>
-            <div>จ.</div>
-            <div>อ.</div>
-            <div>พ.</div>
-            <div>พฤ.</div>
-            <div>ศ.</div>
-            <div>ส.</div>
+          <div class="grid grid-cols-7 text-center text-xs font-semibold mb-2">
+            <div class="text-rose-500">อา.</div>
+            <div class="text-slate-500">จ.</div>
+            <div class="text-slate-500">อ.</div>
+            <div class="text-slate-500">พ.</div>
+            <div class="text-slate-500">พฤ.</div>
+            <div class="text-slate-500">ศ.</div>
+            <div class="text-purple-600">ส.</div>
           </div>
 
           <!-- Calendar Grid Days -->
           <div id="calendar-days-grid" class="grid grid-cols-7 gap-y-2 text-center text-sm">
             <!-- Populated via Javascript -->
+          </div>
+
+          <!-- Calendar Legend (Status & Holiday Indicator) -->
+          <div class="flex items-center justify-center flex-wrap gap-3 pt-3 mt-2 border-t border-slate-100 text-[10px] text-slate-500">
+            <div class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>เข้างาน</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span>
+              <span>ออกงาน</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span class="text-rose-600 font-semibold">วันหยุดราชการ</span>
+            </div>
           </div>
         </div>
 
@@ -620,7 +636,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- Version & Legal Footer -->
         <div class="text-center text-xs text-slate-400 py-3 space-y-1">
-          <div>Version 1.0.49</div>
+          <div>Version 1.0.50</div>
           <div class="flex items-center justify-center gap-2 text-[11px]">
             <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
             <span>•</span>
@@ -3371,6 +3387,12 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
           state.holidays = res.data.holidays;
           const labelHoliday = document.getElementById('label-holiday-count');
           if (labelHoliday) labelHoliday.innerText = `${state.holidays.length} วัน`;
+          renderCalendar();
+          if (state.selectedDate) {
+            const parts = state.selectedDate.split('-');
+            const d = parseInt(parts[2], 10);
+            selectCalendarDate(state.selectedDate, d);
+          }
         }
       });
       loadBroadcastBanners();
@@ -3397,6 +3419,18 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
       if (statLate) statLate.innerText = lateDays;
       if (statEarly) statEarly.innerText = earlyDays;
 
+      // Build quick holiday lookup map
+      const holidayMap = {};
+      if (Array.isArray(state.holidays)) {
+        state.holidays.forEach(h => {
+          if (h && h.HolidayDate && h.Status !== 'Inactive') {
+            const iso = String(h.HolidayDate).substring(0, 10);
+            holidayMap[iso] = h;
+          }
+        });
+      }
+      state.holidayMap = holidayMap;
+
       const grid = document.getElementById('calendar-days-grid');
       grid.innerHTML = '';
 
@@ -3417,16 +3451,44 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
         const isSelected = state.selectedDate === isoDate;
         const isToday = isoDate === todayISO;
         const status = state.calendarStatusMap[isoDate] || { hasIn: false, hasOut: false };
+        const holiday = holidayMap[isoDate];
+
+        const dateObj = new Date(Date.UTC(state.currentYear, state.currentMonth, d));
+        const dayOfWeek = dateObj.getUTCDay(); // 0 = Sunday, 6 = Saturday
 
         let dotsHtml = '<div class="flex items-center justify-center gap-1 mt-1 h-1.5">';
-        if (status.hasIn) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>';
-        if (status.hasOut) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>';
-        if (!status.hasIn && !status.hasOut) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>';
+        if (status.hasIn) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="ลงเวลาเข้าแล้ว"></span>';
+        if (status.hasOut) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-red-500" title="ลงเวลาออกแล้ว"></span>';
+        if (holiday) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-amber-500" title="' + escapeChatHtml(holiday.HolidayName) + '"></span>';
+        if (!status.hasIn && !status.hasOut && !holiday) dotsHtml += '<span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>';
         dotsHtml += '</div>';
 
         const dayBtn = document.createElement('div');
-        dayBtn.className = `py-1 cursor-pointer rounded-xl transition ${isSelected ? 'bg-blue-500 text-white font-bold shadow' : (isToday ? 'border border-blue-400 text-blue-600 font-semibold hover:bg-blue-50' : 'hover:bg-slate-100 text-slate-700')}`;
-        dayBtn.innerHTML = `<span>${d}</span>${dotsHtml}`;
+        let cellClass = 'py-1 cursor-pointer rounded-xl transition relative select-none ';
+
+        if (isSelected) {
+          cellClass += 'bg-blue-600 text-white font-bold shadow-md';
+        } else if (isToday) {
+          cellClass += holiday
+            ? 'border-2 border-rose-400 bg-rose-50 text-rose-700 font-bold hover:bg-rose-100'
+            : 'border-2 border-blue-500 text-blue-600 font-bold hover:bg-blue-50';
+        } else if (holiday) {
+          cellClass += 'bg-rose-50/90 text-rose-600 font-bold hover:bg-rose-100 hover:shadow-xs';
+        } else if (dayOfWeek === 0) { // Sunday
+          cellClass += 'text-rose-500 hover:bg-slate-100 font-medium';
+        } else if (dayOfWeek === 6) { // Saturday
+          cellClass += 'text-purple-600 hover:bg-slate-100 font-medium';
+        } else {
+          cellClass += 'text-slate-700 hover:bg-slate-100';
+        }
+
+        dayBtn.className = cellClass;
+        if (holiday) {
+          dayBtn.title = `${holiday.HolidayName} (${holiday.Type === 'Company' ? 'วันหยุดบริษัท' : 'วันหยุดราชการ'})`;
+        }
+
+        const holidayBadge = holiday ? `<span class="absolute top-0.5 right-1 text-[7px] text-amber-500"><i class="fa-solid fa-star"></i></span>` : '';
+        dayBtn.innerHTML = `<span>${d}</span>${holidayBadge}${dotsHtml}`;
         dayBtn.onclick = () => selectCalendarDate(isoDate, d);
         grid.appendChild(dayBtn);
       }
@@ -3441,11 +3503,65 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
       const dateLogs = state.cachedHistory.filter(l => l.WorkDate === isoDate);
       const container = document.getElementById('selected-date-logs');
+      const holiday = state.holidayMap ? state.holidayMap[isoDate] : null;
 
+      let html = '';
+
+      // 1. Holiday Banner/Card if this date is a holiday
+      if (holiday) {
+        const isPublic = (holiday.Type !== 'Company');
+        const typeLabel = isPublic ? 'วันหยุดราชการ' : 'วันหยุดประเพณี/องค์กร';
+        const typeBg = isPublic ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-purple-100 text-purple-800 border-purple-200';
+        const iconColor = isPublic ? 'text-rose-600' : 'text-purple-600';
+
+        html += `
+          <div class="mb-3 p-3 rounded-2xl bg-gradient-to-r from-rose-50 via-amber-50/60 to-orange-50/70 border border-rose-200 text-left shadow-xs">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-white shadow-xs flex items-center justify-center ${iconColor} border border-rose-100 shrink-0">
+                  <i class="fa-solid fa-calendar-star text-sm"></i>
+                </div>
+                <div>
+                  <h5 class="text-xs font-bold text-slate-800 leading-tight">${escapeChatHtml(holiday.HolidayName)}</h5>
+                  <p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-[9px]"></i>
+                    <span>${thaiDate}</span>
+                  </p>
+                </div>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${typeBg} shrink-0">
+                ${typeLabel}
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Attendance logs or empty state
       if (dateLogs.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 py-4">ไม่พบประวัติการลงเวลา</p>';
+        if (holiday) {
+          html += `
+            <div class="py-4 text-center">
+              <p class="text-xs text-slate-400 flex items-center justify-center gap-1.5">
+                <i class="fa-regular fa-calendar-check text-slate-300"></i>
+                <span>เป็นวันหยุด — ไม่มีบันทึกเวลาปฏิบัติงาน</span>
+              </p>
+            </div>
+          `;
+        } else {
+          html += '<p class="text-xs text-slate-400 py-4">ไม่พบประวัติการลงเวลา</p>';
+        }
       } else {
-        container.innerHTML = dateLogs.map(l => `
+        if (holiday) {
+          html += `
+            <div class="flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 mb-2 px-1">
+              <i class="fa-solid fa-briefcase"></i>
+              <span>การปฏิบัติงานในวันหยุด (Holiday Shift / OT):</span>
+            </div>
+          `;
+        }
+
+        html += dateLogs.map(l => `
           <div onclick="openDetailView('${l.AttendanceID}')" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-slate-100 transition text-left">
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded text-[11px] font-bold ${l.Type === 'CHECK_IN' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
@@ -3457,6 +3573,8 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
           </div>
         `).join('');
       }
+
+      container.innerHTML = html;
     }
 
     function prevMonth() {

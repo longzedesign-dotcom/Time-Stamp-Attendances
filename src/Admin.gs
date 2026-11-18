@@ -6,7 +6,7 @@
  * File          : Admin.gs
  * Module/Layer  : Backend / Administrative Management & System Configuration
  * Description   : บริหารจัดการข้อมูลผู้ใช้, พิกัดสถานที่ทำงาน, วันหยุด และนำเข้าข้อมูลเวลาผ่านไฟล์ CSV
- * Version       : 1.0.49
+ * Version       : 1.0.50
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -18,6 +18,7 @@
  * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
  * - V1.0.48 (2026-11-18) : Aligned version header with TSA V1.0.48 release
  * - V1.0.49 (2026-11-18) : Aligned version header with TSA V1.0.49 release
+ * - V1.0.50 (2026-11-18) : Aligned version header with TSA V1.0.50 release
  * ==============================================================================
  */
 
