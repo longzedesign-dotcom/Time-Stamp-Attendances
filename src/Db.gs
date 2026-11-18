@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.43
+ * Project: Time Stamp Attendances : TSA V1.0.44
  * File: Db.gs
  * Description: High-performance Database Layer with LockService and Sheet Caching.
- * Version: 1.0.43
+ * Version: 1.0.44
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */

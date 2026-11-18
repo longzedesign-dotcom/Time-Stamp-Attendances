@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.43
+ * Project: Time Stamp Attendances : TSA V1.0.44
  * File: Notify.gs
  * Description: Notifications management (In-app alerts and Email notifications).
- * Version: 1.0.43
+ * Version: 1.0.44
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -250,12 +250,36 @@ const Notify = {
   markAsRead(token, notificationId) {
     const valid = Auth.validateSession(token);
     if (!valid.success) return valid;
+    const user = valid.data.user;
 
-    Db.update(CONFIG.SHEETS.NOTIFICATIONS, n => n.NotificationID === notificationId, {
+    Db.update(CONFIG.SHEETS.NOTIFICATIONS, n => String(n.NotificationID) === String(notificationId), {
       ReadStatus: 'Read'
     });
 
-    return Utils.success({}, 'ทำเครื่องหมายอ่านแล้ว');
+    const today = this.getTodayDateStr();
+    const remainingUnread = Db.find(CONFIG.SHEETS.NOTIFICATIONS, n => {
+      if (n.ReadStatus !== 'Unread') return false;
+      if (n.UserID === user.UserID) return true;
+      if (n.UserID === 'ALL') return this.isBroadcastActive(n, today);
+      return false;
+    }).length;
+
+    return Utils.success({ unreadCount: remainingUnread }, 'ทำเครื่องหมายอ่านแล้ว');
+  },
+
+  /**
+   * Mark all notifications as read for current user
+   */
+  markAllAsRead(token) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    const user = valid.data.user;
+
+    Db.update(CONFIG.SHEETS.NOTIFICATIONS, n => (n.UserID === user.UserID || n.UserID === 'ALL') && n.ReadStatus === 'Unread', {
+      ReadStatus: 'Read'
+    });
+
+    return Utils.success({ unreadCount: 0 }, 'ทำเครื่องหมายอ่านแล้วทั้งหมด');
   },
 
   /**

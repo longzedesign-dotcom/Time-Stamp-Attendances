@@ -1,8 +1,8 @@
 <!--
- * Project: Time Stamp Attendances : TSA V1.0.43
+ * Project: Time Stamp Attendances : TSA V1.0.44
  * File: Index.html
  * Description: Enterprise Front-End Application (Single Page Application)
- * Version: 1.0.43
+ * Version: 1.0.44
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
 -->
@@ -256,9 +256,14 @@
       </form>
     </div>
 
-    <!-- Version Footer -->
-    <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.42
+    <!-- Version & Legal Footer -->
+    <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
+      <div>Version 1.0.44</div>
+      <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
+        <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
+        <span>•</span>
+        <button type="button" onclick="openLegalModal('privacy')" class="hover:underline hover:text-blue-700 transition">นโยบายความเป็นส่วนตัว (PDPA)</button>
+      </div>
     </div>
   </div>
 
@@ -459,8 +464,17 @@
 
       <!-- TAB 3: NOTIFICATIONS (IMG_1201) -->
       <div id="tab-notifications" class="hidden h-full overflow-y-auto custom-scroll p-4 pb-20">
-        <h3 class="text-lg font-bold text-slate-800 mb-4 px-1">การแจ้งเตือน</h3>
-        <div id="notifications-list" class="space-y-3">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-slate-800">การแจ้งเตือน</h3>
+            <span id="unread-notif-pill" class="hidden text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full"></span>
+          </div>
+          <button type="button" onclick="markAllNotificationsAsRead()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold transition flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-blue-50">
+            <i class="fa-solid fa-check-double text-[11px]"></i>
+            <span>อ่านทั้งหมด</span>
+          </button>
+        </div>
+        <div id="notifications-list" class="space-y-2.5">
           <!-- Populated via Javascript -->
         </div>
       </div>
@@ -590,9 +604,14 @@
           <span class="text-sm">ออกจากระบบ</span>
         </button>
 
-        <!-- Version Footer -->
-        <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.42
+        <!-- Version & Legal Footer -->
+        <div class="text-center text-xs text-slate-400 py-3 space-y-1">
+          <div>Version 1.0.44</div>
+          <div class="flex items-center justify-center gap-2 text-[11px]">
+            <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
+            <span>•</span>
+            <button type="button" onclick="openLegalModal('privacy')" class="hover:underline hover:text-blue-600 transition">นโยบายความเป็นส่วนตัว (PDPA)</button>
+          </div>
         </div>
       </div>
 
@@ -1590,6 +1609,108 @@
     </div>
     <div id="faq-list-container" class="p-4 overflow-y-auto space-y-3">
       <!-- Populated via Javascript -->
+    </div>
+  </div>
+
+  <!-- Legal Modal: Terms of Use & Privacy Policy (PDPA) -->
+  <div id="modal-legal-doc" class="hidden fixed inset-0 z-50 bg-slate-100 flex flex-col">
+    <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
+      <div class="flex items-center gap-3">
+        <button onclick="closeLegalModal()" class="p-1 hover:text-blue-200 text-lg">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div>
+          <h3 class="text-base font-semibold tracking-wide">ข้อกำหนด &amp; ความเป็นส่วนตัว</h3>
+          <p class="text-[10px] text-blue-200">มาตรฐานคุ้มครองข้อมูลตามกฎหมาย PDPA &amp; สัญญาการให้บริการ</p>
+        </div>
+      </div>
+      <button onclick="closeLegalModal()" class="text-xs bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-xl transition">
+        ปิด
+      </button>
+    </div>
+
+    <!-- Tab Selector -->
+    <div class="bg-white border-b border-slate-200 px-4 py-2 flex gap-2 shrink-0">
+      <button type="button" id="tab-btn-legal-terms" onclick="switchLegalTab('terms')" class="flex-1 py-2 text-xs font-bold rounded-xl bg-blue-50 text-blue-800 border border-blue-200 transition text-center">
+        <i class="fa-solid fa-file-contract mr-1 text-[11px]"></i> ข้อกำหนดการใช้งาน (Terms)
+      </button>
+      <button type="button" id="tab-btn-legal-privacy" onclick="switchLegalTab('privacy')" class="flex-1 py-2 text-xs font-bold rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 transition text-center">
+        <i class="fa-solid fa-shield-halved mr-1 text-[11px]"></i> นโยบายความเป็นส่วนตัว (PDPA)
+      </button>
+    </div>
+
+    <!-- Scrollable Content Container -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scroll">
+      <!-- TERMS TAB -->
+      <div id="legal-content-terms" class="max-w-2xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-xs text-slate-700 space-y-4 leading-relaxed">
+        <div class="border-b border-slate-200 pb-3">
+          <h2 class="text-base font-bold text-slate-900">ข้อกำหนดและเงื่อนไขการใช้งานระบบ (Terms of Use)</h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (TSA Enterprise WebApp) • เวอร์ชัน 1.0</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">1. บทนำและสถานะทางกฎหมาย</h4>
+          <p>ระบบนี้พัฒนาขึ้นเพื่อเป็นเครื่องมืออย่างเป็นทางการขององค์กรในการบริหารจัดการการลงเวลาปฏิบัติงาน การเข้าถึงหรือใช้งานระบบถือว่าท่านตกลงที่จะผูกพันตามข้อกำหนดนี้และระเบียบข้อบังคับการทำงาน ข้อมูลการลงเวลา พิกัดดาวเทียม และภาพถ่ายที่บันทึกผ่านระบบถือเป็น <b>เอกสารอิเล็กทรอนิกส์</b> ตาม พ.ร.บ. ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">2. หน้าที่และความรับผิดชอบของผู้ปฏิบัติงาน</h4>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><b>การลงเวลาด้วยตนเอง:</b> ผู้ปฏิบัติงานต้องลงเวลาด้วยตนเองเท่านั้น ห้ามมิให้ลงเวลาแทนผู้อื่น หรือให้ผู้อื่นลงเวลาแทนตนเอง (Buddy Punching Prohibition) โดยเด็ดขาด</li>
+            <li><b>การรักษาความลับ:</b> ต้องรักษาบัญชีผู้ใช้งาน รหัสผ่าน และการเข้าถึงระบบไว้เป็นความลับ ห้ามส่งต่อหรือเปิดเผยแก่ผู้อื่น</li>
+            <li><b>ข้อห้ามการปลอมแปลงพิกัด (Anti-Spoofing):</b> ห้ามใช้งานโปรแกรมจำลองตำแหน่ง (Mock Location / Fake GPS / VPN / Emulators) หรือดัดแปลงสคริปต์ระบบ</li>
+            <li><b>บทลงโทษทางวินัย:</b> การทุจริตเวลาทำงานหรือปลอมแปลงพิกัดถือเป็นความผิดวินัยร้ายแรงตามระเบียบองค์กร และอาจถูกเลิกจ้างโดยไม่ได้รับค่าชดเชย</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">3. มาตรฐานพิกัดดาวเทียมและความแม่นยำ (GPS Accuracy)</h4>
+          <p>ผู้ใช้งานมีหน้าที่เปิดใช้งาน Location Services บนอุปกรณ์ เกณฑ์ความคลาดเคลื่อนต้องไม่เกิน 100 เมตร และอยู่ในรัศมี Geofence 200 เมตรจากจุดศูนย์กลางสถานที่ทำงานที่ได้รับมอบหมาย หากมีเหตุขัดข้องทางเทคนิคต้องแจ้งหัวหน้างานและส่งคำขอผ่านระบบ Workflow ทันที</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">4. สายการอนุมัติคำขอ (Workflow &amp; Approvals)</h4>
+          <p>การยื่นคำขอปรับปรุงเวลาและคำขอทำล่วงเวลา (OT) ต้องระบุเหตุผลและวันที่เวลาจริงอย่างถูกต้อง และจะมีผลสมบูรณ์เมื่อผ่านการพิจารณาอนุมัติจากหัวหน้างานตามสายบังคับบัญชาแล้วเท่านั้น</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">5. กฎหมายที่ใช้บังคับ</h4>
+          <p>ข้อกำหนดนี้อยู่ภายใต้บังคับและตีความตามกฎหมายแห่งราชอาณาจักรไทย</p>
+        </div>
+      </div>
+
+      <!-- PRIVACY TAB -->
+      <div id="legal-content-privacy" class="hidden max-w-2xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-xs text-slate-700 space-y-4 leading-relaxed">
+        <div class="border-b border-slate-200 pb-3">
+          <h2 class="text-base font-bold text-slate-900">นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (Privacy Policy)</h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">มาตรฐานตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (Thailand PDPA) &amp; EU GDPR</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">1. ฐานทางกฎหมายในการประมวลผล (Lawful Basis)</h4>
+          <p>องค์กรเก็บรวบรวมและใช้ข้อมูลส่วนบุคคลตามฐานสัญญาจ้างแรงงาน (Contractual Necessity), ฐานประโยชน์โดยชอบด้วยกฎหมาย (Legitimate Interests) เพื่อการบริหารงานบุคคลและป้องกันการทุจริต, ฐานหน้าที่ตามกฎหมายแรงงาน (Legal Obligation), และฐานความยินยอมโดยชัดแจ้งสำหรับข้อมูลพิกัดแม่นยำและภาพถ่าย</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">2. ข้อมูลส่วนบุคคลที่จัดเก็บ</h4>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><b>ข้อมูลระบุตัวตน:</b> ชื่อ-นามสกุล, รหัสพนักงาน, แผนก, อีเมล, รูปโปรไฟล์, บทบาทผู้ใช้งาน</li>
+            <li><b>ข้อมูลเวลาและพิกัดภูมิศาสตร์:</b> วันที่, เวลาเข้า-ออก (Check-In/Out), พิกัดดาวเทียม (Latitude, Longitude), ค่าความแม่นยำ (Accuracy), ระยะห่าง (Distance), และสถานที่ทำงาน (Location Name)</li>
+            <li><b>ภาพถ่ายยืนยันตัวตน:</b> ภาพถ่ายใบหน้าแบบสด (Selfie) ขณะกดลงเวลา</li>
+            <li><b>ข้อมูลทางเทคนิค:</b> ข้อมูลอุปกรณ์, User Agent, บันทึกการกระทำในระบบ (Audit Trail Logs)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">3. ความปลอดภัยและการเปิดเผยข้อมูล</h4>
+          <p>ข้อมูลทั้งหมดส่งผ่านโพรโทคอล HTTPS/TLS 1.3 ที่มีการเข้ารหัสขั้นสูง และจัดเก็บบน Google Cloud/Google Drive ที่มีมาตรฐานความปลอดภัยสากล ข้อมูลจะถูกเข้าถึงเฉพาะเจ้าหน้าที่ที่มีสิทธิ์ตามบทบาท (RBAC) และไม่มีการขายหรือเผยแพร่เชิงพาณิชย์โดยเด็ดขาด</p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 mb-1">4. สิทธิของเจ้าของข้อมูล (Data Subject Rights)</h4>
+          <p>ท่านมีสิทธิ์ตามกฎหมาย PDPA ในการขอเข้าถึงและรับสำเนาข้อมูล, ขอแก้ไขข้อมูลให้ถูกต้อง, ขอให้ลบหรือทำลายเมื่อพ้นความจำเป็นตามกฎหมายแรงงาน, ระงับหรือคัดค้านการประมวลผล โดยสามารถติดต่อผ่านฝ่ายทรัพยากรบุคคลหรือแชตภายในระบบ</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3478,36 +3599,155 @@
       });
     }
 
-    // Notifications
+    // Notifications State & Logic
+    function updateNotificationBadge(count) {
+      const badge = document.getElementById('badge-notifications');
+      const pill = document.getElementById('unread-notif-pill');
+      const num = Math.max(0, Number(count) || 0);
+
+      if (badge) {
+        badge.innerText = num;
+        badge.style.display = num > 0 ? 'flex' : 'none';
+      }
+      if (pill) {
+        if (num > 0) {
+          pill.innerText = `${num} ยังไม่อ่าน`;
+          pill.classList.remove('hidden');
+        } else {
+          pill.classList.add('hidden');
+        }
+      }
+    }
+
     function loadNotifications() {
       callAPI('GET_NOTIFICATIONS', { token: state.token }, res => {
-        if (res.success) {
+        if (res && res.success) {
           const list = res.data.notifications || [];
           const count = res.data.unreadCount || 0;
-          const badge = document.getElementById('badge-notifications');
-          if (badge) {
-            badge.innerText = count;
-            badge.style.display = count > 0 ? 'flex' : 'none';
-          }
+          updateNotificationBadge(count);
+
           const container = document.getElementById('notifications-list');
           if (container) {
             if (list.length === 0) {
               container.innerHTML = '<div class="text-center text-xs text-slate-400 py-12">ไม่มีการแจ้งเตือน</div>';
             } else {
-              container.innerHTML = list.map(n => `
-                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 text-xs">
-                    <i class="fa-regular fa-bell"></i>
+              container.innerHTML = list.map(n => {
+                const isUnread = n.ReadStatus === 'Unread';
+                const notifId = escapeChatHtml(n.NotificationID);
+                const title = escapeChatHtml(n.Title);
+                const msg = escapeChatHtml(n.Message);
+                const type = escapeChatHtml(n.Type || 'GENERAL');
+                const timeStr = formatThaiDateStr(n.CreatedAt);
+
+                let iconClass = 'fa-regular fa-bell';
+                let iconBg = 'bg-blue-100 text-blue-600';
+                if (type === 'ATTENDANCE') {
+                  iconClass = title.indexOf('ออก') !== -1 ? 'fa-solid fa-arrow-right-from-bracket' : 'fa-solid fa-arrow-right-to-bracket';
+                  iconBg = title.indexOf('ออก') !== -1 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700';
+                } else if (type === 'WORKFLOW') {
+                  iconClass = 'fa-solid fa-calendar-check';
+                  iconBg = 'bg-purple-100 text-purple-700';
+                } else if (type === 'BROADCAST') {
+                  iconClass = 'fa-solid fa-bullhorn';
+                  iconBg = 'bg-rose-100 text-rose-700';
+                }
+
+                return `
+                  <div id="notif-card-${notifId}" onclick="handleNotificationClick('${notifId}', ${isUnread})"
+                    class="cursor-pointer transition-all duration-150 rounded-2xl p-3.5 shadow-xs border flex items-start gap-3 relative select-none ${
+                      isUnread
+                        ? 'bg-blue-50/40 border-blue-200 hover:bg-blue-50 hover:shadow-sm'
+                        : 'bg-white border-slate-100 opacity-80 hover:opacity-100 hover:border-slate-200'
+                    }">
+                    <div class="w-8 h-8 rounded-full ${iconBg} flex items-center justify-center shrink-0 text-xs shadow-2xs">
+                      <i class="${iconClass}"></i>
+                    </div>
+                    <div class="flex-1 pr-4">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <h4 class="text-xs ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}">${title}</h4>
+                        ${type === 'ATTENDANCE' ? '<span class="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-medium">ลงเวลา</span>' : ''}
+                      </div>
+                      <p class="text-xs ${isUnread ? 'text-slate-700' : 'text-slate-500'} mt-1 font-light leading-relaxed">${msg}</p>
+                      <span class="text-[10px] text-slate-400 block mt-1.5">${timeStr}</span>
+                    </div>
+                    ${
+                      isUnread
+                        ? `<span id="notif-dot-${notifId}" class="absolute top-3.5 right-3.5 w-2 h-2 rounded-full bg-blue-600 ring-4 ring-blue-100"></span>`
+                        : ''
+                    }
                   </div>
-                  <div class="flex-1">
-                    <h4 class="text-xs font-bold text-slate-800">${n.Title}</h4>
-                    <p class="text-xs text-slate-500 mt-0.5 font-light">${n.Message}</p>
-                    <span class="text-[10px] text-slate-400 block mt-1">${formatThaiDateStr(n.CreatedAt)}</span>
-                  </div>
-                </div>
-              `).join('');
+                `;
+              }).join('');
             }
           }
+        }
+      });
+    }
+
+    function handleNotificationClick(notificationId, wasUnread) {
+      const card = document.getElementById(`notif-card-${notificationId}`);
+      const dot = document.getElementById(`notif-dot-${notificationId}`);
+
+      if (wasUnread) {
+        if (card) {
+          card.classList.remove('bg-blue-50/40', 'border-blue-200');
+          card.classList.add('bg-white', 'border-slate-100', 'opacity-80');
+          card.setAttribute('onclick', `handleNotificationClick('${notificationId}', false)`);
+        }
+        if (dot) dot.remove();
+
+        const badge = document.getElementById('badge-notifications');
+        if (badge) {
+          const current = Math.max(0, (parseInt(badge.innerText, 10) || 1) - 1);
+          updateNotificationBadge(current);
+        }
+
+        callAPI('MARK_NOTIFICATION_READ', { token: state.token, notificationId: notificationId }, res => {
+          if (res && res.success && res.data && typeof res.data.unreadCount === 'number') {
+            updateNotificationBadge(res.data.unreadCount);
+          }
+        });
+      }
+
+      if (card) {
+        const title = card.querySelector('h4')?.textContent || 'การแจ้งเตือน';
+        const msg = card.querySelector('p')?.textContent || '';
+        const time = card.querySelector('span.text-\\[10px\\]')?.textContent || '';
+
+        Swal.fire({
+          title: title,
+          html: `<div class="text-left text-xs text-slate-600 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 leading-relaxed mb-2">${escapeChatHtml(msg)}</div><div class="text-right text-[10px] text-slate-400">${escapeChatHtml(time)}</div>`,
+          icon: 'info',
+          confirmButtonColor: '#1b4b8a',
+          confirmButtonText: 'ปิด'
+        });
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const badge = document.getElementById('badge-notifications');
+      const count = badge ? parseInt(badge.innerText, 10) || 0 : 0;
+      if (count === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'ไม่มีรายการค้างอ่าน',
+          text: 'คุณได้อ่านการแจ้งเตือนครบทุกรายการแล้ว',
+          timer: 1300,
+          showConfirmButton: false
+        });
+        return;
+      }
+
+      updateNotificationBadge(0);
+      document.querySelectorAll('#notifications-list [id^="notif-dot-"]').forEach(el => el.remove());
+      document.querySelectorAll('#notifications-list [id^="notif-card-"]').forEach(card => {
+        card.classList.remove('bg-blue-50/40', 'border-blue-200');
+        card.classList.add('bg-white', 'border-slate-100', 'opacity-80');
+      });
+
+      callAPI('MARK_ALL_NOTIFICATIONS_READ', { token: state.token }, res => {
+        if (res && res.success) {
+          loadNotifications();
         }
       });
     }
@@ -3813,6 +4053,46 @@
     }
     function closeFAQModal() {
       document.getElementById('modal-faq').classList.add('hidden');
+    }
+
+    // Legal & Privacy Policy Modal
+    function openLegalModal(initialTab = 'terms') {
+      const modal = document.getElementById('modal-legal-doc');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      switchLegalTab(initialTab);
+    }
+
+    function closeLegalModal() {
+      const modal = document.getElementById('modal-legal-doc');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchLegalTab(tab) {
+      const termsBtn = document.getElementById('tab-btn-legal-terms');
+      const privBtn = document.getElementById('tab-btn-legal-privacy');
+      const termsContent = document.getElementById('legal-content-terms');
+      const privContent = document.getElementById('legal-content-privacy');
+
+      if (tab === 'privacy') {
+        if (termsContent) termsContent.classList.add('hidden');
+        if (privContent) privContent.classList.remove('hidden');
+        if (termsBtn) {
+          termsBtn.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 transition text-center';
+        }
+        if (privBtn) {
+          privBtn.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-blue-50 text-blue-800 border border-blue-200 transition text-center';
+        }
+      } else {
+        if (privContent) privContent.classList.add('hidden');
+        if (termsContent) termsContent.classList.remove('hidden');
+        if (privBtn) {
+          privBtn.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 transition text-center';
+        }
+        if (termsBtn) {
+          termsBtn.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-blue-50 text-blue-800 border border-blue-200 transition text-center';
+        }
+      }
     }
 
     // Modals

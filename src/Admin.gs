@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.43
+ * Project: Time Stamp Attendances : TSA V1.0.44
  * File: Admin.gs
  * Description: Administrative management for Users, Locations, and System Configuration.
- * Version: 1.0.43
+ * Version: 1.0.44
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */

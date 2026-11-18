@@ -4,7 +4,21 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.43`. Every subsequent patch increments the patch number by `+1` (`V1.0.44`, `V1.0.45`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.44`. Every subsequent patch increments the patch number by `+1` (`V1.0.45`, `V1.0.46`, ...).
+
+## [1.0.44] - 2026-11-18
+
+### Added
+- **Interactive Notification Read & Real-time Badge Decrement:** Added `handleNotificationClick()` in `src/Index.html` to mark notifications as read on click, remove the unread dot, and immediately decrement the bell badge counter, while displaying a detail popup.
+- **Mark All Notifications as Read:** Added `markAllNotificationsAsRead()` button and function on the notification tab header and `Notify.markAllAsRead()` in `src/Notify.gs` with `MARK_ALL_NOTIFICATIONS_READ` API action.
+- **Visual Unread Indicators:** Implemented distinct visual hierarchy between unread (highlighted background, blue border, pulsing unread dot) and read notifications.
+- **Comprehensive Legal Documentation (Terms & Privacy Policy):**
+  - Created `TERMS_OF_USE.md` (ข้อกำหนดและเงื่อนไขการใช้งานระบบลงเวลาเข้างานออนไลน์) detailing device rules, GPS geofencing, buddy-punching prohibitions, and labor regulations.
+  - Created `PRIVACY_POLICY.md` (นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล) compliant with Thailand PDPA (B.E. 2562) and EU GDPR.
+  - Added dedicated `modal-legal-doc` in `src/Index.html` with Tab navigation between Terms and Privacy Policy, accessible from both the Login screen and Profile screen footers.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.44` (Deployment `@44`).
 
 ## [1.0.43] - 2026-11-18
 
