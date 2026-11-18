@@ -6,7 +6,7 @@ Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
 File          : Index.html
 Module/Layer  : Presentation / Single Page Application (UI/UX Engine)
 Description   : หน้าจอส่วนติดต่อผู้ใช้, ระบบลงเวลา GPS, แผนที่, ปฏิทิน พ.ศ., รายงาน และตั้งค่า
-Version       : 1.0.47
+Version       : 1.0.48
 Author        : TSA Engineering Team
 Created Date  : 2026-11-08
 Last Modified : 2026-11-18
@@ -266,7 +266,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     <!-- Version & Legal Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
-      <div>Version 1.0.47</div>
+      <div>Version 1.0.48</div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
         <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
         <span>•</span>
@@ -620,7 +620,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- Version & Legal Footer -->
         <div class="text-center text-xs text-slate-400 py-3 space-y-1">
-          <div>Version 1.0.47</div>
+          <div>Version 1.0.48</div>
           <div class="flex items-center justify-center gap-2 text-[11px]">
             <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
             <span>•</span>
@@ -1172,11 +1172,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
           </div>
         </div>
 
-        <div class="flex flex-wrap justify-between items-center gap-2 pt-1">
-          <button type="button" onclick="syncOctNovAttendanceFromDoc()" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>นำเข้าเวลา ต.ค.–พ.ย. (จากเอกสาร)</span>
-          </button>
+        <div class="flex justify-end items-center gap-2 pt-1">
           <button type="submit" id="btn-save-report-cfg" class="bg-[#1b4b8a] hover:bg-blue-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>บันทึกการตั้งค่าฟอร์ม</span>
@@ -2875,7 +2871,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
         : '';
 
       const projectHtml = cfg.projectName
-        ? `<div style="font-size:10.5px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
+        ? `<div style="font-size:10px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
         : '';
 
       const contractHtml = cfg.contractNo
@@ -2940,41 +2936,6 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     function printAttendanceReport() {
       window.print();
-    }
-
-    function syncOctNovAttendanceFromDoc() {
-      Swal.fire({
-        title: 'ยืนยันปรับปรุงเวลา ต.ค.–พ.ย. 2569?',
-        text: 'ระบบจะเขียนทับข้อมูลลงเวลาช่วง 1 ต.ค. – 18 พ.ย. 2569 (วันนี้ลงเฉพาะเวลาเข้า) ตามปฏิทินวันทำงานจริง',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#1b4b8a',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: 'ดำเนินการ',
-        cancelButtonText: 'ยกเลิก'
-      }).then(result => {
-        if (!result.isConfirmed) return;
-        Swal.fire({
-          title: 'กำลังปรับปรุงฐานข้อมูล Attendance...',
-          allowOutsideClick: false,
-          didOpen: () => { Swal.showLoading(); }
-        });
-        callAPI('SYNC_OCT_NOV_ATTENDANCE', { token: state.token }, res => {
-          Swal.close();
-          if (res && res.success) {
-            fetchMonthlyAttendanceReport();
-            Swal.fire({
-              icon: 'success',
-              title: 'ปรับปรุงข้อมูลสำเร็จ',
-              text: res.message || 'อัปเดตข้อมูลเวลาทำงาน ต.ค.–พ.ย. 2569 เรียบร้อยแล้ว',
-              confirmButtonColor: '#1b4b8a'
-            });
-          } else {
-            const errMsg = (res && res.error && res.error.message) || 'ไม่สามารถปรับปรุงข้อมูลได้';
-            Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: errMsg, confirmButtonColor: '#1b4b8a' });
-          }
-        });
-      });
     }
 
     // ==========================================

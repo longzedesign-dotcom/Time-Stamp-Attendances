@@ -6,7 +6,7 @@
  * File          : Files.gs
  * Module/Layer  : Storage / Google Drive Media & Asset Storage Service
  * Description   : จัดการอัปโหลดภาพถ่าย Selfie, รูปภาพโปรไฟล์ และจัดเก็บไฟล์โลโก้รายงานลงใน Google Drive
- * Version       : 1.0.47
+ * Version       : 1.0.48
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -16,6 +16,7 @@
  * Revision History:
  * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
  * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
+ * - V1.0.48 (2026-11-18) : Aligned version header with TSA V1.0.48 release
  * ==============================================================================
  */
 

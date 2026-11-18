@@ -4,7 +4,16 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.47`. Every subsequent patch increments the patch number by `+1` (`V1.0.48`, `V1.0.49`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.48`. Every subsequent patch increments the patch number by `+1` (`V1.0.49`, `V1.0.50`, ...).
+
+## [1.0.48] - 2026-11-18
+
+### Changed
+- **Report Template Font Tuning:** Adjusted font size of Project Name (`cfg.projectName`) in Monthly Attendance Report print template from `10.5px` to `10px` in `src/Index.html`, providing optimal breathing room, preventing line wrap/overflow, and ensuring clean single-line alignment across various printer margins and screen widths.
+- **Release Sync:** Updated all source headers in 13 `.gs` files, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.48` (Deployment `@48`).
+
+### Removed
+- **Legacy Hardcoded Script Import Button:** Removed obsolete `[🔄 นำเข้าเวลา ต.ค.–พ.ย. (จากเอกสาร)]` button (`syncOctNovAttendanceFromDoc`) from the report customization panel in `src/Index.html`, as it has been fully superseded by the standardized CSV file import feature (`IMPORT_ATTENDANCE_CSV`).
 
 ## [1.0.47] - 2026-11-18
 
