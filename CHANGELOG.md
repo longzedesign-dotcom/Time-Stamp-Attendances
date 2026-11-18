@@ -4,7 +4,17 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.36`. Every subsequent patch increments the patch number by `+1` (`V1.0.37`, `V1.0.38`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.37`. Every subsequent patch increments the patch number by `+1` (`V1.0.38`, `V1.0.39`, ...).
+
+## [1.0.37] - 2026-11-18
+
+### Added
+- **Monthly Printable Attendance Report & Form Customizer:** Added `รายงานการลงเวลาปฏิบัติงาน` menu item under Settings (after `เชื่อมต่อ Google & LINE Login`) and full A4 portrait printable report modal (`#modal-attendance-report`) in `src/Index.html`.
+- **Real Attendance & Holiday Aggregation:** Added `Reports.getMonthlyAttendanceReport()`, `Reports.getReportFormConfig()`, and `Reports.saveReportFormConfig()` in `src/Reports.gs` (wired via `GET_MONTHLY_REPORT`, `GET_REPORT_FORM_CONFIG`, `SAVE_REPORT_FORM_CONFIG` in `src/Code.gs`) using live `Users`, `Attendance`, and `Holiday` sheet data (`วันหยุดประจำสัปดาห์`, `วันหยุดราชการ` + Holiday Name in `หมายเหตุ`).
+- **Admin Form Template & Drive Logo Upload:** Added `Files.uploadReportLogo()` and shared `Files.uploadPublicImage()` helper in `src/Files.gs` so Admins can upload a company logo to `Report_Assets` and customize `reportTitle`, `projectName`, `contractNo`, and `signerLabel` stored in `ScriptProperties`.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.37` (Deployment `@37`).
 
 ## [1.0.36] - 2026-11-16
 

@@ -1,10 +1,10 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.36
+ * Project: Time Stamp Attendances : TSA V1.0.37
  * File: Files.gs
  * Description: Google Drive integration for storing Selfie images and verification files.
- * Version: 1.0.36
+ * Version: 1.0.37
  * Author: TSA Engineering Team
- * Last Updated: 2026-11-16
+ * Last Updated: 2026-11-18
  */
 
 const Files = {
@@ -54,17 +54,20 @@ const Files = {
   },
 
   /**
-   * Upload Profile Avatar image to Google Drive and return direct display URL
+   * Shared helper: Upload base64 image to a named Drive subfolder and return direct display URL
    */
-  uploadAvatar(base64Data, userCode = 'USER') {
+  uploadPublicImage(folderName, base64Data, filePrefix = 'IMG') {
     if (!base64Data) return null;
     try {
-      const folder = this.getOrCreateSubfolder('Profile_Avatars');
+      const folder = this.getOrCreateSubfolder(folderName);
       const cleanBase64 = String(base64Data).replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/i, '');
+      const mimeMatch = String(base64Data).match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/i);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+      const ext = mimeType.indexOf('png') !== -1 ? 'png' : 'jpg';
       const decodedBytes = Utilities.base64Decode(cleanBase64);
-      const safeCode = String(userCode || 'USER').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const filename = `Avatar_${safeCode}_${Date.now()}.jpg`;
-      const blob = Utilities.newBlob(decodedBytes, 'image/jpeg', filename);
+      const safePrefix = String(filePrefix || 'IMG').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `${safePrefix}_${Date.now()}.${ext}`;
+      const blob = Utilities.newBlob(decodedBytes, mimeType, filename);
       const file = folder.createFile(blob);
 
       let shared = false;
@@ -72,7 +75,7 @@ const Files = {
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         shared = true;
       } catch (shareErr) {
-        Logger.log('Avatar sharing fallback: ' + shareErr.toString());
+        Logger.log('Image sharing fallback: ' + shareErr.toString());
       }
 
       const fileId = file.getId();
@@ -83,8 +86,23 @@ const Files = {
         shared: shared
       };
     } catch (err) {
-      Logger.log('Error uploading avatar: ' + err.toString());
+      Logger.log('Error uploading image: ' + err.toString());
       return null;
     }
+  },
+
+  /**
+   * Upload Profile Avatar image to Google Drive and return direct display URL
+   */
+  uploadAvatar(base64Data, userCode = 'USER') {
+    const safeCode = String(userCode || 'USER').replace(/[^a-zA-Z0-9_-]/g, '_');
+    return this.uploadPublicImage('Profile_Avatars', base64Data, `Avatar_${safeCode}`);
+  },
+
+  /**
+   * Upload Attendance Report Form Logo to Google Drive and return direct display URL
+   */
+  uploadReportLogo(base64Data) {
+    return this.uploadPublicImage('Report_Assets', base64Data, 'ReportLogo');
   }
 };

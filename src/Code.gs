@@ -1,10 +1,10 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.36
+ * Project: Time Stamp Attendances : TSA V1.0.37
  * File: Code.gs
  * Description: Web App Entry Point and Client-Server API Dispatcher.
- * Version: 1.0.36
+ * Version: 1.0.37
  * Author: TSA Engineering Team
- * Last Updated: 2026-11-16
+ * Last Updated: 2026-11-18
  */
 
 function doGet(e) {
@@ -144,6 +144,15 @@ function apiDispatcher(action, payload) {
       // Reports & Admin
       case 'GET_MONTHLY_SUMMARY':
         res = Reports.getMonthlySummary(token, data.year, data.month);
+        break;
+      case 'GET_MONTHLY_REPORT':
+        res = Reports.getMonthlyAttendanceReport(token, data.year, data.month, data.targetUserId);
+        break;
+      case 'GET_REPORT_FORM_CONFIG':
+        res = Reports.getReportFormConfig(token);
+        break;
+      case 'SAVE_REPORT_FORM_CONFIG':
+        res = Reports.saveReportFormConfig(token, data.reportConfig);
         break;
       case 'EXPORT_CSV':
         res = Reports.exportCSV(token, data.year, data.month);

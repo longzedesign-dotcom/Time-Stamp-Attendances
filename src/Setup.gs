@@ -1,10 +1,10 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.36
+ * Project: Time Stamp Attendances : TSA V1.0.37
  * File: Setup.gs
  * Description: Enterprise Database Setup & Self-Healing Schema Manager.
- * Version: 1.0.36
+ * Version: 1.0.37
  * Author: TSA Engineering Team
- * Last Updated: 2026-11-16
+ * Last Updated: 2026-11-18
  */
 
 function setupDatabase() {
