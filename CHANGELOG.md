@@ -4,7 +4,14 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.48`. Every subsequent patch increments the patch number by `+1` (`V1.0.49`, `V1.0.50`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.49`. Every subsequent patch increments the patch number by `+1` (`V1.0.50`, `V1.0.51`, ...).
+
+## [1.0.49] - 2026-11-18
+
+### Changed
+- **Report Template Project Title Optimization:** Enhanced font size and visual weight of Project Name (`cfg.projectName`) to `11.5px` with Medium font weight (`font-weight: 500`), perfectly filling the single header line with balanced margins (~17px buffer on each side), maximizing readability without colliding or overlapping with the organization logo on the left.
+- **Contract Number Font Balance:** Tuned Contract Number (`cfg.contractNo`) to `11px` to maintain a harmonious 3-tier visual hierarchy (Title: 12px Bold $\rightarrow$ Project: 11.5px Medium $\rightarrow$ Contract: 11px Regular).
+- **Release Sync:** Updated all source headers in 13 `.gs` files, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.49` (Deployment `@49`).
 
 ## [1.0.48] - 2026-11-18
 

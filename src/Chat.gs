@@ -6,7 +6,7 @@
  * File          : Chat.gs
  * Module/Layer  : Collaboration / Internal Messaging & Support Ticket Service
  * Description   : ระบบห้องแชตภายในองค์กร, ฐานความรู้คำถามที่พบบ่อย (FAQ) และระบบเปิดเคสสอบถามฝ่ายบุคคล (HR)
- * Version       : 1.0.48
+ * Version       : 1.0.49
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -17,6 +17,7 @@
  * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
  * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
  * - V1.0.48 (2026-11-18) : Aligned version header with TSA V1.0.48 release
+ * - V1.0.49 (2026-11-18) : Aligned version header with TSA V1.0.49 release
  * ==============================================================================
  */
 

@@ -6,7 +6,7 @@ Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
 File          : Index.html
 Module/Layer  : Presentation / Single Page Application (UI/UX Engine)
 Description   : หน้าจอส่วนติดต่อผู้ใช้, ระบบลงเวลา GPS, แผนที่, ปฏิทิน พ.ศ., รายงาน และตั้งค่า
-Version       : 1.0.48
+Version       : 1.0.49
 Author        : TSA Engineering Team
 Created Date  : 2026-11-08
 Last Modified : 2026-11-18
@@ -266,7 +266,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     <!-- Version & Legal Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
-      <div>Version 1.0.48</div>
+      <div>Version 1.0.49</div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
         <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
         <span>•</span>
@@ -620,7 +620,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- Version & Legal Footer -->
         <div class="text-center text-xs text-slate-400 py-3 space-y-1">
-          <div>Version 1.0.48</div>
+          <div>Version 1.0.49</div>
           <div class="flex items-center justify-center gap-2 text-[11px]">
             <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
             <span>•</span>
@@ -2871,11 +2871,11 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
         : '';
 
       const projectHtml = cfg.projectName
-        ? `<div style="font-size:10px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
+        ? `<div style="font-size:11.5px;font-weight:500;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
         : '';
 
       const contractHtml = cfg.contractNo
-        ? `<div style="font-size:11.5px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.contractNo)}</div>`
+        ? `<div style="font-size:11px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.contractNo)}</div>`
         : '';
 
       const bodyRowsHtml = rows.map(r => {
