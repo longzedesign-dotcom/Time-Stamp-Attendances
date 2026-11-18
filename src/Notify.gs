@@ -6,7 +6,7 @@
  * File          : Notify.gs
  * Module/Layer  : Messaging / In-App Notifications & Broadcast Announcement Service
  * Description   : จัดการการแจ้งเตือนภายในแอป, การนับจำนวนค้างอ่าน (Unread Counter) และประกาศฉุกเฉินระดับองค์กร
- * Version       : 1.0.46
+ * Version       : 1.0.47
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -15,6 +15,7 @@
  * ------------------------------------------------------------------------------
  * Revision History:
  * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * - V1.0.47 (2026-11-18) : Aligned version header with TSA V1.0.47 release
  * ==============================================================================
  */
 

@@ -6,7 +6,7 @@
  * File          : Code.gs
  * Module/Layer  : Application Controller / Web App Entry Point & API Dispatcher
  * Description   : จุดรับคำขอหลัก (doGet/doPost), ประมวลผล OAuth Callback และ Universal API Dispatcher
- * Version       : 1.0.46
+ * Version       : 1.0.47
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -15,6 +15,7 @@
  * ------------------------------------------------------------------------------
  * Revision History:
  * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * - V1.0.47 (2026-11-18) : Added GET_DEPARTMENTS API route for profile editing
  * ==============================================================================
  */
 
@@ -91,6 +92,9 @@ function apiDispatcher(action, payload) {
         break;
       case 'UPDATE_PROFILE':
         res = Auth.updateProfile(token, data.profileData);
+        break;
+      case 'GET_DEPARTMENTS':
+        res = Auth.getDepartments(token);
         break;
       case 'START_OAUTH':
         res = Auth.createOAuthAuthUrl(data.provider);

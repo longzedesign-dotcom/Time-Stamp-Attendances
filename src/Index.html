@@ -6,7 +6,7 @@ Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
 File          : Index.html
 Module/Layer  : Presentation / Single Page Application (UI/UX Engine)
 Description   : หน้าจอส่วนติดต่อผู้ใช้, ระบบลงเวลา GPS, แผนที่, ปฏิทิน พ.ศ., รายงาน และตั้งค่า
-Version       : 1.0.46
+Version       : 1.0.47
 Author        : TSA Engineering Team
 Created Date  : 2026-11-08
 Last Modified : 2026-11-18
@@ -266,7 +266,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     <!-- Version & Legal Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
-      <div>Version 1.0.46</div>
+      <div>Version 1.0.47</div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
         <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
         <span>•</span>
@@ -508,7 +508,13 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- User Information Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
-          <h4 class="text-xs font-semibold text-slate-400 mb-3">ข้อมูลผู้ใช้งาน</h4>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-semibold text-slate-400">ข้อมูลผู้ใช้งาน</h4>
+            <button type="button" onclick="openEditProfileModal()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1.5 py-1 px-2.5 rounded-lg hover:bg-blue-50 transition border border-blue-200">
+              <i class="fa-solid fa-user-pen text-[11px]"></i>
+              <span>แก้ไขข้อมูล</span>
+            </button>
+          </div>
           <div class="space-y-3 text-sm">
             <div class="flex items-start justify-between">
               <span class="text-slate-500 text-xs">อีเมล:</span>
@@ -614,7 +620,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- Version & Legal Footer -->
         <div class="text-center text-xs text-slate-400 py-3 space-y-1">
-          <div>Version 1.0.46</div>
+          <div>Version 1.0.47</div>
           <div class="flex items-center justify-center gap-2 text-[11px]">
             <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
             <span>•</span>
@@ -1862,6 +1868,161 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
     </div>
   </div>
 
+  <!-- Modal: Edit User Profile & Change Password (TSA V1.0.47) -->
+  <div id="modal-edit-profile" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white px-5 py-4 flex items-center justify-between shadow shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
+            <i class="fa-solid fa-user-pen text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold tracking-wide">แก้ไขข้อมูลส่วนตัว</h3>
+            <p class="text-[10px] text-blue-100">ปรับปรุงข้อมูลบัญชีผู้ใช้และรหัสผ่านเข้าสู่ระบบ</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditProfileModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="form-edit-profile" onsubmit="submitEditProfile(event)" class="overflow-y-auto custom-scroll p-5 space-y-4 text-xs">
+        
+        <!-- Full Name -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">ชื่อ - สกุล <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-id-badge text-xs"></i>
+            </span>
+            <input type="text" id="edit-profile-fullname" required placeholder="เช่น นายเฉลิมพร ถาโคตร"
+              class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">อีเมล <span class="text-rose-500">*</span></label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-envelope text-xs"></i>
+            </span>
+            <input type="email" id="edit-profile-email" required placeholder="เช่น email@example.com"
+              class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">ใช้สำหรับเข้าสู่ระบบและการแจ้งเตือนของระบบ</p>
+        </div>
+
+        <!-- Department & Position -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">สังกัด / ฝ่าย</label>
+            <div class="relative">
+              <select id="edit-profile-dept"
+                class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs bg-white">
+                <option value="ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร">ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ตำแหน่งงาน</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-briefcase text-xs"></i>
+              </span>
+              <input type="text" id="edit-profile-position" placeholder="เช่น System Admin, IT Support"
+                class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-200 my-2">
+
+        <!-- Section: Change Password Toggle -->
+        <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="edit-profile-toggle-password" onchange="toggleChangePasswordFields()"
+              class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
+            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-key text-blue-600"></i>
+              <span>ต้องการเปลี่ยนรหัสผ่านเข้าสู่ระบบ</span>
+            </span>
+          </label>
+          <p class="text-[10px] text-slate-500 mt-1 pl-6">ทำเครื่องหมายหากต้องการตั้งรหัสผ่านใหม่ (หากไม่ต้องการเปลี่ยน ให้เว้นว่างไว้)</p>
+
+          <!-- Password fields container (hidden by default) -->
+          <div id="edit-profile-password-fields" class="hidden mt-3 pt-3 border-t border-slate-200 space-y-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">รหัสผ่านเดิม <span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-lock text-xs"></i>
+                </span>
+                <input type="password" id="edit-profile-current-password" placeholder="กรอกรหัสผ่านเดิมปัจจุบัน" autocomplete="current-password"
+                  class="w-full pl-9 pr-9 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+                <button type="button" onclick="toggleEyePassword('edit-profile-current-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                  <i class="fa-regular fa-eye text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">รหัสผ่านใหม่ (ขั้นต่ำ 6 ตัวอักษร) <span class="text-rose-500">*</span></label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-key text-xs"></i>
+                  </span>
+                  <input type="password" id="edit-profile-new-password" placeholder="ตั้งรหัสผ่านใหม่" autocomplete="new-password"
+                    class="w-full pl-9 pr-9 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+                  <button type="button" onclick="toggleEyePassword('edit-profile-new-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                    <i class="fa-regular fa-eye text-xs"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">ยืนยันรหัสผ่านใหม่ <span class="text-rose-500">*</span></label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-check-double text-xs"></i>
+                  </span>
+                  <input type="password" id="edit-profile-confirm-password" placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" autocomplete="new-password"
+                    class="w-full pl-9 pr-9 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 text-xs">
+                  <button type="button" onclick="toggleEyePassword('edit-profile-confirm-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                    <i class="fa-regular fa-eye text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="password-match-hint" class="text-[10px] text-slate-400"></div>
+          </div>
+        </div>
+
+        <!-- Notification feedback alert inside modal -->
+        <div id="edit-profile-alert" class="hidden p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+        <!-- Form Action Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" onclick="closeEditProfileModal()"
+            class="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition text-xs">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-submit-edit-profile"
+            class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition flex items-center gap-2 shadow-md shadow-blue-500/20 text-xs">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>บันทึกการเปลี่ยนแปลง</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== SERVER OAUTH BOOT PAYLOAD ==================== -->
   <script>
     window.__OAUTH_BOOT__ = <?!= typeof oauthBootJson !== 'undefined' ? oauthBootJson : 'null' ?>;
@@ -2067,9 +2228,10 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
       document.getElementById('header-fullname').innerText = user.FullName || 'คุณ เฉลิมพร ถาโคตร';
       document.getElementById('header-shift').innerText = `เวลาทำงาน ${user.WorkStart || '8:30'} – ${user.WorkEnd || '16:30'}`;
       document.getElementById('profile-fullname').innerText = user.FullName || 'คุณ เฉลิมพร ถาโคตร';
-      document.getElementById('profile-position').innerText = user.Position || 'IT Support';
+      document.getElementById('profile-position').innerText = user.Position || 'System Admin';
       document.getElementById('profile-email').innerText = user.Email || '';
-      document.getElementById('profile-dept').innerText = user.DepartmentID === 'IT' ? 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' : user.DepartmentID;
+      const deptDisplay = (user.DepartmentID === 'IT' || !user.DepartmentID) ? (user.Department || 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร') : (user.DepartmentName || user.DepartmentID);
+      document.getElementById('profile-dept').innerText = deptDisplay;
       renderUserAvatars(user.AvatarUrl || '');
 
       // Location Settings button is ONLY visible for ADMIN users
@@ -4243,6 +4405,237 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
     }
 
     // Modals
+    // ==========================================
+    // Edit User Profile & Change Password Modal (TSA V1.0.47)
+    // ==========================================
+    let cachedDepartments = null;
+
+    function openEditProfileModal() {
+      const modal = document.getElementById('modal-edit-profile');
+      if (!modal) return;
+
+      const user = state.user || {};
+      const fullNameInput = document.getElementById('edit-profile-fullname');
+      const emailInput = document.getElementById('edit-profile-email');
+      const deptSelect = document.getElementById('edit-profile-dept');
+      const positionInput = document.getElementById('edit-profile-position');
+      const togglePass = document.getElementById('edit-profile-toggle-password');
+      const passFields = document.getElementById('edit-profile-password-fields');
+      const currentPass = document.getElementById('edit-profile-current-password');
+      const newPass = document.getElementById('edit-profile-new-password');
+      const confirmPass = document.getElementById('edit-profile-confirm-password');
+      const alertBox = document.getElementById('edit-profile-alert');
+      const matchHint = document.getElementById('password-match-hint');
+
+      if (fullNameInput) fullNameInput.value = user.FullName || '';
+      if (emailInput) emailInput.value = user.Email || '';
+      if (positionInput) positionInput.value = user.Position || '';
+      if (togglePass) togglePass.checked = false;
+      if (passFields) passFields.classList.add('hidden');
+      if (currentPass) currentPass.value = '';
+      if (newPass) newPass.value = '';
+      if (confirmPass) confirmPass.value = '';
+      if (alertBox) {
+        alertBox.className = 'hidden';
+        alertBox.innerHTML = '';
+      }
+      if (matchHint) matchHint.innerHTML = '';
+
+      // Populate departments
+      const currentDept = user.DepartmentID === 'IT' ? 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' : (user.DepartmentID || user.Department || 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร');
+
+      const renderDeptOptions = (depts) => {
+        if (!deptSelect) return;
+        deptSelect.innerHTML = '';
+        let foundCurrent = false;
+        depts.forEach(d => {
+          const opt = document.createElement('option');
+          const val = d.DepartmentName || d.DepartmentID;
+          opt.value = val;
+          opt.textContent = val;
+          if (val === currentDept || d.DepartmentID === user.DepartmentID) {
+            opt.selected = true;
+            foundCurrent = true;
+          }
+          deptSelect.appendChild(opt);
+        });
+        if (!foundCurrent && currentDept) {
+          const opt = document.createElement('option');
+          opt.value = currentDept;
+          opt.textContent = currentDept;
+          opt.selected = true;
+          deptSelect.insertBefore(opt, deptSelect.firstChild);
+        }
+      };
+
+      if (cachedDepartments && cachedDepartments.length > 0) {
+        renderDeptOptions(cachedDepartments);
+      } else {
+        const fallbackDepts = [
+          { DepartmentID: 'IT', DepartmentName: 'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร' },
+          { DepartmentID: 'HR', DepartmentName: 'สำนักบริหารกลาง / ฝ่ายทรัพยากรบุคคล (HR)' },
+          { DepartmentID: 'PMO', DepartmentName: 'ฝ่ายบริหารโครงการและสัญญา' },
+          { DepartmentID: 'NET', DepartmentName: 'ฝ่ายเทคโนโลยีสารสนเทศและระบบเครือข่าย' },
+          { DepartmentID: 'ENG', DepartmentName: 'ฝ่ายวิศวกรรมและสนับสนุนเทคนิค' },
+          { DepartmentID: 'FIN', DepartmentName: 'ฝ่ายการเงินและพัสดุ' },
+          { DepartmentID: 'AUDIT', DepartmentName: 'ฝ่ายตรวจสอบภายใน' },
+          { DepartmentID: 'PLAN', DepartmentName: 'ฝ่ายแผนงานและยุทธศาสตร์' },
+          { DepartmentID: 'LEGAL', DepartmentName: 'ฝ่ายกฎหมายและวินัย' }
+        ];
+        renderDeptOptions(fallbackDepts);
+
+        callAPI('GET_DEPARTMENTS', {}, res => {
+          if (res && res.success && res.data && res.data.departments) {
+            cachedDepartments = res.data.departments;
+            renderDeptOptions(cachedDepartments);
+          }
+        });
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeEditProfileModal() {
+      const modal = document.getElementById('modal-edit-profile');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleChangePasswordFields() {
+      const toggle = document.getElementById('edit-profile-toggle-password');
+      const container = document.getElementById('edit-profile-password-fields');
+      const currentPass = document.getElementById('edit-profile-current-password');
+      if (!toggle || !container) return;
+      if (toggle.checked) {
+        container.classList.remove('hidden');
+        if (currentPass) currentPass.focus();
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function toggleEyePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) {
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        }
+      } else {
+        input.type = 'password';
+        if (icon) {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      }
+    }
+
+    function submitEditProfile(event) {
+      if (event) event.preventDefault();
+
+      const fullName = (document.getElementById('edit-profile-fullname')?.value || '').trim();
+      const email = (document.getElementById('edit-profile-email')?.value || '').trim().toLowerCase();
+      const dept = document.getElementById('edit-profile-dept')?.value || '';
+      const position = (document.getElementById('edit-profile-position')?.value || '').trim();
+      const isChangePassword = !!document.getElementById('edit-profile-toggle-password')?.checked;
+      const currentPassword = (document.getElementById('edit-profile-current-password')?.value || '').trim();
+      const newPassword = (document.getElementById('edit-profile-new-password')?.value || '').trim();
+      const confirmPassword = (document.getElementById('edit-profile-confirm-password')?.value || '').trim();
+
+      const alertBox = document.getElementById('edit-profile-alert');
+      const showAlert = (msg, isSuccess = false) => {
+        if (!alertBox) return;
+        alertBox.className = `p-3 rounded-xl text-xs flex items-center gap-2 ${
+          isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
+        }`;
+        alertBox.innerHTML = `<i class="fa-solid ${isSuccess ? 'fa-circle-check text-emerald-600' : 'fa-circle-exclamation text-rose-600'}"></i> <span>${msg}</span>`;
+        alertBox.classList.remove('hidden');
+      };
+
+      if (!fullName) {
+        showAlert('กรุณาระบุชื่อ-นามสกุล');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        showAlert('กรุณาระบุรูปแบบอีเมลที่ถูกต้อง (เช่น yourname@domain.com)');
+        return;
+      }
+
+      if (isChangePassword) {
+        if (!currentPassword) {
+          showAlert('กรุณากรอกรหัสผ่านเดิมเพื่อยืนยัน');
+          return;
+        }
+        if (newPassword.length < 6) {
+          showAlert('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          showAlert('รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน');
+          return;
+        }
+        if (newPassword === currentPassword) {
+          showAlert('รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านเดิม');
+          return;
+        }
+      }
+
+      const submitBtn = document.getElementById('btn-submit-edit-profile');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึก...</span>';
+      }
+
+      const payload = {
+        FullName: fullName,
+        Email: email,
+        DepartmentID: dept,
+        Position: position,
+        changePassword: isChangePassword,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword
+      };
+
+      callAPI('UPDATE_PROFILE', { profileData: payload }, res => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+
+        if (res && res.success) {
+          if (res.data && res.data.user) {
+            state.user = Object.assign({}, state.user, res.data.user);
+            applyUserData(state.user);
+          }
+          closeEditProfileModal();
+          Swal.fire({
+            toast: true,
+            position: 'top',
+            icon: 'success',
+            title: res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          const errMsg = (res && res.message) ? res.message : 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
+          showAlert(errMsg);
+          Swal.fire({
+            icon: 'error',
+            title: 'ไม่สามารถบันทึกข้อมูลได้',
+            text: errMsg,
+            confirmButtonColor: '#1976d2',
+            confirmButtonText: 'ตกลง'
+          });
+        }
+      });
+    }
+
     function openFilterModal() { document.getElementById('modal-filter').classList.remove('hidden'); }
     function closeFilterModal() { document.getElementById('modal-filter').classList.add('hidden'); }
     function applyDateFilter() {

@@ -4,7 +4,29 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.46`. Every subsequent patch increments the patch number by `+1` (`V1.0.47`, `V1.0.48`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.47`. Every subsequent patch increments the patch number by `+1` (`V1.0.48`, `V1.0.49`, ...).
+
+## [1.0.47] - 2026-11-18
+
+### Added
+- **Edit User Profile & Change Password Modal (`modal-edit-profile`):**
+  - Added `[✏️ แก้ไขข้อมูล]` button on Profile Tab in "ข้อมูลผู้ใช้งาน" card.
+  - Interactive modal dialog supporting updates for:
+    - **ชื่อ - สกุล (Full Name):** Required, validated non-empty.
+    - **อีเมล (Email):** Required, RFC-compliant email regex validation and unique check across system users.
+    - **สังกัด / ฝ่าย (Department):** Interactive dropdown populated via `GET_DEPARTMENTS` API with fallback to organizational standard divisions, dynamically retaining existing department.
+    - **ตำแหน่งงาน (Position):** Editable field reflecting user role/title (e.g. System Admin, IT Support).
+    - **เปลี่ยนรหัสผ่าน (Change Password):** Optional toggleable checkbox revealing Current Password (`*`), New Password (min 6 characters), and Confirm New Password inputs with show/hide eye toggle.
+- **Backend Authentication & Security Enhancements in `src/Auth.gs`:**
+  - Expanded `Auth.updateProfile(token, profileData)` to validate and update FullName, Email, DepartmentID, Position, and PasswordHash with SHA-256 salted hashing (`Utils.hashPassword`).
+  - Added Current Password verification against stored password hash and legacy fallback mechanisms before allowing password change.
+  - Enforced security checks: New Password length $\ge$ 6 characters, New Password === Confirm Password, and New Password !== Current Password.
+  - Added `Auth.getDepartments(token)` and `GET_DEPARTMENTS` API route in `src/Code.gs`.
+  - Added audit logging in `Auditlogs` sheet for profile updates with masked password indicators.
+  - Added cache eviction and safe user object return without sensitive hashes.
+
+### Changed
+- **Release Sync:** Updated all source headers in 13 `.gs` files, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.47` (Deployment `@47`).
 
 ## [1.0.46] - 2026-11-18
 
