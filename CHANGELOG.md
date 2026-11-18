@@ -4,7 +4,18 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.42`. Every subsequent patch increments the patch number by `+1` (`V1.0.43`, `V1.0.44`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.43`. Every subsequent patch increments the patch number by `+1` (`V1.0.44`, `V1.0.45`, ...).
+
+## [1.0.43] - 2026-11-18
+
+### Added
+- **CSV Attendance Import on Report View Modal:** Added `Admin.importAttendanceCsv()` backend endpoint and interactive UI in `src/Index.html` (`report-import-panel`) allowing Admins/Supervisors to import attendance records directly from external `.csv` files on the same screen as the monthly report.
+- **Client-Side CSV Template Download:** Added 1-click download buttons for `attendance_template_october_2026.csv` (complete 31-day October 2026 sample) and `attendance_template_blank.csv` with UTF-8 BOM (`\uFEFF`) ensuring seamless Thai character compatibility in Microsoft Excel.
+- **Instant Client-Side CSV Validation & 5-Row Preview:** Added real-time CSV parser in `src/Index.html` that validates column headers, checks working day counts, calculates absent/weekend days, and renders a compact preview table before committing.
+- **Auto-Refresh Live Sheet:** Automatically refreshes the A4 monthly attendance report sheet immediately after successful CSV import without requiring page reloads.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.43` (Deployment `@43`).
 
 ## [1.0.42] - 2026-11-18
 

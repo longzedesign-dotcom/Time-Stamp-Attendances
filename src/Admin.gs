@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.42
+ * Project: Time Stamp Attendances : TSA V1.0.43
  * File: Admin.gs
  * Description: Administrative management for Users, Locations, and System Configuration.
- * Version: 1.0.42
+ * Version: 1.0.43
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -383,5 +383,249 @@ const Admin = {
       workingDaysCount: workingDaysCount,
       insertedRows: records.length
     }, `ปรับปรุงข้อมูลลงเวลา ต.ค.–พ.ย. 2569 สำเร็จ (${workingDaysCount} วันทำงาน / ${records.length} รายการ)`);
+  },
+
+  /**
+   * Import Attendance records from CSV data/rows
+   * @param {string} token
+   * @param {Array<Object>|string} inputData - Array of parsed objects or raw CSV string
+   * @param {Object} options - { overwrite: boolean, defaultLocationId: string }
+   */
+  importAttendanceCsv(token, inputData, options = {}) {
+    const valid = Auth.validateSession(token);
+    if (!valid.success) return valid;
+    const operator = valid.data.user;
+    if (operator.Role !== CONFIG.ROLES.ADMIN && operator.Role !== CONFIG.ROLES.SUPERVISOR) {
+      return Utils.error('เฉพาะผู้ดูแลระบบ (Admin) หรือหัวหน้างาน (Supervisor) เท่านั้นที่นำเข้าข้อมูลเวลาได้', 'FORBIDDEN');
+    }
+
+    if (!inputData) {
+      return Utils.error('ไม่พบข้อมูลที่จะนำเข้า กรุณาเลือกไฟล์ .CSV');
+    }
+
+    let rows = [];
+    if (Array.isArray(inputData)) {
+      rows = inputData;
+    } else if (typeof inputData === 'string') {
+      rows = this.parseCsvToObjects(inputData);
+    }
+
+    if (!rows || rows.length === 0) {
+      return Utils.error('ไม่พบข้อมูลแถวในไฟล์ CSV หรือไฟล์ว่างเปล่า');
+    }
+
+    const allUsers = Db.getAll(CONFIG.SHEETS.USERS) || [];
+    const userMapByCode = {};
+    const userMapByName = {};
+    allUsers.forEach(u => {
+      if (u.EmployeeCode) userMapByCode[String(u.EmployeeCode).trim().toUpperCase()] = u;
+      if (u.FullName) userMapByName[String(u.FullName).trim()] = u;
+    });
+
+    const locations = Db.find(CONFIG.SHEETS.LOCATIONS, l => l.Status !== 'Inactive') || [];
+    const loc = locations[0] || {
+      LocationID: 'LOC001',
+      LocationName: 'สำนักงานหลัก',
+      Address: '567 ถนนนนทบุรี ต.บางกระสอ อ.เมือง จ.นนทบุรี 11000',
+      Latitude: 13.91094031,
+      Longitude: 100.5946153
+    };
+
+    const overwrite = options.overwrite !== false; // default true
+    const baseStamp = Date.now();
+    const newRecords = [];
+    let importedDays = 0;
+    let skippedRows = 0;
+    const touchedUserDates = {}; // "userId_workDate" -> true
+
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const rawDate = r.WorkDate || r.Date || r.วันที่ || '';
+      const isoDate = Utils.formatISODate(rawDate);
+      if (!isoDate) {
+        skippedRows++;
+        continue;
+      }
+
+      const empCode = String(r.EmployeeCode || r.EmpCode || r.รหัสพนักงาน || '').trim().toUpperCase();
+      const fullName = String(r.FullName || r.Name || r.ชื่อ || '').trim();
+
+      let targetUser = userMapByCode[empCode] || userMapByName[fullName];
+      if (!targetUser) {
+        // Fallback: If only 1 employee in system or operator itself
+        targetUser = allUsers.find(u => String(u.EmployeeCode || '') === 'E0001') || operator;
+      }
+
+      const checkInRaw = String(r.CheckIn || r.InTime || r.เข้า || '').trim();
+      const checkOutRaw = String(r.CheckOut || r.OutTime || r.ออก || '').trim();
+      const remark = String(r.Remark || r.หมายเหตุ || '').trim();
+
+      const cleanCheckIn = this.normalizeTime(checkInRaw);
+      const cleanCheckOut = this.normalizeTime(checkOutRaw);
+
+      if (!cleanCheckIn && !cleanCheckOut) {
+        // Weekend or Holiday or absent row with no stamps
+        skippedRows++;
+        continue;
+      }
+
+      importedDays++;
+      const userDateKey = `${targetUser.UserID}_${isoDate}`;
+      touchedUserDates[userDateKey] = { userId: String(targetUser.UserID), workDate: isoDate };
+
+      // 1. Check-In Stamp
+      if (cleanCheckIn) {
+        const isLate = Utils.timeToMinutes(cleanCheckIn) > (8 * 60 + 30); // Late after 08:30
+        newRecords.push({
+          AttendanceID: `ATT${baseStamp}_${i + 1}_IN`,
+          UserID: String(targetUser.UserID),
+          EmployeeCode: String(targetUser.EmployeeCode || ''),
+          FullName: String(targetUser.FullName || ''),
+          WorkDate: isoDate,
+          WorkTime: cleanCheckIn,
+          Type: CONFIG.ATTENDANCE_TYPE.CHECK_IN,
+          Status: isLate ? CONFIG.ATTENDANCE_STATUS.LATE : CONFIG.ATTENDANCE_STATUS.ON_TIME,
+          Latitude: loc.Latitude || 13.91094031,
+          Longitude: loc.Longitude || 100.5946153,
+          Accuracy: 15,
+          DistanceMeter: 0,
+          LocationID: loc.LocationID || 'LOC001',
+          LocationName: loc.LocationName || 'สำนักงานหลัก',
+          Address: loc.Address || '',
+          DeviceInfo: 'CSV Import',
+          WorkMode: CONFIG.WORK_MODES.ONSITE,
+          WorkMinutes: 0,
+          SelfieUrl: '',
+          Remark: remark,
+          CreatedAt: `${isoDate}T${cleanCheckIn}+07:00`
+        });
+      }
+
+      // 2. Check-Out Stamp
+      if (cleanCheckOut) {
+        let workMins = 0;
+        if (cleanCheckIn) {
+          workMins = Math.max(0, Utils.timeToMinutes(cleanCheckOut) - Utils.timeToMinutes(cleanCheckIn));
+        }
+        newRecords.push({
+          AttendanceID: `ATT${baseStamp}_${i + 1}_OUT`,
+          UserID: String(targetUser.UserID),
+          EmployeeCode: String(targetUser.EmployeeCode || ''),
+          FullName: String(targetUser.FullName || ''),
+          WorkDate: isoDate,
+          WorkTime: cleanCheckOut,
+          Type: CONFIG.ATTENDANCE_TYPE.CHECK_OUT,
+          Status: CONFIG.ATTENDANCE_STATUS.CHECKED_OUT,
+          Latitude: loc.Latitude || 13.91094031,
+          Longitude: loc.Longitude || 100.5946153,
+          Accuracy: 15,
+          DistanceMeter: 0,
+          LocationID: loc.LocationID || 'LOC001',
+          LocationName: loc.LocationName || 'สำนักงานหลัก',
+          Address: loc.Address || '',
+          DeviceInfo: 'CSV Import',
+          WorkMode: CONFIG.WORK_MODES.ONSITE,
+          WorkMinutes: workMins,
+          SelfieUrl: '',
+          Remark: remark,
+          CreatedAt: `${isoDate}T${cleanCheckOut}+07:00`
+        });
+      }
+    }
+
+    if (newRecords.length === 0) {
+      return Utils.error(`ไม่มีรายการเวลาเข้า-ออกที่ถูกต้องในไฟล์ (ข้าม ${skippedRows} แถว)`);
+    }
+
+    // Save to Database under Lock
+    Db.withLock(() => {
+      // If overwrite, delete existing attendance rows for these users on these dates
+      if (overwrite) {
+        Db.delete(CONFIG.SHEETS.ATTENDANCE, a => {
+          const uId = String(a.UserID);
+          const wDate = Utils.formatISODate(a.WorkDate);
+          return Boolean(touchedUserDates[`${uId}_${wDate}`]);
+        });
+      }
+
+      const sheet = Db.getSheet(CONFIG.SHEETS.ATTENDANCE);
+      let headers = Db.getHeaders(CONFIG.SHEETS.ATTENDANCE);
+      if (headers.length === 0) {
+        headers = Object.keys(newRecords[0]);
+        Db.setHeaders(CONFIG.SHEETS.ATTENDANCE, headers);
+      }
+      const matrix = newRecords.map(rec =>
+        headers.map(h => (rec[h] !== undefined && rec[h] !== null ? rec[h] : ''))
+      );
+      const startRow = sheet.getLastRow() + 1;
+      sheet.getRange(startRow, 1, matrix.length, headers.length).setValues(matrix);
+    });
+
+    Db.logAudit(operator.UserID, 'IMPORT_ATTENDANCE_CSV', {
+      importedDays: importedDays,
+      totalInsertedRows: newRecords.length,
+      skippedRows: skippedRows,
+      overwrite: overwrite
+    });
+
+    return Utils.success({
+      importedDays: importedDays,
+      totalInsertedRows: newRecords.length,
+      skippedRows: skippedRows,
+      sampleRecords: newRecords.slice(0, 4)
+    }, `นำเข้าข้อมูลเวลาสำเร็จ ${importedDays} วัน (${newRecords.length} รายการเข้า-ออก)`);
+  },
+
+  /**
+   * Helper: Normalize time string to HH:mm:ss
+   */
+  normalizeTime(timeStr) {
+    if (!timeStr) return '';
+    const clean = String(timeStr).trim().replace(/\./g, ':');
+    const parts = clean.split(':');
+    if (parts.length < 2) return '';
+    const h = String(parseInt(parts[0], 10) || 0).padStart(2, '0');
+    const m = String(parseInt(parts[1], 10) || 0).padStart(2, '0');
+    const s = parts[2] ? String(parseInt(parts[2], 10) || 0).padStart(2, '0') : '00';
+    return `${h}:${m}:${s}`;
+  },
+
+  /**
+   * Helper: Parse CSV string to array of objects
+   */
+  parseCsvToObjects(csvText) {
+    if (!csvText) return [];
+    const cleanText = csvText.charCodeAt(0) === 0xFEFF ? csvText.slice(1) : csvText;
+    const lines = cleanText.split(/\r?\n/).filter(line => line.trim().length > 0);
+    if (lines.length < 2) return [];
+
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    const result = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+      for (let c = 0; c < line.length; c++) {
+        const char = line[c];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current.trim().replace(/^["']|["']$/g, ''));
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current.trim().replace(/^["']|["']$/g, ''));
+
+      const rowObj = {};
+      headers.forEach((h, idx) => {
+        rowObj[h] = values[idx] !== undefined ? values[idx] : '';
+      });
+      result.push(rowObj);
+    }
+    return result;
   }
 };

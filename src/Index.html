@@ -1,8 +1,8 @@
 <!--
- * Project: Time Stamp Attendances : TSA V1.0.42
+ * Project: Time Stamp Attendances : TSA V1.0.43
  * File: Index.html
  * Description: Enterprise Front-End Application (Single Page Application)
- * Version: 1.0.42
+ * Version: 1.0.43
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
 -->
@@ -975,10 +975,123 @@
         <select id="report-month-select" onchange="fetchMonthlyAttendanceReport()" class="text-xs border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
         <select id="report-year-select" onchange="fetchMonthlyAttendanceReport()" class="text-xs border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
         <select id="report-employee-select" onchange="fetchMonthlyAttendanceReport()" class="hidden text-xs border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[190px]"></select>
-        <button type="button" id="btn-toggle-report-customize" onclick="toggleReportCustomizePanel()" class="hidden ml-auto text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3 py-1.5 rounded-xl border border-indigo-200 transition flex items-center gap-1.5">
-          <i class="fa-solid fa-sliders"></i>
-          <span>ปรับแต่งฟอร์ม</span>
-        </button>
+        <div class="ml-auto flex items-center gap-1.5">
+          <button type="button" id="btn-toggle-report-import" onclick="toggleReportImportPanel()" class="hidden text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-3 py-1.5 rounded-xl border border-emerald-200 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-file-csv"></i>
+            <span>นำเข้าเวลา (CSV)</span>
+          </button>
+          <button type="button" id="btn-toggle-report-customize" onclick="toggleReportCustomizePanel()" class="hidden text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3 py-1.5 rounded-xl border border-indigo-200 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders"></i>
+            <span>ปรับแต่งฟอร์ม</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CSV Attendance Import Drawer / Box -->
+      <div id="report-import-panel" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3 max-h-[50vh] overflow-y-auto custom-scroll shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-file-csv"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">นำเข้าข้อมูลเวลาปฏิบัติงานจากไฟล์ CSV</span>
+              <span class="text-[10px] text-slate-500">ดาวน์โหลดแม่แบบ กรอกข้อมูลใน Excel แล้วอัปโหลดเพื่อบันทึกเวลา</span>
+            </div>
+          </div>
+          <button type="button" onclick="toggleReportImportPanel(false)" class="text-[11px] text-slate-400 hover:text-slate-600 p-1">
+            <i class="fa-solid fa-xmark"></i> ปิด
+          </button>
+        </div>
+
+        <!-- 1. Download Template Section -->
+        <div class="bg-white border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div>
+            <span class="text-xs font-bold text-slate-700 block">1. ไฟล์แม่แบบสำหรับนำเข้า (Template)</span>
+            <span class="text-[10px] text-slate-500">ดาวน์โหลดเพื่อนำไปเปิดในโปรแกรม Excel (รองรับภาษาไทย ไม่เพี้ยน)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="downloadAttendanceCsvTemplate('october')" class="text-[11px] bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 shadow-2xs">
+              <i class="fa-solid fa-download"></i>
+              <span>โหลด Template ตัวอย่าง (ต.ค. 2569)</span>
+            </button>
+            <button type="button" onclick="downloadAttendanceCsvTemplate('blank')" class="text-[11px] bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl font-semibold transition flex items-center gap-1.5 shadow-2xs">
+              <i class="fa-solid fa-file-lines"></i>
+              <span>โหลด Template เปล่า</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Upload Box & Drag-and-drop Dropzone -->
+        <div class="space-y-1.5">
+          <span class="text-xs font-bold text-slate-700 block">2. เลือกไฟล์ .CSV เพื่อนำเข้า</span>
+          <div id="attendance-csv-dropzone" onclick="document.getElementById('attendance-csv-file-input').click()" class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/30 hover:bg-emerald-50/60 rounded-2xl p-4 text-center cursor-pointer transition">
+            <input type="file" id="attendance-csv-file-input" accept=".csv,text/csv" onchange="handleAttendanceCsvSelected(event)" class="hidden">
+            <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-600 mb-1"></i>
+            <p class="text-xs font-bold text-slate-700">คลิกเพื่อเลือกไฟล์ .CSV หรือลากไฟล์มาวางที่นี่</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">รองรับคอลัมน์: WorkDate, EmployeeCode, FullName, CheckIn, CheckOut, Remark</p>
+          </div>
+        </div>
+
+        <!-- 3. Validation & Preview Container -->
+        <div id="attendance-csv-preview-container" class="hidden space-y-2.5 pt-1">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-emerald-50/70 border border-emerald-100 rounded-xl p-2.5 text-xs">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+              <div>
+                <span class="font-bold text-slate-800" id="csv-preview-filename">-</span>
+                <span class="text-[10px] text-slate-500 block" id="csv-preview-filesize">-</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 text-[11px]">
+              <div>ทั้งหมด: <b class="text-blue-700" id="csv-preview-total-count">0</b> แถว</div>
+              <div>มีเวลาเข้า-ออก: <b class="text-emerald-700" id="csv-preview-valid-count">0</b> วัน</div>
+              <div>วันหยุด/ข้าม: <b class="text-amber-700" id="csv-preview-skip-count">0</b> วัน</div>
+            </div>
+          </div>
+
+          <!-- Preview Table (up to 5 sample rows) -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden bg-white text-[11px]">
+            <div class="bg-slate-100 px-3 py-1.5 font-bold text-slate-600 flex justify-between items-center">
+              <span>ตัวอย่างข้อมูลในไฟล์ (5 รายการแรก)</span>
+              <span class="text-[10px] text-slate-400 font-normal">ตรวจสอบความถูกต้องก่อนกดบันทึก</span>
+            </div>
+            <div class="max-h-36 overflow-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 text-[10px] text-slate-500 uppercase border-b border-slate-200 sticky top-0">
+                  <tr>
+                    <th class="py-1 px-2.5">วันที่</th>
+                    <th class="py-1 px-2.5">รหัส</th>
+                    <th class="py-1 px-2.5">ชื่อ-นามสกุล</th>
+                    <th class="py-1 px-2.5">เวลาเข้า</th>
+                    <th class="py-1 px-2.5">เวลาออก</th>
+                    <th class="py-1 px-2.5">หมายเหตุ</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-csv-preview-tbody" class="divide-y divide-slate-100 text-slate-700">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Options & Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200">
+            <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+              <input type="checkbox" id="attendance-csv-overwrite" checked class="rounded text-emerald-600 focus:ring-emerald-500">
+              <span>เขียนทับข้อมูลเวลาเดิมหากมีอยู่แล้วในวันเดียวกัน</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="resetAttendanceCsvImport()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-xl transition">
+                ล้างข้อมูล
+              </button>
+              <button type="button" id="btn-submit-attendance-csv" onclick="submitAttendanceCsvImport()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-file-import"></i>
+                <span>บันทึกนำเข้าเวลาสู่ระบบ</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Admin Form Customizer Drawer -->
@@ -2127,8 +2240,26 @@
       const panel = document.getElementById('report-customize-panel');
       if (!panel) return;
       const shouldOpen = forceOpen !== undefined ? forceOpen : panel.classList.contains('hidden');
-      if (shouldOpen) panel.classList.remove('hidden');
-      else panel.classList.add('hidden');
+      if (shouldOpen) {
+        panel.classList.remove('hidden');
+        const impPanel = document.getElementById('report-import-panel');
+        if (impPanel) impPanel.classList.add('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function toggleReportImportPanel(forceOpen) {
+      const panel = document.getElementById('report-import-panel');
+      if (!panel) return;
+      const shouldOpen = forceOpen !== undefined ? forceOpen : panel.classList.contains('hidden');
+      if (shouldOpen) {
+        panel.classList.remove('hidden');
+        const custPanel = document.getElementById('report-customize-panel');
+        if (custPanel) custPanel.classList.add('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
     }
 
     function fetchMonthlyAttendanceReport() {
@@ -2179,6 +2310,12 @@
       if (customBtn) {
         if (data.canCustomize) customBtn.classList.remove('hidden');
         else customBtn.classList.add('hidden');
+      }
+
+      const importBtn = document.getElementById('btn-toggle-report-import');
+      if (importBtn) {
+        if (data.canCustomize) importBtn.classList.remove('hidden');
+        else importBtn.classList.add('hidden');
       }
 
       const cfg = data.config || {};
@@ -2405,6 +2542,266 @@
           } else {
             const errMsg = (res && res.error && res.error.message) || 'ไม่สามารถปรับปรุงข้อมูลได้';
             Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: errMsg, confirmButtonColor: '#1b4b8a' });
+          }
+        });
+      });
+    }
+
+    // ==========================================
+    // ATTENDANCE CSV IMPORT & TEMPLATE DOWNLOAD
+    // ==========================================
+    const attendanceCsvState = {
+      parsedRows: [],
+      rawText: '',
+      fileName: '',
+      fileSizeBytes: 0
+    };
+
+    function downloadAttendanceCsvTemplate(type) {
+      let csvContent = '\uFEFF'; // UTF-8 BOM for Thai Excel
+      let filename = 'attendance_template_october_2026.csv';
+
+      if (type === 'blank') {
+        filename = 'attendance_template_blank.csv';
+        csvContent += 'WorkDate,EmployeeCode,FullName,CheckIn,CheckOut,Remark\r\n';
+        csvContent += '2026-10-01,E0001,นายเฉลิมพร ถาโคตร,08:10:00,17:11:00,วันทำงานปกติ\r\n';
+        csvContent += '2026-10-02,E0001,นายเฉลิมพร ถาโคตร,08:13:00,17:15:00,วันทำงานปกติ\r\n';
+        csvContent += '2026-10-03,E0001,นายเฉลิมพร ถาโคตร,,,วันเสาร์ (วันหยุดประจำสัปดาห์)\r\n';
+      } else {
+        filename = 'attendance_template_october_2026.csv';
+        const rows = [
+          ['WorkDate', 'EmployeeCode', 'FullName', 'CheckIn', 'CheckOut', 'Remark'],
+          ['2026-10-01', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:10:00', '17:11:00', 'วันทำงานปกติ'],
+          ['2026-10-02', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:13:00', '17:15:00', 'วันทำงานปกติ'],
+          ['2026-10-03', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันเสาร์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-04', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันอาทิตย์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-05', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:18:00', 'วันทำงานปกติ'],
+          ['2026-10-06', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:18:00', '17:07:00', 'วันทำงานปกติ'],
+          ['2026-10-07', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:19:00', '17:05:00', 'วันทำงานปกติ'],
+          ['2026-10-08', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:21:00', '17:10:00', 'วันทำงานปกติ'],
+          ['2026-10-09', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:25:00', '17:11:00', 'วันทำงานปกติ'],
+          ['2026-10-10', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันเสาร์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-11', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันอาทิตย์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-12', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:12:00', 'วันทำงานปกติ'],
+          ['2026-10-13', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันนวมินทรมหาราช (วันหยุดนักขัตฤกษ์)'],
+          ['2026-10-14', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:23:00', '17:14:00', 'วันทำงานปกติ'],
+          ['2026-10-15', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:28:00', 'วันทำงานปกติ'],
+          ['2026-10-16', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:10:00', '17:11:00', 'วันทำงานปกติ'],
+          ['2026-10-17', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันเสาร์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-18', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันอาทิตย์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-19', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:13:00', '17:15:00', 'วันทำงานปกติ'],
+          ['2026-10-20', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:18:00', 'วันทำงานปกติ'],
+          ['2026-10-21', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:21:00', '17:10:00', 'วันทำงานปกติ'],
+          ['2026-10-22', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:12:00', 'วันทำงานปกติ'],
+          ['2026-10-23', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันปิยมหาราช (วันหยุดนักขัตฤกษ์)'],
+          ['2026-10-24', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันเสาร์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-25', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันอาทิตย์ (วันหยุดประจำสัปดาห์)'],
+          ['2026-10-26', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:10:00', '17:14:00', 'วันทำงานปกติ'],
+          ['2026-10-27', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:10:00', '17:11:00', 'วันทำงานปกติ'],
+          ['2026-10-28', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:13:00', '17:15:00', 'วันทำงานปกติ'],
+          ['2026-10-29', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:18:00', 'วันทำงานปกติ'],
+          ['2026-10-30', 'E0001', 'นายเฉลิมพร ถาโคตร', '08:20:00', '17:18:00', 'วันทำงานปกติ'],
+          ['2026-10-31', 'E0001', 'นายเฉลิมพร ถาโคตร', '', '', 'วันเสาร์ (วันหยุดประจำสัปดาห์)']
+        ];
+        csvContent += rows.map(r => r.join(',')).join('\r\n');
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function handleAttendanceCsvSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const text = e.target.result;
+          parseAndPreviewAttendanceCsv(file.name, file.size, text);
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'อ่านไฟล์ไม่สำเร็จ',
+            text: err.message || 'รูปแบบไฟล์ CSV ไม่ถูกต้อง',
+            confirmButtonColor: '#1b4b8a'
+          });
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    function parseAndPreviewAttendanceCsv(fileName, fileSize, text) {
+      if (!text || !text.trim()) {
+        throw new Error('ไฟล์ที่เลือกไม่มีข้อมูล (ไฟล์ว่างเปล่า)');
+      }
+
+      const clean = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+      const lines = clean.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) {
+        throw new Error('ไม่พบแถวข้อมูลในไฟล์ CSV (ต้องการหัวตาราง + ข้อมูลอย่างน้อย 1 แถว)');
+      }
+
+      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+      const parsedRows = [];
+      let validDaysCount = 0;
+      let skipDaysCount = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (let c = 0; c < line.length; c++) {
+          const char = line[c];
+          if (char === '"') inQuotes = !inQuotes;
+          else if (char === ',' && !inQuotes) {
+            values.push(current.trim().replace(/^["']|["']$/g, ''));
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim().replace(/^["']|["']$/g, ''));
+
+        const row = {};
+        rawHeaders.forEach((h, idx) => {
+          row[h] = values[idx] !== undefined ? values[idx] : '';
+        });
+
+        const checkIn = String(row.CheckIn || row.InTime || row.เข้า || '').trim();
+        const checkOut = String(row.CheckOut || row.OutTime || row.ออก || '').trim();
+        if (checkIn || checkOut) {
+          validDaysCount++;
+        } else {
+          skipDaysCount++;
+        }
+        parsedRows.push(row);
+      }
+
+      attendanceCsvState.parsedRows = parsedRows;
+      attendanceCsvState.rawText = text;
+      attendanceCsvState.fileName = fileName;
+      attendanceCsvState.fileSizeBytes = fileSize;
+
+      const container = document.getElementById('attendance-csv-preview-container');
+      const fnameEl = document.getElementById('csv-preview-filename');
+      const fsizeEl = document.getElementById('csv-preview-filesize');
+      const totalEl = document.getElementById('csv-preview-total-count');
+      const validEl = document.getElementById('csv-preview-valid-count');
+      const skipEl = document.getElementById('csv-preview-skip-count');
+      const tbody = document.getElementById('attendance-csv-preview-tbody');
+
+      if (fnameEl) fnameEl.textContent = fileName;
+      if (fsizeEl) fsizeEl.textContent = (fileSize / 1024).toFixed(1) + ' KB';
+      if (totalEl) totalEl.textContent = parsedRows.length;
+      if (validEl) validEl.textContent = validDaysCount;
+      if (skipEl) skipEl.textContent = skipDaysCount;
+
+      if (tbody) {
+        const sampleRows = parsedRows.slice(0, 5);
+        tbody.innerHTML = sampleRows.map(r => {
+          const wDate = r.WorkDate || r.Date || r.วันที่ || '-';
+          const code = r.EmployeeCode || r.EmpCode || r.รหัสพนักงาน || '-';
+          const name = r.FullName || r.Name || r.ชื่อ || '-';
+          const inT = r.CheckIn || r.InTime || r.เข้า || '';
+          const outT = r.CheckOut || r.OutTime || r.ออก || '';
+          const rem = r.Remark || r.หมายเหตุ || '-';
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="py-1 px-2.5 font-mono text-[10px]">${escapeChatHtml(wDate)}</td>
+              <td class="py-1 px-2.5 font-semibold text-slate-600">${escapeChatHtml(code)}</td>
+              <td class="py-1 px-2.5 truncate max-w-[120px]">${escapeChatHtml(name)}</td>
+              <td class="py-1 px-2.5">${inT ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded text-[10px] font-mono">${escapeChatHtml(inT)}</span>` : '<span class="text-slate-300">-</span>'}</td>
+              <td class="py-1 px-2.5">${outT ? `<span class="bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded text-[10px] font-mono">${escapeChatHtml(outT)}</span>` : '<span class="text-slate-300">-</span>'}</td>
+              <td class="py-1 px-2.5 text-slate-500 truncate max-w-[140px]">${escapeChatHtml(rem)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      if (container) container.classList.remove('hidden');
+    }
+
+    function resetAttendanceCsvImport() {
+      attendanceCsvState.parsedRows = [];
+      attendanceCsvState.rawText = '';
+      attendanceCsvState.fileName = '';
+      attendanceCsvState.fileSizeBytes = 0;
+
+      const fileInput = document.getElementById('attendance-csv-file-input');
+      if (fileInput) fileInput.value = '';
+
+      const container = document.getElementById('attendance-csv-preview-container');
+      if (container) container.classList.add('hidden');
+    }
+
+    function submitAttendanceCsvImport() {
+      if (!attendanceCsvState.parsedRows || attendanceCsvState.parsedRows.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ยังไม่ได้เลือกไฟล์',
+          text: 'กรุณาเลือกไฟล์ .CSV ที่มีข้อมูลก่อนดำเนินการ',
+          confirmButtonColor: '#1b4b8a'
+        });
+        return;
+      }
+
+      const overwriteCheck = document.getElementById('attendance-csv-overwrite');
+      const isOverwrite = overwriteCheck ? overwriteCheck.checked : true;
+      const total = attendanceCsvState.parsedRows.length;
+
+      Swal.fire({
+        title: 'ยืนยันนำเข้าข้อมูลเวลา?',
+        html: `พบข้อมูลทั้งหมด <b>${total}</b> แถว<br>${isOverwrite ? '<span class="text-xs text-amber-600">⚠️ ระบบจะเขียนทับข้อมูลเดิมที่มีอยู่ในวันเดียวกัน</span>' : ''}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ยืนยันนำเข้าข้อมูล',
+        cancelButtonText: 'ยกเลิก'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+
+        Swal.fire({
+          title: 'กำลังนำเข้าข้อมูลเวลา...',
+          text: 'ระบบกำลังบันทึกข้อมูลเข้าฐานข้อมูล Attendance',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        callAPI('IMPORT_ATTENDANCE_CSV', {
+          token: state.token,
+          rows: attendanceCsvState.parsedRows,
+          options: { overwrite: isOverwrite }
+        }, res => {
+          Swal.close();
+          if (res && res.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'นำเข้าข้อมูลสำเร็จ',
+              text: res.message || 'นำเข้าข้อมูลเวลาปฏิบัติงานเรียบร้อยแล้ว',
+              confirmButtonColor: '#059669'
+            });
+            resetAttendanceCsvImport();
+            toggleReportImportPanel(false);
+            // Instant live refresh on same page
+            fetchMonthlyAttendanceReport();
+          } else {
+            const errMsg = (res && res.error && res.error.message) || 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';
+            Swal.fire({
+              icon: 'error',
+              title: 'นำเข้าข้อมูลไม่สำเร็จ',
+              text: errMsg,
+              confirmButtonColor: '#1b4b8a'
+            });
           }
         });
       });

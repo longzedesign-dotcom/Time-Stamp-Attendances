@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.42
+ * Project: Time Stamp Attendances : TSA V1.0.43
  * File: Code.gs
  * Description: Web App Entry Point and Client-Server API Dispatcher.
- * Version: 1.0.42
+ * Version: 1.0.43
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -192,6 +192,9 @@ function apiDispatcher(action, payload) {
         break;
       case 'SYNC_OCT_NOV_ATTENDANCE':
         res = Admin.syncOctNov2026Attendance(token, false);
+        break;
+      case 'IMPORT_ATTENDANCE_CSV':
+        res = Admin.importAttendanceCsv(token, data.rows || data.csvText, data.options || {});
         break;
 
       // Broadcast & Special Alerts
