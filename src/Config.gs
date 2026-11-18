@@ -6,7 +6,7 @@
  * File          : Config.gs
  * Module/Layer  : Configuration / Enterprise Constants & Environment Settings
  * Description   : ศูนย์รวมค่าคงที่ของระบบ, ขอบเขตเวลา, รหัส Spreadsheet, โฟลเดอร์ Drive และเวอร์ชันแอปพลิเคชัน
- * Version       : 1.0.45
+ * Version       : 1.0.46
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -14,7 +14,7 @@
  * Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
  * ------------------------------------------------------------------------------
  * Revision History:
- * - V1.0.45 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
  * ==============================================================================
  */
 
@@ -22,7 +22,7 @@ const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.45',
+  APP_VERSION: '1.0.46',
   APP_UPDATED_AT: '2026-11-18',
   TIMEZONE: 'Asia/Bangkok',
 

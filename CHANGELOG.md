@@ -4,7 +4,16 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.45`. Every subsequent patch increments the patch number by `+1` (`V1.0.46`, `V1.0.47`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.46`. Every subsequent patch increments the patch number by `+1` (`V1.0.47`, `V1.0.48`, ...).
+
+## [1.0.46] - 2026-11-18
+
+### Added
+- **Full Legal Document Modal Integration on Profile Menu:** Linked the `Terms of Use & Privacy Policy` menu item in user profile directly to `modal-legal-doc`, presenting the complete 11 sections of Terms of Use and 10 sections of Privacy Policy (PDPA & GDPR) in an interactive, tabbed, scrollable modal with print capability.
+- **Enhanced Mobile/Desktop Legal Navigation:** Updated `showTermsModal()` to open the comprehensive legal modal instead of the legacy brief SweetAlert.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.46` (Deployment `@46`).
 
 ## [1.0.45] - 2026-11-18
 

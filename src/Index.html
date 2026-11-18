@@ -6,7 +6,7 @@ Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
 File          : Index.html
 Module/Layer  : Presentation / Single Page Application (UI/UX Engine)
 Description   : หน้าจอส่วนติดต่อผู้ใช้, ระบบลงเวลา GPS, แผนที่, ปฏิทิน พ.ศ., รายงาน และตั้งค่า
-Version       : 1.0.45
+Version       : 1.0.46
 Author        : TSA Engineering Team
 Created Date  : 2026-11-08
 Last Modified : 2026-11-18
@@ -266,7 +266,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
     <!-- Version & Legal Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-3 space-y-1">
-      <div>Version 1.0.45</div>
+      <div>Version 1.0.46</div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400">
         <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-700 transition">ข้อกำหนดการใช้งาน</button>
         <span>•</span>
@@ -518,7 +518,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
               <span class="text-slate-500 text-xs">สังกัด:</span>
               <span id="profile-dept" class="text-slate-700 text-xs font-medium text-right max-w-[200px]">ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร</span>
             </div>
-            <div onclick="showTermsModal()" class="flex items-center justify-between pt-2 border-t border-slate-50 cursor-pointer text-slate-600 hover:text-blue-600">
+            <div onclick="openLegalModal('terms')" class="flex items-center justify-between pt-2 border-t border-slate-50 cursor-pointer text-slate-600 hover:text-blue-600 transition">
               <div class="flex items-center gap-2 text-xs">
                 <i class="fa-regular fa-file-lines text-slate-400"></i>
                 <span>Terms of Use & Privacy Policy</span>
@@ -614,7 +614,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
         <!-- Version & Legal Footer -->
         <div class="text-center text-xs text-slate-400 py-3 space-y-1">
-          <div>Version 1.0.45</div>
+          <div>Version 1.0.46</div>
           <div class="flex items-center justify-center gap-2 text-[11px]">
             <button type="button" onclick="openLegalModal('terms')" class="hover:underline hover:text-blue-600 transition">ข้อกำหนดการใช้งาน</button>
             <span>•</span>
@@ -1622,6 +1622,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
 
   <!-- Legal Modal: Terms of Use & Privacy Policy (PDPA) -->
   <div id="modal-legal-doc" class="hidden fixed inset-0 z-50 bg-slate-100 flex flex-col">
+    <!-- Top Header Bar -->
     <div class="bg-[#1b4b8a] text-white px-4 py-3.5 flex items-center justify-between shadow shrink-0">
       <div class="flex items-center gap-3">
         <button onclick="closeLegalModal()" class="p-1 hover:text-blue-200 text-lg">
@@ -1629,99 +1630,237 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
         </button>
         <div>
           <h3 class="text-base font-semibold tracking-wide">ข้อกำหนด &amp; ความเป็นส่วนตัว</h3>
-          <p class="text-[10px] text-blue-200">มาตรฐานคุ้มครองข้อมูลตามกฎหมาย PDPA &amp; สัญญาการให้บริการ</p>
+          <p class="text-[10px] text-blue-200">มาตรฐานคุ้มครองข้อมูลตามกฎหมาย PDPA, GDPR &amp; สัญญาการให้บริการ</p>
         </div>
       </div>
-      <button onclick="closeLegalModal()" class="text-xs bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-xl transition">
-        ปิด
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="window.print()" class="text-xs bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+          <i class="fa-solid fa-print text-[11px]"></i>
+          <span>พิมพ์</span>
+        </button>
+        <button onclick="closeLegalModal()" class="text-xs bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1.5 rounded-xl transition">
+          ปิด
+        </button>
+      </div>
     </div>
 
     <!-- Tab Selector -->
     <div class="bg-white border-b border-slate-200 px-4 py-2 flex gap-2 shrink-0">
-      <button type="button" id="tab-btn-legal-terms" onclick="switchLegalTab('terms')" class="flex-1 py-2 text-xs font-bold rounded-xl bg-blue-50 text-blue-800 border border-blue-200 transition text-center">
-        <i class="fa-solid fa-file-contract mr-1 text-[11px]"></i> ข้อกำหนดการใช้งาน (Terms)
+      <button type="button" id="tab-btn-legal-terms" onclick="switchLegalTab(terms)" class="flex-1 py-2 text-xs font-bold rounded-xl bg-blue-50 text-blue-800 border border-blue-200 transition text-center shadow-xs">
+        <i class="fa-solid fa-file-contract mr-1.5 text-blue-600"></i> ข้อกำหนดการใช้งาน (Terms of Use)
       </button>
-      <button type="button" id="tab-btn-legal-privacy" onclick="switchLegalTab('privacy')" class="flex-1 py-2 text-xs font-bold rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 transition text-center">
-        <i class="fa-solid fa-shield-halved mr-1 text-[11px]"></i> นโยบายความเป็นส่วนตัว (PDPA)
+      <button type="button" id="tab-btn-legal-privacy" onclick="switchLegalTab(privacy)" class="flex-1 py-2 text-xs font-bold rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200 transition text-center">
+        <i class="fa-solid fa-shield-halved mr-1.5 text-emerald-600"></i> นโยบายความเป็นส่วนตัว (Privacy Policy - PDPA)
       </button>
     </div>
 
     <!-- Scrollable Content Container -->
-    <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scroll">
+    <div class="flex-1 overflow-y-auto p-3 sm:p-6 custom-scroll">
       <!-- TERMS TAB -->
-      <div id="legal-content-terms" class="max-w-2xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-xs text-slate-700 space-y-4 leading-relaxed">
-        <div class="border-b border-slate-200 pb-3">
-          <h2 class="text-base font-bold text-slate-900">ข้อกำหนดและเงื่อนไขการใช้งานระบบ (Terms of Use)</h2>
-          <p class="text-[11px] text-slate-500 mt-0.5">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (TSA Enterprise WebApp) • เวอร์ชัน 1.0</p>
+      <div id="legal-content-terms" class="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+        <div class="mb-4 bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 flex items-start gap-2.5">
+          <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-sm"></i>
+          <div>
+            <span class="font-bold text-blue-900 block">เอกสารฉบับทางการฉบับเต็ม</span>
+            <span class="text-[11px] text-blue-700">มีผลผูกพันทางกฎหมายตาม พ.ร.บ. ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544 และกฎหมายคุ้มครองแรงงาน</span>
+          </div>
         </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">1. บทนำและสถานะทางกฎหมาย</h4>
-          <p>ระบบนี้พัฒนาขึ้นเพื่อเป็นเครื่องมืออย่างเป็นทางการขององค์กรในการบริหารจัดการการลงเวลาปฏิบัติงาน การเข้าถึงหรือใช้งานระบบถือว่าท่านตกลงที่จะผูกพันตามข้อกำหนดนี้และระเบียบข้อบังคับการทำงาน ข้อมูลการลงเวลา พิกัดดาวเทียม และภาพถ่ายที่บันทึกผ่านระบบถือเป็น <b>เอกสารอิเล็กทรอนิกส์</b> ตาม พ.ร.บ. ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">2. หน้าที่และความรับผิดชอบของผู้ปฏิบัติงาน</h4>
-          <ul class="list-disc pl-5 space-y-1">
-            <li><b>การลงเวลาด้วยตนเอง:</b> ผู้ปฏิบัติงานต้องลงเวลาด้วยตนเองเท่านั้น ห้ามมิให้ลงเวลาแทนผู้อื่น หรือให้ผู้อื่นลงเวลาแทนตนเอง (Buddy Punching Prohibition) โดยเด็ดขาด</li>
-            <li><b>การรักษาความลับ:</b> ต้องรักษาบัญชีผู้ใช้งาน รหัสผ่าน และการเข้าถึงระบบไว้เป็นความลับ ห้ามส่งต่อหรือเปิดเผยแก่ผู้อื่น</li>
-            <li><b>ข้อห้ามการปลอมแปลงพิกัด (Anti-Spoofing):</b> ห้ามใช้งานโปรแกรมจำลองตำแหน่ง (Mock Location / Fake GPS / VPN / Emulators) หรือดัดแปลงสคริปต์ระบบ</li>
-            <li><b>บทลงโทษทางวินัย:</b> การทุจริตเวลาทำงานหรือปลอมแปลงพิกัดถือเป็นความผิดวินัยร้ายแรงตามระเบียบองค์กร และอาจถูกเลิกจ้างโดยไม่ได้รับค่าชดเชย</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">3. มาตรฐานพิกัดดาวเทียมและความแม่นยำ (GPS Accuracy)</h4>
-          <p>ผู้ใช้งานมีหน้าที่เปิดใช้งาน Location Services บนอุปกรณ์ เกณฑ์ความคลาดเคลื่อนต้องไม่เกิน 100 เมตร และอยู่ในรัศมี Geofence 200 เมตรจากจุดศูนย์กลางสถานที่ทำงานที่ได้รับมอบหมาย หากมีเหตุขัดข้องทางเทคนิคต้องแจ้งหัวหน้างานและส่งคำขอผ่านระบบ Workflow ทันที</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">4. สายการอนุมัติคำขอ (Workflow &amp; Approvals)</h4>
-          <p>การยื่นคำขอปรับปรุงเวลาและคำขอทำล่วงเวลา (OT) ต้องระบุเหตุผลและวันที่เวลาจริงอย่างถูกต้อง และจะมีผลสมบูรณ์เมื่อผ่านการพิจารณาอนุมัติจากหัวหน้างานตามสายบังคับบัญชาแล้วเท่านั้น</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">5. กฎหมายที่ใช้บังคับ</h4>
-          <p>ข้อกำหนดนี้อยู่ภายใต้บังคับและตีความตามกฎหมายแห่งราชอาณาจักรไทย</p>
-        </div>
+        <h1 class="text-lg font-bold text-slate-900 mb-1">ข้อกำหนดและเงื่อนไขการใช้งานระบบ (Terms of Use)</h1>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances : TSA)</h3>
+<p class="text-slate-700 leading-relaxed my-2"><strong class="font-semibold text-slate-900">เวอร์ชันเอกสาร:</strong> 1.0 (มีผลบังคับใช้ตั้งแต่วันที่ 18 พฤศจิกายน 2569)</p>
+<hr class="border-slate-200 my-4" />
+<p class="text-slate-700 leading-relaxed my-2">ยินดีต้อนรับสู่ <strong class="font-semibold text-slate-900">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances : TSA)</strong> ("ระบบ" หรือ "แอปพลิเคชัน") การเข้าถึงและการใช้งานระบบนี้อยู่ภายใต้ข้อกำหนดและเงื่อนไขการใช้งานฉบับนี้ ("ข้อกำหนด") โปรดอ่านข้อกำหนดเหล่านี้อย่างละเอียดก่อนเริ่มใช้งานระบบ การเข้าสู่ระบบ ลงทะเบียน หรือใช้งานฟังก์ชันใดๆ ของระบบ ถือว่าท่านในฐานะพนักงาน บุคลากร หรือผู้ปฏิบัติงาน ("ผู้ใช้งาน") ได้อ่าน เข้าใจ และตกลงที่จะผูกพันตามข้อกำหนดและเงื่อนไขเหล่านี้ทุกประการ รวมถึงนโยบายความเป็นส่วนตัว (Privacy Policy) และระเบียบข้อบังคับการทำงานขององค์กร</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 1. บทนำและสถานะทางกฎหมาย (Introduction & Legal Status)</h2>
+<p class="text-slate-700 leading-relaxed my-2">1.1 ระบบนี้พัฒนาขึ้นเพื่อเป็นเครื่องมืออย่างเป็นทางการขององค์กร/หน่วยงานในการบริหารจัดการการลงเวลาปฏิบัติงาน การคำนวณเวลาทำงาน การอนุมัติคำขอ และการจัดทำรายงานการปฏิบัติงาน</p>
+<p class="text-slate-700 leading-relaxed my-2">1.2 ข้อมูลการลงเวลา บันทึกประวัติการเข้า-ออกงาน พิกัดทางภูมิศาสตร์ และภาพถ่ายที่บันทึกผ่านระบบนี้ ถือเป็น <strong class="font-semibold text-slate-900">"เอกสารและข้อมูลอิเล็กทรอนิกส์"</strong> ที่มีผลผูกพันทางกฎหมายตามพระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544 (และที่แก้ไขเพิ่มเติม) และใช้เป็นหลักฐานในการบริหารงานบุคคล การประเมินผลการปฏิบัติงาน และการจ่ายค่าตอบแทนตามกฎหมายคุ้มครองแรงงาน</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 2. ขอบเขตการให้บริการของระบบ (Scope of Services)</h2>
+<p class="text-slate-700 leading-relaxed my-2">ระบบ TSA ให้บริการฟังก์ชันการทำงานหลักดังต่อไปนี้:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">การลงเวลาเข้า-ออกงาน (Smart Clock Hub):</strong> การประทับเวลาปฏิบัติงานแบบเรียลไทม์ ควบคู่กับการตรวจจับพิกัดทางภูมิศาสตร์ดาวเทียม (GPS Geofencing) และการบันทึกภาพถ่ายยืนยันตัวตน (Selfie)</li>
+<li><strong class="font-semibold text-slate-900">การตรวจสอบพิกัดสถานที่ทำงาน (Workplace & Site Offices):</strong> การตรวจสอบระยะห่างระหว่างตำแหน่งจริงของผู้ใช้งานกับขอบเขตสถานที่ทำงานหลักและ Site งานย่อยที่ได้รับมอบหมาย</li>
+<li><strong class="font-semibold text-slate-900">ปฏิทินและประวัติการลงเวลา (Buddhist Era Calendar & Attendance History):</strong> การตรวจสอบประวัติการลงเวลาย้อนหลัง วันทำงาน วันหยุดราชการ และวันหยุดประจำสัปดาห์</li>
+<li><strong class="font-semibold text-slate-900">ระบบสายอนุมัติคำขอ (Workflow & Approvals):</strong> การยื่นคำขอปรับปรุงเวลาปฏิบัติงาน (Time Correction) และการยื่นคำขอทำงานล่วงเวลา (Overtime - OT)</li>
+<li><strong class="font-semibold text-slate-900">การสื่อสารและศูนย์ช่วยเหลือ (Internal Chat & Support Tickets):</strong> ระบบส่งข้อความสอบถามประสานงานกับฝ่ายทรัพยากรบุคคล (HR)</li>
+<li><strong class="font-semibold text-slate-900">การออกรายงานใบบันทึกเวลาประจำเดือน (Monthly Printable Attendance Reports):</strong> การสร้างรายงานเอกสารขนาด A4 พร้อมลายเซ็นและข้อมูลหัวเอกสารตามสัญญาจ้าง</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 3. บัญชีผู้ใช้งาน ความปลอดภัย และหน้าที่ของผู้ปฏิบัติงาน (User Accounts & Responsibilities)</h2>
+<p class="text-slate-700 leading-relaxed my-2">3.1 <strong class="font-semibold text-slate-900">การเข้าถึงบัญชี:</strong> ผู้ใช้งานต้องเข้าสู่ระบบด้วยข้อมูลประจำตัวที่ได้รับอนุญาต ได้แก่ อีเมลและรหัสผ่านส่วนบุคคล หรือการยืนยันตัวตนผ่านบุคคลภายนอก (Single Sign-On: Google Workspace หรือ LINE Login)</p>
+<p class="text-slate-700 leading-relaxed my-2">3.2 <strong class="font-semibold text-slate-900">การรักษาความลับ:</strong> ผู้ใช้งานมีหน้าที่เก็บรักษารหัสผ่านและสิทธิ์การเข้าถึงไว้เป็นความลับ ห้ามเปิดเผย มอบหมาย หรือยินยอมให้บุคคลอื่นเข้าถึงบัญชีของตนโดยเด็ดขาด</p>
+<p class="text-slate-700 leading-relaxed my-2">3.3 <strong class="font-semibold text-slate-900">ข้อห้ามการลงเวลาแทนกัน (Buddy Punching Prohibition):</strong> ผู้ใช้งานต้องลงเวลาปฏิบัติงานด้วยตนเองเท่านั้น ห้ามมิให้ลงเวลาแทนผู้อื่น หรือให้ผู้อื่นลงเวลาแทนตนเองไม่ว่ากรณีใดๆ</p>
+<p class="text-slate-700 leading-relaxed my-2">3.4 <strong class="font-semibold text-slate-900">ข้อห้ามการปลอมแปลงพิกัดและข้อมูล (Anti-Spoofing & Tampering Prohibition):</strong> ห้ามมิให้ผู้ใช้งานกระทำการใดๆ ดังต่อไปนี้:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>ใช้งานโปรแกรมจำลองพิกัด GPS (Mock Location / Fake GPS Application)</li>
+<li>ใช้งานโปรแกรมจำลองระบบ (Emulators / Virtual Machines / VPN / Proxy) เพื่อบิดเบือนตำแหน่งหรือข้อมูลการเชื่อมต่อ</li>
+<li>การแก้ไขหรือดัดแปลงสคริปต์ รหัสต้นฉบับ หรือเรียกใช้งาน Application Programming Interface (API) ของระบบโดยไม่ได้รับอนุญาต</li>
+</ul>
+<p class="text-slate-700 leading-relaxed my-2">3.5 <strong class="font-semibold text-slate-900">ผลทางวินัย:</strong> การฝ่าฝืนข้อ 3.3 หรือ 3.4 ถือเป็นความผิดวินัยร้ายแรง ฐานทุจริตต่อหน้าที่หรือจงใจทำให้องค์กรได้รับความเสียหาย ซึ่งอาจมีโทษทางวินัยสูงสุดถึงการเลิกจ้างโดยไม่จ่ายค่าชดเชย และอาจถูกดำเนินคดีตามกฎหมายแพ่งและอาญาที่เกี่ยวข้อง</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 4. มาตรฐานอุปกรณ์และความถูกต้องของพิกัดดาวเทียม (Device & GPS Accuracy Standards)</h2>
+<p class="text-slate-700 leading-relaxed my-2">4.1 ผู้ใช้งานมีหน้าที่รับผิดชอบในการจัดหาอุปกรณ์ (สมาร์ตโฟน แท็บเล็ต หรือคอมพิวเตอร์) สัญญาณอินเทอร์เน็ต และการเปิดใช้งานระบบระบุตำแหน่ง (Location Services / GPS) บนเว็บเบราว์เซอร์ให้พร้อมใช้งาน</p>
+<p class="text-slate-700 leading-relaxed my-2">4.2 ระบบกำหนดเกณฑ์ความคลาดเคลื่อนของตำแหน่งดาวเทียม (MinAccuracy) ไม่เกิน 100 เมตร และรัศมีขอบเขตสถานที่ทำงาน (Geofence Radius) ปกติ 200 เมตร หากระบบตรวจพบว่าพิกัดมีความคลาดเคลื่อนสูงเกินเกณฑ์ ระบบจะไม่อนุญาตให้ลงเวลา หรือจะบันทึกสถานะว่าอยู่นอกพื้นที่ทำงานเพื่อรอการตรวจสอบจากหัวหน้างาน</p>
+<p class="text-slate-700 leading-relaxed my-2">4.3 กรณีเกิดเหตุสุดวิสัยทางเทคนิค เช่น สัญญาณ GPS ขัดข้อง หรืออุปกรณ์มีปัญหา ผู้ใช้งานต้องแจ้งต่อหัวหน้างานทันที และยื่นคำขอปรับปรุงเวลาผ่านระบบ Workflow ภายในระยะเวลาที่องค์กรกำหนด</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 5. การขอปรับปรุงเวลาและการทำงานล่วงเวลา (Corrections & Overtime Workflow)</h2>
+<p class="text-slate-700 leading-relaxed my-2">5.1 การยื่นคำขอปรับปรุงเวลา (Correction Request) และคำขอทำงานล่วงเวลา (Overtime Request) จะต้องระบุเหตุผลอันสมควร วันที่ เวลาที่ถูกต้อง พร้อมแนบเอกสารหลักฐาน (ถ้ามี)</p>
+<p class="text-slate-700 leading-relaxed my-2">5.2 คำขอทั้งหมดต้องผ่านการพิจารณาอนุมัติจากหัวหน้างานตามสายการบังคับบัญชา (Supervisor / Admin) การยื่นคำขอไม่ได้เป็นหลักประกันว่าจะได้รับการอนุมัติเสมอไป และเวลาที่ปรับปรุงจะมีผลสมบูรณ์เมื่อได้รับการอนุมัติผ่านระบบแล้วเท่านั้น</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 6. ทรัพย์สินทางปัญญา (Intellectual Property Rights)</h2>
+<p class="text-slate-700 leading-relaxed my-2">รหัสต้นทาง (Source Code), โครงสร้างฐานข้อมูล, อินเทอร์เฟซผู้ใช้งาน (UI/UX), การออกแบบกราฟิก, โลโก้, เครื่องหมายการค้า และเอกสารคู่มือทั้งหมดที่ปรากฏในระบบ TSA เป็นทรัพย์สินทางปัญญาขององค์กรและ/หรือผู้พัฒนา ห้ามมิให้ทำซ้ำ ดัดแปลง เผยแพร่ ทำวิศวกรรมย้อนกลับ (Reverse Engineering) หรือนำไปใช้ประโยชน์ในเชิงพาณิชย์โดยไม่ได้รับความยินยอมเป็นลายลักษณ์อักษร</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 7. การจำกัดความรับผิดและการปฏิเสธการรับประกัน (Disclaimer & Limitation of Liability)</h2>
+<p class="text-slate-700 leading-relaxed my-2">7.1 ระบบนี้ให้บริการตามสภาพ ("AS IS" และ "AS AVAILABLE") องค์กรและผู้พัฒนาดำเนินการอย่างเต็มความสามารถเพื่อให้ระบบมีความเสถียร ปลอดภัย และแม่นยำ อย่างไรก็ดี องค์กรไม่รับประกันว่าการทำงานของระบบจะปราศจากข้อผิดพลาด หรือทำงานได้ต่อเนื่องโดยไม่มีการหยุดชะงักจากเหตุขัดข้องของเครือข่ายอินเทอร์เน็ต ผู้ให้บริการคลาวด์ภายนอก หรือระบบปฏิบัติการของอุปกรณ์ผู้ใช้งาน</p>
+<p class="text-slate-700 leading-relaxed my-2">7.2 องค์กรจะไม่รับผิดชอบต่อความเสียหายทางอ้อม ความเสียหายสืบเนื่อง หรือการสูญเสียข้อมูลอันเกิดจากการใช้งานระบบที่ไม่ถูกต้องตามคำแนะนำ หรือการกระทำโดยประมาทเลินเล่อของผู้ใช้งาน</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 8. การระงับและการยกเลิกการให้บริการ (Suspension and Termination)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรขอสงวนสิทธิ์ในการระงับ ปิดกั้น หรือยกเลิกบัญชีผู้ใช้งานได้ทันทีโดยไม่ต้องแจ้งล่วงหน้า ในกรณีที่:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>ผู้ใช้งานสิ้นสุดสภาพการเป็นพนักงานหรือบุคลากรขององค์กร</li>
+<li>ตรวจพบการใช้งานระบบที่ผิดปกติ การพยายามเจาะระบบ หรือการละเมิดข้อกำหนดนี้</li>
+<li>มีการร้องขอจากหน่วยงานที่มีอำนาจตามกฎหมาย</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 9. การแก้ไขเปลี่ยนแปลงข้อกำหนด (Amendments to Terms)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรขอสงวนสิทธิ์ในการแก้ไข ปรับปรุง หรือเพิ่มเติมข้อกำหนดและเงื่อนไขนี้ได้ตลอดเวลาเพื่อให้สอดคล้องกับแนวปฏิบัติ กฎหมายที่เปลี่ยนแปลง หรือการอัปเกรดฟังก์ชันระบบ โดยจะแจ้งให้ผู้ใช้งานทราบผ่านทางหน้าประกาศของระบบ หรือการแจ้งเตือนภายในแอปพลิเคชัน การที่ท่านยังคงใช้งานระบบต่อไปหลังจากการเปลี่ยนแปลง ถือว่าท่านยอมรับข้อกำหนดฉบับปรับปรุงใหม่โดยปริยาย</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 10. กฎหมายที่ใช้บังคับและการระงับข้อพิพาท (Governing Law & Dispute Resolution)</h2>
+<p class="text-slate-700 leading-relaxed my-2">ข้อกำหนดและเงื่อนไขฉบับนี้ให้อยู่ภายใต้บังคับและตีความตาม <strong class="font-semibold text-slate-900">กฎหมายแห่งราชอาณาจักรไทย</strong> ข้อพิพาทใดๆ ที่เกิดขึ้นจากการใช้งานระบบนี้ ให้ยื่นต่อศาลที่มีเขตอำนาจในประเทศไทย</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 11. ช่องทางการติดต่อ (Contact Information)</h2>
+<p class="text-slate-700 leading-relaxed my-2">หากท่านมีข้อสงสัย ข้อเสนอแนะ หรือต้องการความช่วยเหลือเกี่ยวกับการใช้งานระบบ สามารถติดต่อได้ที่:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">ฝ่ายทรัพยากรบุคคล / ผู้ดูแลระบบ (HR & System Administrator)</strong></li>
+<li><strong class="font-semibold text-slate-900">ระบบแชตภายในแอปพลิเคชัน (Internal Support Chat):</strong> เมนู "แชตภายใน" บน WebApp TSA</li>
+<li><strong class="font-semibold text-slate-900">ที่อยู่:</strong> สำนักงานใหญ่ / ศูนย์ปฏิบัติการเทคโนโลยีสารสนเทศประจำองค์กร</li>
+</ul>
       </div>
 
       <!-- PRIVACY TAB -->
-      <div id="legal-content-privacy" class="hidden max-w-2xl mx-auto bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 text-xs text-slate-700 space-y-4 leading-relaxed">
-        <div class="border-b border-slate-200 pb-3">
-          <h2 class="text-base font-bold text-slate-900">นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (Privacy Policy)</h2>
-          <p class="text-[11px] text-slate-500 mt-0.5">มาตรฐานตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (Thailand PDPA) &amp; EU GDPR</p>
+      <div id="legal-content-privacy" class="hidden max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+        <div class="mb-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl p-3.5 flex items-start gap-2.5">
+          <i class="fa-solid fa-shield-heart text-emerald-600 mt-0.5 text-sm"></i>
+          <div>
+            <span class="font-bold text-emerald-900 block">มาตรฐานการคุ้มครองข้อมูลส่วนบุคคลระดับสากล</span>
+            <span class="text-[11px] text-emerald-700">สอดคล้องตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) และ General Data Protection Regulation (EU GDPR)</span>
+          </div>
         </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">1. ฐานทางกฎหมายในการประมวลผล (Lawful Basis)</h4>
-          <p>องค์กรเก็บรวบรวมและใช้ข้อมูลส่วนบุคคลตามฐานสัญญาจ้างแรงงาน (Contractual Necessity), ฐานประโยชน์โดยชอบด้วยกฎหมาย (Legitimate Interests) เพื่อการบริหารงานบุคคลและป้องกันการทุจริต, ฐานหน้าที่ตามกฎหมายแรงงาน (Legal Obligation), และฐานความยินยอมโดยชัดแจ้งสำหรับข้อมูลพิกัดแม่นยำและภาพถ่าย</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">2. ข้อมูลส่วนบุคคลที่จัดเก็บ</h4>
-          <ul class="list-disc pl-5 space-y-1">
-            <li><b>ข้อมูลระบุตัวตน:</b> ชื่อ-นามสกุล, รหัสพนักงาน, แผนก, อีเมล, รูปโปรไฟล์, บทบาทผู้ใช้งาน</li>
-            <li><b>ข้อมูลเวลาและพิกัดภูมิศาสตร์:</b> วันที่, เวลาเข้า-ออก (Check-In/Out), พิกัดดาวเทียม (Latitude, Longitude), ค่าความแม่นยำ (Accuracy), ระยะห่าง (Distance), และสถานที่ทำงาน (Location Name)</li>
-            <li><b>ภาพถ่ายยืนยันตัวตน:</b> ภาพถ่ายใบหน้าแบบสด (Selfie) ขณะกดลงเวลา</li>
-            <li><b>ข้อมูลทางเทคนิค:</b> ข้อมูลอุปกรณ์, User Agent, บันทึกการกระทำในระบบ (Audit Trail Logs)</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">3. ความปลอดภัยและการเปิดเผยข้อมูล</h4>
-          <p>ข้อมูลทั้งหมดส่งผ่านโพรโทคอล HTTPS/TLS 1.3 ที่มีการเข้ารหัสขั้นสูง และจัดเก็บบน Google Cloud/Google Drive ที่มีมาตรฐานความปลอดภัยสากล ข้อมูลจะถูกเข้าถึงเฉพาะเจ้าหน้าที่ที่มีสิทธิ์ตามบทบาท (RBAC) และไม่มีการขายหรือเผยแพร่เชิงพาณิชย์โดยเด็ดขาด</p>
-        </div>
-
-        <div>
-          <h4 class="font-bold text-slate-900 mb-1">4. สิทธิของเจ้าของข้อมูล (Data Subject Rights)</h4>
-          <p>ท่านมีสิทธิ์ตามกฎหมาย PDPA ในการขอเข้าถึงและรับสำเนาข้อมูล, ขอแก้ไขข้อมูลให้ถูกต้อง, ขอให้ลบหรือทำลายเมื่อพ้นความจำเป็นตามกฎหมายแรงงาน, ระงับหรือคัดค้านการประมวลผล โดยสามารถติดต่อผ่านฝ่ายทรัพยากรบุคคลหรือแชตภายในระบบ</p>
-        </div>
+        <h1 class="text-lg font-bold text-slate-900 mb-1">นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (Privacy Policy)</h1>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances : TSA)</h3>
+<p class="text-slate-700 leading-relaxed my-2"><strong class="font-semibold text-slate-900">เวอร์ชันเอกสาร:</strong> 1.0 (มีผลบังคับใช้ตั้งแต่วันที่ 18 พฤศจิกายน 2569)</p>
+<p class="text-slate-700 leading-relaxed my-2"><strong class="font-semibold text-slate-900">มาตรฐานการคุ้มครองข้อมูล:</strong> สอดคล้องตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (Thailand PDPA) และ General Data Protection Regulation (EU GDPR)</p>
+<hr class="border-slate-200 my-4" />
+<p class="text-slate-700 leading-relaxed my-2">องค์กร/หน่วยงานของเรา ("องค์กร", "พวกเรา" หรือ "ผู้ควบคุมข้อมูลส่วนบุคคล") ตระหนักและให้ความสำคัญอย่างยิ่งต่อสิทธิความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคลของพนักงาน เจ้าหน้าที่ บุคลากร และผู้ปฏิบัติงาน ("ท่าน" หรือ "เจ้าของข้อมูลส่วนบุคคล") นโยบายความเป็นส่วนตัวฉบับนี้จัดทำขึ้นเพื่อชี้แจงรายละเอียดเกี่ยวกับการเก็บรวบรวม ใช้ เปิดเผย ส่งต่อ และปกป้องข้อมูลส่วนบุคคลของท่านเมื่อใช้งาน <strong class="font-semibold text-slate-900">ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances : TSA)</strong></p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 1. ฐานทางกฎหมายในการประมวลผลข้อมูลส่วนบุคคล (Lawful Basis for Processing)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรดำเนินการประมวลผลข้อมูลส่วนบุคคลของท่านภายใต้ฐานความชอบด้วยกฎหมายตามมาตรา 24 และมาตรา 26 แห่งพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) รวมถึง Article 6 แห่ง EU GDPR ดังต่อไปนี้:</p>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">ฐานสัญญาจ้างแรงงาน (Contractual Necessity):</strong> จำเป็นต่อการปฏิบัติตามสัญญาจ้างแรงงาน หรือข้อตกลงการปฏิบัติงานระหว่างท่านกับองค์กร เพื่อการบันทึกเวลาทำงาน การประเมินผลงาน และการจ่ายค่าจ้างค่าตอบแทน</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">ฐานประโยชน์โดยชอบด้วยกฎหมาย (Legitimate Interests):</strong> จำเป็นเพื่อประโยชน์โดยชอบด้วยกฎหมายขององค์กรในการบริหารจัดการงานบุคคล การตรวจสอบความถูกต้องในการปฏิบัติงาน การรักษาความปลอดภัยของสถานที่ทำงาน การป้องกันการทุจริตเวลา และการพัฒนาประสิทธิภาพการทำงาน</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">ฐานหน้าที่ตามกฎหมาย (Legal Obligation):</strong> จำเป็นเพื่อการปฏิบัติตามกฎหมายคุ้มครองแรงงาน กฎหมายประกันสังคม กฎหมายภาษีอากร และกฎระเบียบของทางราชการที่เกี่ยวข้อง</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">ฐานความยินยอมโดยชัดแจ้ง (Explicit Consent):</strong> ในกรณีที่มีการเก็บรวบรวมหรือประมวลผลข้อมูลที่กฎหมายกำหนดให้ต้องขอความยินยอมเป็นการเฉพาะ เช่น ข้อมูลพิกัดตำแหน่งทางภูมิศาสตร์แบบแม่นยำสูง (Precise Geolocation) หรือภาพถ่ายใบหน้าเพื่อการยืนยันตัวตน</p></div>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 2. ข้อมูลส่วนบุคคลที่ระบบเก็บรวบรวม (Personal Data Collected)</h2>
+<p class="text-slate-700 leading-relaxed my-2">เมื่อท่านเข้าใช้งานระบบ TSA ระบบจะเก็บรวบรวมข้อมูลส่วนบุคคลเท่าที่จำเป็นตามวัตถุประสงค์ ดังนี้:</p>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">2.1 ข้อมูลระบุตัวตน (Identity & Profile Data)</h3>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>ชื่อ-นามสกุล, รหัสพนักงาน (Employee Code), แผนก/ฝ่าย (Department), ตำแหน่งงาน (Position)</li>
+<li>อีเมลประจำองค์กร, รูปภาพโปรไฟล์ (Avatar), หมายเลขโทรศัพท์ (ถ้ามี)</li>
+<li>ข้อมูลบัญชีผู้ใช้งาน, รหัสผ่านที่ผ่านการเข้ารหัสทางเดียว (Bcrypt/SHA-256 Hashing), บทบาทและสิทธิ์การเข้าถึง (Admin, Supervisor, Employee)</li>
+</ul>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">2.2 ข้อมูลการลงเวลาและพิกัดภูมิศาสตร์ (Attendance & Geolocation Data)</h3>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>วันที่และเวลาที่มีการประทับเวลาปฏิบัติงาน (WorkDate, WorkTime: Check-In / Check-Out)</li>
+<li>พิกัดทางภูมิศาสตร์จากระบบดาวเทียม (Latitude, Longitude) ขณะทำการกดบันทึกเวลา</li>
+<li>ค่าความแม่นยำของสัญญาณ GPS (Accuracy เป็นเมตร)</li>
+<li>ระยะทางห่างจากจุดศูนย์กลางสถานที่ทำงาน (Distance Meter) และรหัสสถานที่ทำงานที่ตรวจพบ (LocationID / Site Name)</li>
+<li>สถานะการลงเวลา (ตรงเวลา, มาสาย, ออกก่อนเวลา, ลางาน, ขาดงาน) และจำนวนชั่วโมง/นาทีที่ปฏิบัติงานจริง (WorkMinutes)</li>
+</ul>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">2.3 ข้อมูลภาพถ่ายยืนยันตัวตน (Photo Verification Data)</h3>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>ภาพถ่ายใบหน้าแบบถ่ายสดผ่านกล้องหน้า (Selfie) ขณะทำการลงเวลาเข้า-ออกงาน เพื่อยืนยันว่าเป็นผู้ปฏิบัติงานตัวจริงและป้องกันการลงเวลาแทนกัน</li>
+</ul>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">2.4 ข้อมูลทางเทคนิคและบันทึกประวัติการใช้งาน (Technical & Audit Log Data)</h3>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>ที่อยู่ไอพี (IP Address), ข้อมูลชนิดอุปกรณ์, ระบบปฏิบัติการ (OS), เว็บเบราว์เซอร์ และ User Agent</li>
+<li>ประวัติการเข้าสู่ระบบ วันที่ เวลาของเซสชัน (Sessions Log)</li>
+<li>บันทึกการกระทำของผู้ใช้งาน (Audit Trail Logs) เช่น การยื่นคำขอปรับปรุงเวลา การอนุมัติคำขอ การแก้ไขข้อมูลสถานที่ทำงาน</li>
+</ul>
+<h3 class="text-xs font-semibold text-slate-600 mb-2">2.5 ข้อมูลการเชื่อมต่อภายนอก (Third-Party Identity Data)</h3>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>กรณีเข้าสู่ระบบผ่าน Google Login: ข้อมูล Google User ID, Email, Verified Profile Name</li>
+<li>กรณีเข้าสู่ระบบผ่าน LINE Login: ข้อมูล LINE User ID, Display Name, Profile Picture URL</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 3. วัตถุประสงค์ในการเก็บรวบรวมและใช้ข้อมูล (Purposes of Processing)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรจะใช้ข้อมูลส่วนบุคคลของท่านตามวัตถุประสงค์ดังต่อไปนี้เท่านั้น:</p>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การบันทึกเวลาทำงาน:</strong> เพื่อบันทึก ยืนยัน และตรวจสอบวันและเวลาการเข้า-ออกปฏิบัติงานของท่านอย่างถูกต้องและโปร่งใส</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การคำนวณค่าจ้างและสิทธิประโยชน์:</strong> เพื่อใช้เป็นฐานข้อมูลในการคำนวณเงินเดือน ค่าจ้าง ค่าทำงานล่วงเวลา (OT) เบี้ยขยัน และการหักภาษี ณ ที่จ่ายตามกฎหมาย</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การบริหารสายอนุมัติ:</strong> เพื่อรองรับขั้นตอนการยื่นและพิจารณาอนุมัติคำขอปรับปรุงเวลาและคำขอทำ OT ผ่านระบบ Workflow</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การจัดทำรายงาน:</strong> เพื่อออกรายงานใบบันทึกเวลาการมาปฏิบัติงานประจำเดือน (Monthly Attendance Report) เสนอต่อผู้ว่าจ้างหรือผู้บริหารตามสัญญาจ้าง</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การรักษาความปลอดภัยและป้องกันการทุจริต:</strong> เพื่อตรวจสอบความถูกต้องของสถานที่ทำงาน ป้องกันการปลอมแปลงพิกัด (Fake GPS) และป้องกันการลงเวลาแทนกัน</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">การสื่อสารและการสนับสนุน:</strong> เพื่อส่งการแจ้งเตือนเกี่ยวกับสถานะการลงเวลา ประกาศด่วนขององค์กร และการให้บริการตอบข้อซักถามผ่านระบบแชต HR</p></div>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 4. การเปิดเผยและการส่งต่อข้อมูลส่วนบุคคล (Data Disclosure)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรจะไม่จำหน่าย จ่าย แจก หรือเปิดเผยข้อมูลส่วนบุคคลของท่านแก่บุคคลภายนอก เว้นแต่กรณีดังต่อไปนี้:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">บุคลากรภายในองค์กรที่มีสิทธิ์เข้าถึง:</strong> ได้แก่ ผู้ดูแลระบบ (Admin), หัวหน้างานตามสายบังคับบัญชา (Supervisor), และเจ้าหน้าที่ฝ่ายบุคคล (HR) เท่าที่จำเป็นต่อการปฏิบัติงาน</li>
+<li><strong class="font-semibold text-slate-900">ผู้ให้บริการระบบคลาวด์และโครงสร้างพื้นฐานเทคโนโลยี:</strong></li>
+<li><strong class="font-semibold text-slate-900">Google Cloud Platform / Google Workspace:</strong> จัดเก็บฐานข้อมูลบน Google Sheets และไฟล์ภาพบน Google Drive ซึ่งมีมาตรฐานความปลอดภัยระดับสากล (ISO/IEC 27001, SOC 1/2/3)</li>
+<li><strong class="font-semibold text-slate-900">LINE Corporation:</strong> สำหรับการส่งข้อมูลยืนยันตัวตนผ่าน LINE Login v2.1</li>
+<li><strong class="font-semibold text-slate-900">หน่วยงานของรัฐที่มีอำนาจตามกฎหมาย:</strong> เช่น กรมสวัสดิการและคุ้มครองแรงงาน, สำนักงานประกันสังคม, กรมสรรพากร หรือตามคำสั่งศาล</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 5. มาตรการรักษาความมั่นคงปลอดภัยของข้อมูล (Data Security Measures)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรกำหนดมาตรการรักษาความมั่นคงปลอดภัยทั้งทางเทคนิค (Technical Measures) และทางกายภาพและการบริหารจัดการ (Organizational Measures) ตามมาตรฐานสากล:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">การเข้ารหัสข้อมูล (Encryption):</strong> ข้อมูลทั้งหมดที่ส่งผ่านเครือข่ายอินเทอร์เน็ตได้รับการเข้ารหัสด้วยโพรโทคอล HTTPS / TLS 1.3</li>
+<li><strong class="font-semibold text-slate-900">การควบคุมสิทธิ์การเข้าถึง (Access Control):</strong> การจำแนกสิทธิ์ตามบทบาทหน้าที่ (Role-Based Access Control - RBAC) เฉพาะผู้ที่ได้รับมอบหมายเท่านั้นที่เข้าถึงข้อมูลได้</li>
+<li><strong class="font-semibold text-slate-900">การบันทึกประวัติที่แก้ไขไม่ได้ (Audit Logging):</strong> ทุกการแก้ไข เปลี่ยนแปลง หรือลบข้อมูล จะถูกบันทึกไว้ในชีต Auditlogs พร้อมระบุวันเวลาและผู้ดำเนินการ</li>
+<li><strong class="font-semibold text-slate-900">การจำกัดอายุเซสชัน (Session Timeout):</strong> โทเค็นการเข้าใช้งานมีอายุจำกัดและมีการตรวจสอบความถูกต้องอย่างสม่ำเสมอ</li>
+<li><strong class="font-semibold text-slate-900">การคุ้มครองพิกัดตำแหน่ง:</strong> พิกัด GPS จะถูกเรียกอ่านเฉพาะขณะที่ผู้ใช้งานกดปุ่มลงเวลาเท่านั้น ระบบไม่มีการติดตามตำแหน่งต่อเนื่อง (No Background Location Tracking)</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 6. ระยะเวลาในการเก็บรักษาข้อมูล (Data Retention Period)</h2>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">ข้อมูลประวัติการลงเวลาและรายงานรายเดือน:</strong> องค์กรจะเก็บรักษาไว้ตลอดระยะเวลาที่ท่านมีสถานะเป็นพนักงาน และเก็บต่อเนื่องต่อไปเป็นเวลา <strong class="font-semibold text-slate-900">5 ถึง 10 ปี</strong> นับจากวันที่สิ้นสุดสัญญาจ้าง เพื่อใช้เป็นหลักฐานตามอายุความทางกฎหมายแรงงานและกฎหมายภาษีอากร</li>
+<li><strong class="font-semibold text-slate-900">ข้อมูลภาพถ่ายยืนยันตัวตน (Selfies):</strong> จัดเก็บไว้ในโฟลเดอร์ Google Drive ที่มีการควบคุมสิทธิ์ และดำเนินการทำลายหรือลบทิ้งตามรอบระยะเวลาการตรวจสอบขององค์กร (เช่น ทุก 1-2 ปี)</li>
+<li>เมื่อพ้นระยะเวลาการเก็บรักษา องค์กรจะดำเนินการลบ ทำลาย หรือทำให้ข้อมูลส่วนบุคคลนั้นไม่สามารถระบุตัวตนของท่านได้อีกต่อไป</li>
+</ul>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 7. สิทธิของเจ้าของข้อมูลส่วนบุคคล (Data Subject Rights)</h2>
+<p class="text-slate-700 leading-relaxed my-2">ภายใต้พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 ท่านมีสิทธิในการดำเนินการดังต่อไปนี้:</p>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการเข้าถึงและรับสำเนา (Right of Access):</strong> ขอเข้าถึงและขอรับสำเนาข้อมูลส่วนบุคคลของท่าน รวมถึงประวัติการลงเวลาในระบบ</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการขอแก้ไขข้อมูล (Right to Rectification):</strong> ขอแก้ไขข้อมูลส่วนบุคคลของตนให้ถูกต้อง เป็นปัจจุบัน และสมบูรณ์ (เช่น ผ่านระบบ Workflow คำขอแก้ไขเวลา)</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการขอให้ลบหรือทำลาย (Right to Erasure):</strong> ขอให้ลบ ทำลาย หรือทำให้ข้อมูลไม่สามารถระบุตัวตนได้ เมื่อพ้นความจำเป็นตามกฎหมาย</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการระงับการใช้ข้อมูล (Right to Restriction):</strong> ขอให้ระงับการใช้ข้อมูลส่วนบุคคลในระหว่างการตรวจสอบความถูกต้อง</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการคัดค้าน (Right to Object):</strong> คัดค้านการเก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคลในบางกรณี</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการถอนความยินยอม (Right to Withdraw Consent):</strong> ถอนความยินยอมที่เคยให้ไว้สำหรับการประมวลผลที่ต้องใช้ฐานความยินยอม</p></div>
+<div class="my-2 pl-3 border-l-2 border-blue-300 text-slate-700"><p><strong class="font-semibold text-slate-900">สิทธิในการร้องเรียน (Right to Lodge a Complaint):</strong> ยื่นข้อร้องเรียนต่อสำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล (สคส.) หากพบว่าองค์กรฝ่าฝืนกฎหมาย PDPA</p></div>
+<p class="text-slate-700 leading-relaxed my-2">*การใช้สิทธิดังกล่าวข้างต้นอาจถูกจำกัดภายใต้บทบัญญัติแห่งกฎหมายแรงงานหรือความจำเป็นในการปฏิบัติตามสัญญาจ้าง*</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 8. การใช้งานคุกกี้และพื้นที่จัดเก็บข้อมูลบนเบราว์เซอร์ (Cookies & Local Storage)</h2>
+<p class="text-slate-700 leading-relaxed my-2">ระบบ TSA ใช้งาน <strong class="font-semibold text-slate-900">Local Storage</strong> และ <strong class="font-semibold text-slate-900">Session Storage</strong> บนเบราว์เซอร์ของท่าน เพื่อประโยชน์ในการ:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li>จัดเก็บสถานะการเข้าสู่ระบบ (Session Token) เพื่อให้ท่านใช้งานระบบได้อย่างต่อเนื่องโดยไม่ต้องล็อกอินซ้ำบ่อยครั้ง</li>
+<li>จัดเก็บบันทึกการตั้งค่าหน้าจอและประวัติการลงเวลาล่าสุดเพื่อความรวดเร็วในการแสดงผล</li>
+</ul>
+<p class="text-slate-700 leading-relaxed my-2">ระบบไม่มีการนำข้อมูล Local Storage ไปใช้เพื่อการโฆษณาหรือส่งต่อแก่บุคคลภายนอกเพื่อผลประโยชน์ทางการค้า</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 9. การแก้ไขปรับปรุงนโยบายความเป็นส่วนตัว (Policy Updates)</h2>
+<p class="text-slate-700 leading-relaxed my-2">องค์กรอาจทบทวนและปรับปรุงนโยบายความเป็นส่วนตัวฉบับนี้เป็นครั้งคราว เพื่อให้สอดคล้องกับการเปลี่ยนแปลงของการให้บริการ เทคโนโลยี และกฎหมายที่เกี่ยวข้อง การแก้ไขจะประกาศให้ทราบผ่านหน้า WebApp โดยระบุวันที่มีผลบังคับใช้ล่าสุดอย่างชัดเจน</p>
+<hr class="border-slate-200 my-4" />
+<h2 class="text-sm font-bold text-[#1b4b8a] mt-5 mb-2 pb-1 border-b border-slate-100 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-blue-500 text-[10px]"></i> 10. เจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคลและช่องทางการติดต่อ (Contact & DPO)</h2>
+<p class="text-slate-700 leading-relaxed my-2">หากท่านมีข้อสงสัย ข้อเสนอแนะ หรือประสงค์จะใช้สิทธิของเจ้าของข้อมูลส่วนบุคคล สามารถติดต่อได้ที่:</p>
+<ul class="list-disc pl-5 space-y-1.5 my-2 text-slate-700">
+<li><strong class="font-semibold text-slate-900">ผู้ควบคุมข้อมูลส่วนบุคคล (Data Controller):</strong> ฝ่ายทรัพยากรบุคคลและบริหารงานทั่วไป</li>
+<li><strong class="font-semibold text-slate-900">เจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล (Data Protection Officer - DPO):</strong> ทีมกำกับดูแลความปลอดภัยสารสนเทศ</li>
+<li><strong class="font-semibold text-slate-900">ช่องทางติดต่อภายใน:</strong> เมนู "แชตภายใน" บน WebApp TSA</li>
+<li><strong class="font-semibold text-slate-900">ที่อยู่:</strong> สำนักงานใหญ่ / ศูนย์เทคโนโลยีสารสนเทศประจำหน่วยงาน</li>
+</ul>
       </div>
     </div>
   </div>
-
 
   <!-- ==================== SERVER OAUTH BOOT PAYLOAD ==================== -->
   <script>
@@ -5432,13 +5571,7 @@ Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
       });
     }
     function showTermsModal() {
-      Swal.fire({
-        title: 'นโยบายความเป็นส่วนตัว',
-        html: '<p class="text-sm text-slate-600 leading-relaxed">ข้อกำหนดการใช้งานและนโยบายคุ้มครองข้อมูลส่วนบุคคล ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)</p>',
-        icon: 'info',
-        confirmButtonColor: '#1b4b8a',
-        confirmButtonText: 'เข้าใจแล้ว'
-      });
+      openLegalModal('terms');
     }
     function showStatusLegend() {
       Swal.fire({

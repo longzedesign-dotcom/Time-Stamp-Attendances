@@ -6,7 +6,7 @@
  * File          : Code.gs
  * Module/Layer  : Application Controller / Web App Entry Point & API Dispatcher
  * Description   : จุดรับคำขอหลัก (doGet/doPost), ประมวลผล OAuth Callback และ Universal API Dispatcher
- * Version       : 1.0.45
+ * Version       : 1.0.46
  * Author        : TSA Engineering Team
  * Created Date  : 2026-11-08
  * Last Modified : 2026-11-18
@@ -14,7 +14,7 @@
  * Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
  * ------------------------------------------------------------------------------
  * Revision History:
- * - V1.0.45 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * - V1.0.46 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
  * ==============================================================================
  */
 
