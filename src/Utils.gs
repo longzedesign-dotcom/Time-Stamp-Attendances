@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.39
+ * Project: Time Stamp Attendances : TSA V1.0.40
  * File: Utils.gs
  * Description: Enterprise Utility Engine for GPS calculation, Accuracy Buffers, Time Windows, and Formatting.
- * Version: 1.0.39
+ * Version: 1.0.40
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
