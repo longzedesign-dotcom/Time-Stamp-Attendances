@@ -1,8 +1,8 @@
 <!--
- * Project: Time Stamp Attendances : TSA V1.0.40
+ * Project: Time Stamp Attendances : TSA V1.0.41
  * File: Index.html
  * Description: Enterprise Front-End Application (Single Page Application)
- * Version: 1.0.40
+ * Version: 1.0.41
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
 -->
@@ -258,7 +258,7 @@
 
     <!-- Version Footer -->
     <div class="text-center text-xs text-slate-500 font-light pb-2">
-      Version 1.0.40
+      Version 1.0.41
     </div>
   </div>
 
@@ -592,7 +592,7 @@
 
         <!-- Version Footer -->
         <div class="text-center text-xs text-slate-400 py-2">
-          Version 1.0.40
+          Version 1.0.41
         </div>
       </div>
 
@@ -2300,11 +2300,11 @@
       const rows = Array.isArray(data.rows) ? data.rows : [];
 
       const logoHtml = cfg.logoUrl
-        ? `<img src="${escapeChatHtml(cfg.logoUrl)}" alt="Logo" style="max-height:38px;max-width:84px;object-fit:contain;display:block;">`
+        ? `<img src="${escapeChatHtml(cfg.logoUrl)}" alt="Logo" style="max-height:40px;max-width:82px;object-fit:contain;display:block;">`
         : '';
 
       const projectHtml = cfg.projectName
-        ? `<div style="font-size:11px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
+        ? `<div style="font-size:10.5px;line-height:1.35;margin-top:2px;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.projectName)}</div>`
         : '';
 
       const contractHtml = cfg.contractNo
@@ -2329,10 +2329,10 @@
       }).join('');
 
       sheet.innerHTML = `
-        <div style="position:relative;min-height:${cfg.logoUrl ? '48px' : '0'};margin-bottom:6px;">
-          ${cfg.logoUrl ? `<div style="position:absolute;left:0;top:0;width:86px;">${logoHtml}</div>` : ''}
-          <div style="text-align:center;color:#000;">
-            <div style="font-size:12.5px;font-weight:700;line-height:1.35;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.reportTitle || 'ใบบันทึกเวลาการมาปฏิบัติงานของเจ้าหน้าที่')}</div>
+        <div style="display:flex;align-items:flex-start;${cfg.logoUrl ? 'gap:8px;' : ''}margin-bottom:6px;">
+          ${cfg.logoUrl ? `<div style="flex-shrink:0;max-width:82px;">${logoHtml}</div>` : ''}
+          <div style="flex:1;min-width:0;text-align:center;color:#000;">
+            <div style="font-size:12px;font-weight:700;line-height:1.35;text-align:center;white-space:nowrap;">${escapeChatHtml(cfg.reportTitle || 'ใบบันทึกเวลาการมาปฏิบัติงานของเจ้าหน้าที่')}</div>
             ${projectHtml}
             ${contractHtml}
           </div>

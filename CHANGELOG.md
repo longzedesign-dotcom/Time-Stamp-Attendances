@@ -4,7 +4,15 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.40`. Every subsequent patch increments the patch number by `+1` (`V1.0.41`, `V1.0.42`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.41`. Every subsequent patch increments the patch number by `+1` (`V1.0.42`, `V1.0.43`, ...).
+
+## [1.0.41] - 2026-11-18
+
+### Fixed
+- **Logo-to-Text Spacing & Readability:** Updated `renderMonthlyAttendanceSheet()` in `src/Index.html` to reserve the `82px` logo column on the left with an `8px` (~1-character) gap before the centered single-line `reportTitle` (`12px`), `projectName` (`10.5px`), and `contractNo` (`11.5px`) so text never overlaps the logo.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.41` (Deployment `@41`).
 
 ## [1.0.40] - 2026-11-18
 
