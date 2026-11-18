@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.38
+ * Project: Time Stamp Attendances : TSA V1.0.39
  * File: Notify.gs
  * Description: Notifications management (In-app alerts and Email notifications).
- * Version: 1.0.38
+ * Version: 1.0.39
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */

@@ -1,8 +1,8 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.38
+ * Project: Time Stamp Attendances : TSA V1.0.39
  * File: Config.gs
  * Description: Unified Configuration combining Enterprise GPS Engine, Time Windows, Dual-Office, and Security.
- * Version: 1.0.38
+ * Version: 1.0.39
  * Author: TSA Engineering Team
  * Last Updated: 2026-11-18
  */
@@ -11,7 +11,7 @@ const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.38',
+  APP_VERSION: '1.0.39',
   APP_UPDATED_AT: '2026-11-18',
   TIMEZONE: 'Asia/Bangkok',
 
