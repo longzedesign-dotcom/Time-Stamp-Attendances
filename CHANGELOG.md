@@ -4,7 +4,16 @@ All notable changes to **Time Stamp Attendances** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.44`. Every subsequent patch increments the patch number by `+1` (`V1.0.45`, `V1.0.46`, ...).
+> **Patch Versioning Standard:** Current baseline is `Time Stamp Attendances : TSA V1.0.45`. Every subsequent patch increments the patch number by `+1` (`V1.0.46`, `V1.0.47`, ...).
+
+## [1.0.45] - 2026-11-18
+
+### Added
+- **Enterprise Source Code Header Specification:** Formulated and published `SOURCE_CODE_STANDARDS.md` specifying mandatory header fields (Project, Script ID, Repository, File, Module/Layer, Description, Version, Author, Dates, License, Copyright, Revision History) across all backend and frontend files.
+- **Source Code Header Standardization Across Server & Repository:** Upgraded headers across all 13 Google Apps Script files (`src/*.gs`) and the frontend SPA (`src/Index.html`) to link explicitly with Google Apps Script Project ID `17h7De_f5Dl_Uf5x0HG3mSj89EZ2gHf4Ji1N-5p6-sBrdhO3Ny01AK8i4` and GitHub repository.
+
+### Changed
+- **Release Sync:** Updated all source headers, `src/Config.gs`, `src/Index.html`, `README.md`, `INSTALL_GUIDE.md`, and `CHANGELOG.md` to `TSA V1.0.45` (Deployment `@45`).
 
 ## [1.0.44] - 2026-11-18
 

@@ -1,10 +1,21 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.44
- * File: Setup.gs
- * Description: Enterprise Database Setup & Self-Healing Schema Manager.
- * Version: 1.0.44
- * Author: TSA Engineering Team
- * Last Updated: 2026-11-18
+ * ==============================================================================
+ * Project       : Time Stamp Attendances (TSA Enterprise Edition)
+ * Script ID     : 17h7De_f5Dl_Uf5x0HG3mSj89EZ2gHf4Ji1N-5p6-sBrdhO3Ny01AK8i4
+ * Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
+ * File          : Setup.gs
+ * Module/Layer  : Database Migration / Schema Definition & Self-Healing Seeder
+ * Description   : สร้างโครงสร้างตารางเริ่มต้น 14 ตารางบน Google Sheets และตรวจสอบความสมบูรณ์ของ Schema
+ * Version       : 1.0.45
+ * Author        : TSA Engineering Team
+ * Created Date  : 2026-11-08
+ * Last Modified : 2026-11-18
+ * License       : Proprietary / Enterprise Internal Use
+ * Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
+ * ------------------------------------------------------------------------------
+ * Revision History:
+ * - V1.0.45 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * ==============================================================================
  */
 
 function setupDatabase() {

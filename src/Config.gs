@@ -1,17 +1,28 @@
 /**
- * Project: Time Stamp Attendances : TSA V1.0.44
- * File: Config.gs
- * Description: Unified Configuration combining Enterprise GPS Engine, Time Windows, Dual-Office, and Security.
- * Version: 1.0.44
- * Author: TSA Engineering Team
- * Last Updated: 2026-11-18
+ * ==============================================================================
+ * Project       : Time Stamp Attendances (TSA Enterprise Edition)
+ * Script ID     : 17h7De_f5Dl_Uf5x0HG3mSj89EZ2gHf4Ji1N-5p6-sBrdhO3Ny01AK8i4
+ * Repository    : https://github.com/longzedesign-dotcom/Time-Stamp-Attendances
+ * File          : Config.gs
+ * Module/Layer  : Configuration / Enterprise Constants & Environment Settings
+ * Description   : ศูนย์รวมค่าคงที่ของระบบ, ขอบเขตเวลา, รหัส Spreadsheet, โฟลเดอร์ Drive และเวอร์ชันแอปพลิเคชัน
+ * Version       : 1.0.45
+ * Author        : TSA Engineering Team
+ * Created Date  : 2026-11-08
+ * Last Modified : 2026-11-18
+ * License       : Proprietary / Enterprise Internal Use
+ * Copyright (c) : 2026 Time Stamp Attendances. All rights reserved.
+ * ------------------------------------------------------------------------------
+ * Revision History:
+ * - V1.0.45 (2026-11-18) : Updated source code header to Corporate Enterprise Standard
+ * ==============================================================================
  */
 
 const CONFIG = Object.freeze({
   APP_NAME: 'Time Stamp Attendances',
   APP_ORGANIZATION: 'ระบบลงเวลาเข้างานออนไลน์',
   APP_ORGANIZATION_EN: 'Time Stamp Attendances',
-  APP_VERSION: '1.0.44',
+  APP_VERSION: '1.0.45',
   APP_UPDATED_AT: '2026-11-18',
   TIMEZONE: 'Asia/Bangkok',
 

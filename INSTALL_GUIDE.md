@@ -3,7 +3,7 @@
 <div align="center">
 
 # ระบบลงเวลาเข้างานออนไลน์ประจำหน่วยงาน (Time Stamp Attendances)
-### เวอร์ชันปัจจุบัน: Time Stamp Attendances : TSA V1.0.44 (Deployment Version 44)
+### เวอร์ชันปัจจุบัน: Time Stamp Attendances : TSA V1.0.45 (Deployment Version 45)
 
 </div>
 
